@@ -4,8 +4,7 @@ import {
   HeroSection,
   LocationSection,
   CategoryGridSection,
-  VoucherBanner1Section,
-  VoucherBanner2Section,
+  VoucherBannersSection,
   SpecialTodaySection,
   OfficialMerchandiseSection,
   ProductSection,
@@ -128,17 +127,18 @@ export default function Home() {
         />
       </div>
 
-      <VoucherBanner1Section
-        title='Voucher buy 1 get 1 special'
-        subtitle='UNIONLABS WEBSITE USER.'
-        onClaim={handleVoucherClaim}
-      />
-
-      <VoucherBanner2Section
-        title1='Mau Voucher'
-        title2='Diskon 10RB?'
-        description='Gabung & Ambil Vouchernya Sekarang juga!'
-        onClaim={handleVoucherClaim}
+      <VoucherBannersSection
+        voucher1={{
+          title: 'Voucher buy 1 get 1 special',
+          subtitle: 'UNIONLABS WEBSITE USER.',
+          onClaim: handleVoucherClaim,
+        }}
+        voucher2={{
+          title1: 'Mau Voucher',
+          title2: 'Diskon 10RB?',
+          description: 'Gabung & Ambil Vouchernya Sekarang juga!',
+          onClaim: handleVoucherClaim,
+        }}
       />
 
       <SpecialTodaySection
