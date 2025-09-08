@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { NavigationTab } from '@/types';
 import { Home, ShoppingBag, Gift, User, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface FooterNavigationSectionProps {
   tabs?: NavigationTab[];
@@ -23,6 +24,16 @@ export default function FooterNavigationSection({
   activeTab = 'home',
   onTabClick,
 }: FooterNavigationSectionProps) {
+  const router = useRouter();
+
+  const handleClick = (tab: NavigationTab) => {
+    onTabClick?.(tab);
+    if (tab.id === 'home') {
+      router.push('/');
+    } else if (tab.id === 'profile') {
+      router.push('/user');
+    }
+  };
   return (
     <footer className='bg-white border-t sticky bottom-0 p-4 z-2'>
       <div className='flex justify-around'>
@@ -31,7 +42,7 @@ export default function FooterNavigationSection({
           return (
             <button
               key={tab.id}
-              onClick={() => onTabClick?.(tab)}
+              onClick={() => handleClick(tab)}
               className={`flex flex-col items-center space-y-1 relative transition-colors ${
                 activeTab === tab.id ? 'text-brand' : 'text-gray-600'
               }`}
