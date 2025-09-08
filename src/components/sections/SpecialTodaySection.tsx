@@ -105,14 +105,14 @@ export default function SpecialTodaySection({
         }}
         className='w-full'
       >
-        <CarouselContent className='-ml-2 md:-ml-4'>
+        <CarouselContent className='-ml-2 md:-ml-4 pr-2 md:pr-4'>
           {isLoading ? (
             <SpecialTodayCarouselSkeleton count={6} />
           ) : (
             products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className='pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4'
+                className='pl-2 md:pl-4 basis-[48%] sm:basis-[47%] md:basis-[46%]'
               >
                 <Card
                   className='shadow-sm cursor-pointer hover:shadow-md transition-shadow'
