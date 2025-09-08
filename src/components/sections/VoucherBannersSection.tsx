@@ -67,7 +67,6 @@ export default function VoucherBannersSection({
           v2,
           {
             ...v2,
-            // Example variant for demo of the carousel
             title2:
               (v2.title2 && v2.title2.replace(/10RB/i, '15RB')) || v2.title2,
             image: '/assets/Voucher2.png',
@@ -116,6 +115,7 @@ export default function VoucherBannersSection({
         </div>
       </div>
 
+      {/* Voucher banner 2 */}
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
         <Carousel
           plugins={[plugin.current]}
