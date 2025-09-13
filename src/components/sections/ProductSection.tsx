@@ -12,6 +12,7 @@ interface ProductSectionProps {
   products?: Product[];
   isLoading?: boolean;
   onProductClick?: (product: Product) => void;
+  showChevron?: boolean;
 }
 
 const defaultProducts: Product[] = [
@@ -76,6 +77,7 @@ export default function ProductSection({
   products = defaultProducts,
   isLoading = false,
   onProductClick,
+  showChevron = true,
 }: ProductSectionProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -87,23 +89,23 @@ export default function ProductSection({
 
   return (
     <section className='px-4'>
-      <div className='flex items-center justify-between mb-4'>
+      <div className='flex items-center justify-between mb-3'>
         <div className='text-start font-bold text-gray-700'>{title}</div>
-        <ChevronRight className='w-5 h-5 text-gray-600' />
+        {showChevron && <ChevronRight className='w-5 h-5 text-gray-600' />}
       </div>
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-2 gap-2'>
         {isLoading ? (
           <ProductGridSkeleton count={6} />
         ) : (
           products.map((product) => (
             <Card
               key={product.id}
-              className='shadow-sm cursor-pointer hover:shadow-md transition-shadow'
+              className='rounded-md shadow-none hover:shadow-sm transition-shadow border border-gray-200 overflow-hidden py-0'
               onClick={() => onProductClick?.(product)}
             >
               <CardContent className='p-3'>
                 <div className='relative mb-2'>
-                  <div className='w-full h-24 bg-gray-200 rounded flex items-center justify-center relative overflow-hidden'>
+                  <div className='w-full h-24 rounded-sm flex items-center justify-center relative overflow-hidden'>
                     {product.image ? (
                       <Image
                         src={product.image}

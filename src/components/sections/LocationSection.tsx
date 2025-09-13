@@ -1,28 +1,43 @@
 'use client';
 
-import {
-  CardDualSection,
-  CardTopSection,
-  CardBottomSection,
-} from '@/components/ui/card';
-import { MapPin } from 'lucide-react';
+import { MapPin, Star } from 'lucide-react';
+
 interface LocationSectionProps {
   onLocationClick?: () => void;
+  points?: number;
 }
 
 export default function LocationSection({
   onLocationClick,
+  points = 100,
 }: LocationSectionProps) {
   return (
     <div className='mx-4'>
-      <CardDualSection className='shadow-lg'>
-        <CardTopSection className='border-b-2 border-gray-400'>
-          <h3 className='font-bold text-lg italic text-brand p-4'>
-            GET STARTED, <span className='font-extrabold'>ORDER NOW!</span>
-          </h3>
-        </CardTopSection>
-        <CardBottomSection>
-          <div className='flex items-center justify-between p-4'>
+      <div className='bg-white rounded-2xl overflow-hidden shadow-lg'>
+        <div className='flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b border-black/5'>
+          <div className='flex items-center'>
+            <div className='flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
+              <Star
+                className='w-5 h-5 sm:w-6 sm:h-6 text-[#997B27]'
+                fill='currentColor'
+              />
+              <span className='text-sm sm:text-base font-semibold text-[#997B27]'>
+                Poin kamu
+              </span>
+            </div>
+          </div>
+          <div className='flex items-end gap-1 text-gray-900'>
+            <span className='text-lg sm:text-xl font-extrabold leading-none'>
+              {points}
+            </span>
+            <span className='text-sm sm:text-base font-medium leading-none text-gray-700'>
+              pts
+            </span>
+          </div>
+        </div>
+
+        <div className='bg-gray-100 p-2'>
+          <div className='bg-white flex items-center justify-between rounded-xl px-3 py-2 sm:px-4 sm:py-3'>
             <div className='flex-1'>
               <h3 className='font-semibold text-lg text-gray-900'>
                 Ruko Mulyosari Surabaya
@@ -34,14 +49,24 @@ export default function LocationSection({
             <div className='ml-4'>
               <button
                 onClick={onLocationClick}
-                className='w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center border-3 border-brand hover:bg-purple-200 transition-colors'
+                className='w-12 h-12 bg-white rounded-full flex items-center justify-center border-4 border-brand hover:bg-purple-200 transition-colors'
+                aria-label='Ubah lokasi'
               >
-                <MapPin className='w-6 h-6 text-red-500' />
+                <MapPin className='w-6 h-6 text-red-600' />
               </button>
             </div>
           </div>
-        </CardBottomSection>
-      </CardDualSection>
+        </div>
+      </div>
+
+      <div className='mt-3 px-2'>
+        <div className='flex items-center gap-2 text-gray-500'>
+          <span className='text-sm font-bold'>Melayani</span>
+          <span className='w-3 h-3 sm:w-4 sm:h-4 md:w-4 md:h-4 rounded-full border-2 sm:border-4 border-green-500 inline-block'></span>
+          <span className='text-sm font-bold text-black'>Delivery 8/5</span>
+          <div className='flex-1 h-px bg-gray-300 ml-2'></div>
+        </div>
+      </div>
     </div>
   );
 }
