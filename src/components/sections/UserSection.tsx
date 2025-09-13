@@ -5,18 +5,20 @@ import type React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { LoginSheet } from '@/components/sections/auth/LoginSheet';
+// import { LoginSheet } from '@/components/sections/auth/LoginSheet';
 import { RegisterSheet } from '@/components/sections/auth/RegisterSheet';
 import { ForgotPasswordSheet } from '@/components/sections/auth/ForgotPasswordSheet';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Menu,
   MapPin,
   Phone,
   Crown,
-  ChevronRight,
+  // ChevronRight,
   Star,
   LogOut,
+  Edit2,
 } from 'lucide-react';
 import Image from 'next/image';
 import {
@@ -58,7 +60,8 @@ const menuItems: MenuItem[] = [
 export function MobileMenu() {
   const registerTriggerRef = useRef<HTMLButtonElement>(null);
   const forgotTriggerRef = useRef<HTMLButtonElement>(null);
-  const toggleLogin = () => {};
+  // const toggleLogin = () => {};
+  const router = useRouter();
 
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const voucherBase = {
@@ -92,28 +95,16 @@ export function MobileMenu() {
               </AvatarFallback>
             </Avatar>
           </div>
-          {/* jika user sudah login, login sheet ini ganti dengan edit */}
-          <LoginSheet
-            trigger={
-              <Button
-                onClick={toggleLogin}
-                variant='ghost'
-                className='bg-white text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-0 h-auto font-medium'
-              >
-                Masuk
-                <ChevronRight className='w-4 h-4 ml-1' />
-              </Button>
-            }
-            onForgotPassword={() => {
-              forgotTriggerRef.current?.click();
-            }}
-            onSwitchToRegister={() => {
-              registerTriggerRef.current?.click();
-            }}
-          />
+          <Button
+            variant='ghost'
+            className='bg-white text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-0 h-auto font-medium'
+            onClick={() => router.push('/user/edit')}
+          >
+            Ganti
+            <Edit2 className='ml-2 w-4 h-4' />
+          </Button>
         </div>
         <div className='flex items-center justify-between'>
-          {/* jika user belum login, hanya muncul teks "guest" */}
           <div className='flex items-center gap-2'>
             <div className='flex items-center gap-1 px-2 py-1 rounded-lg shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
               <Star className='w-4 h-4 text-[#997B27]' fill='currentColor' />
@@ -134,7 +125,6 @@ export function MobileMenu() {
         </div>
       </div>
 
-      {/* voucher banner hanya muncul waktu user sudah login */}
       <div className='px-4 pt-4'>
         <Carousel
           plugins={[plugin.current]}
@@ -176,7 +166,7 @@ export function MobileMenu() {
                       </div>
                     </div>
 
-                    <Button className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-2 sm:py-3 md:py-4 rounded-full text-sm sm:text-base md:text-lg'>
+                    <Button className='w-full bg-brand hover:bg-brand/90 text-white font-semibold py-2 sm:py-3 md:py-4 rounded-full text-sm sm:text-base md:text-lg'>
                       {item.buttonText}
                     </Button>
                   </div>
@@ -193,7 +183,18 @@ export function MobileMenu() {
             key={index}
             className='border-0 shadow-none hover:bg-gray-50 transition-colors cursor-pointer'
           >
-            <div className='flex items-center gap-4 p-4'>
+            <div
+              className='flex items-center gap-4 p-4'
+              role='button'
+              tabIndex={0}
+              onClick={() => router.push(item.href)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(item.href);
+                }
+              }}
+            >
               <div className='flex-shrink-0'>{item.icon}</div>
               <span className='text-gray-700 font-medium flex-1'>
                 {item.label}
@@ -219,9 +220,7 @@ export function MobileMenu() {
       </div>
 
       <div className='absolute bottom-6 left-1/2 transform -translate-x-1/2'>
-        <p className='text-xs text-gray-400 text-center'>
-          Versi Website 001.00.00
-        </p>
+        <p className='text-xs text-gray-400 text-center'>Versi Website 1.0</p>
       </div>
     </div>
   );

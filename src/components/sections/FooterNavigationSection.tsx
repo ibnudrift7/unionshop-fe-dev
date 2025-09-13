@@ -32,34 +32,42 @@ export default function FooterNavigationSection({
       router.push('/');
     } else if (tab.id === 'profile') {
       router.push('/user');
+    } else if (tab.id === 'shop') {
+      router.push('/shop');
     }
   };
   return (
-    <footer className='bg-white border-t sticky bottom-0 p-4 z-2'>
-      <div className='flex justify-around'>
-        {tabs.map((tab) => {
-          const IconComponent = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleClick(tab)}
-              className={`flex flex-col items-center space-y-1 relative transition-colors ${
-                activeTab === tab.id ? 'text-brand' : 'text-gray-600'
-              }`}
-            >
-              <div className='relative'>
-                <IconComponent className='w-6 h-6' />
-                {tab.badge && (
-                  <Badge className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center p-0'>
-                    {tab.badge}
-                  </Badge>
-                )}
-              </div>
-              <span className='text-xs'>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </footer>
+    <>
+      <div className='h-16 sm:h-20' aria-hidden />
+      <footer
+        role='contentinfo'
+        className='fixed bottom-0 left-0 right-0 mx-auto max-w-[720px] bg-white border-t p-4 z-50'
+      >
+        <div className='flex justify-around'>
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleClick(tab)}
+                className={`flex flex-col items-center space-y-1 relative transition-colors ${
+                  activeTab === tab.id ? 'text-brand' : 'text-gray-600'
+                }`}
+              >
+                <div className='relative'>
+                  <IconComponent className='w-6 h-6' />
+                  {tab.badge && (
+                    <Badge className='absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center p-0'>
+                      {tab.badge}
+                    </Badge>
+                  )}
+                </div>
+                <span className='text-xs'>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </footer>
+    </>
   );
 }

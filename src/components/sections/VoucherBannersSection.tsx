@@ -94,10 +94,10 @@ export default function VoucherBannersSection({
             </div>
 
             <div className='flex-1 text-center'>
-              <p className='font-bold text-xl sm:text-base md:text-xl text-gray-900 leading-tight'>
+              <p className='font-bold text-sm sm:text-base md:text-lg text-gray-900 leading-tight'>
                 {v1.title}
               </p>
-              <p className='font-bold italic text-xl sm:text-sm text-gray-700'>
+              <p className='font-bold italic text-sm sm:text-sm md:text-lg text-gray-700'>
                 {v1.subtitle}
               </p>
             </div>

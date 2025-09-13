@@ -8,3 +8,4 @@ export { default as ProductSection } from './ProductSection';
 export { default as PromoSection } from './PromoSection';
 export { default as ChatAdminSection } from './ChatAdminSection';
 export { default as FooterNavigationSection } from './FooterNavigationSection';
+export { default as ShopSection } from './ShopSection';
