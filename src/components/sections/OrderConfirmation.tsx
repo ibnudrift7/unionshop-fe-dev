@@ -93,6 +93,7 @@ export function OrderConfirmation() {
             <Button
               variant='outline'
               className='text-brand border-brand hover:bg-brand/5 bg-transparent flex items-center gap-1'
+              onClick={() => router.push('/orders/add')}
             >
               Tambah Pesanan
               <Plus className='h-4 w-4' />
