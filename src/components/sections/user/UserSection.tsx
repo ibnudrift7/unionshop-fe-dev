@@ -5,7 +5,6 @@ import type React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-// import { LoginSheet } from '@/components/sections/auth/LoginSheet';
 import { RegisterSheet } from '@/components/sections/auth/RegisterSheet';
 import { ForgotPasswordSheet } from '@/components/sections/auth/ForgotPasswordSheet';
 import { useRef } from 'react';
@@ -15,7 +14,6 @@ import {
   MapPin,
   Phone,
   Crown,
-  // ChevronRight,
   Star,
   LogOut,
   Edit2,
@@ -57,10 +55,9 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-export function MobileMenu() {
+export default function MobileMenu() {
   const registerTriggerRef = useRef<HTMLButtonElement>(null);
   const forgotTriggerRef = useRef<HTMLButtonElement>(null);
-  // const toggleLogin = () => {};
   const router = useRouter();
 
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));

@@ -1,7 +1,8 @@
 export { default as HeroSection } from './HeroSection';
 export { default as LocationSection } from './LocationSection';
 export { default as CategoryGridSection } from './shop/CategoryGridSection';
-export { default as VoucherBannersSection } from './VoucherBannersSection';
+export { default as VoucherBannersSection } from './shop/VoucherBannersSection';
+export { default as MobileMenu } from './user/UserSection';
 export { default as SpecialTodaySection } from './shop/SpecialTodaySection';
 export { default as OfficialMerchandiseSection } from './OfficialMerchandiseSection';
 export { default as ProductSection } from './product/ProductSection';

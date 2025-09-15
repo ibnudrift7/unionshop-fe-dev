@@ -1,4 +1,4 @@
-import { MobileMenu } from '@/components/sections/UserSection';
+import { MobileMenu } from '@/components/sections';
 import FooterNavigationSection from '@/components/sections/FooterNavigationSection';
 
 export default function UserPage() {
