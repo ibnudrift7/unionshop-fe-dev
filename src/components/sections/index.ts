@@ -1,4 +1,4 @@
-export { default as HeroSection } from './HeroSection';
+export { default as HeroSection } from './shop/HeroSection';
 export { default as LocationSection } from './shop/LocationSection';
 export { default as CategoryGridSection } from './shop/CategoryGridSection';
 export { default as VoucherBannersSection } from './shop/VoucherBannersSection';
