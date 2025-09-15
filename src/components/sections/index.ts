@@ -4,7 +4,7 @@ export { default as CategoryGridSection } from './shop/CategoryGridSection';
 export { default as VoucherBannersSection } from './shop/VoucherBannersSection';
 export { default as MobileMenu } from './user/UserSection';
 export { default as SpecialTodaySection } from './shop/SpecialTodaySection';
-export { default as OfficialMerchandiseSection } from './OfficialMerchandiseSection';
+export { default as OfficialMerchandiseSection } from './shop/OfficialMerchandiseSection';
 export { default as ProductSection } from './product/ProductSection';
 export { default as ProductReviews } from './product/ProductReview';
 export { default as ProductDetail } from './product/ProductDetail';
