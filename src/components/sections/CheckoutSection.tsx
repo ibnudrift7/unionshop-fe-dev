@@ -36,13 +36,13 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
   return (
     <div className='p-4 space-y-4'>
       <Card className='border border-gray-200 rounded-lg shadow-sm'>
-        <CardContent className='p-4'>
-          <div className='flex items-start gap-3'>
-            <div className='w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center mt-1'>
+        <CardContent className='px-4 py-2'>
+          <div className='flex items-start gap-2'>
+            <div className='w-7 h-7 bg-brand/10 rounded-full flex items-center justify-center mt-0.5'>
               <MapPin className='h-4 w-4 text-brand' />
             </div>
             <div className='flex-1'>
-              <p className='text-xs text-gray-600 mb-1'>Dikirim ke</p>
+              <p className='text-xs text-gray-600 mb-0.5'>Dikirim ke</p>
               <h3 className='text-sm font-semibold text-gray-900'>Kantor</h3>
               <p className='text-sm text-gray-600'>
                 Jl. Suretejo Utara Baru No.174, RT. 003/RW.04, Dukuh
@@ -75,7 +75,7 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
               </p>
             </div>
 
-            <hr className='border-dashed border-gray-300' />
+            <hr className='border-dashed border-gray-400' />
 
             <div className='flex justify-between items-start'>
               <div className='flex-1'>
