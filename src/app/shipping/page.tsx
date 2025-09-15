@@ -1,4 +1,4 @@
-import AddressSection from '@/components/sections/AddressSection';
+import { AddressSection } from '@/components/sections';
 import FooterNavigationSection from '@/components/sections/FooterNavigationSection';
 
 export default function ShippingPage() {

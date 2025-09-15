@@ -1,5 +1,5 @@
 export { default as HeroSection } from './HeroSection';
-export { default as LocationSection } from './LocationSection';
+export { default as LocationSection } from './shop/LocationSection';
 export { default as CategoryGridSection } from './shop/CategoryGridSection';
 export { default as VoucherBannersSection } from './shop/VoucherBannersSection';
 export { default as MobileMenu } from './user/UserSection';
@@ -12,4 +12,6 @@ export { default as PromoSection } from './shop/PromoSection';
 export { default as ChatAdminSection } from './ChatAdminSection';
 export { default as FooterNavigationSection } from './FooterNavigationSection';
 export { default as ShopSection } from './shop/ShopSection';
-export { default as CheckoutSection } from './CheckoutSection';
+export { default as CheckoutSection } from './checkout/CheckoutSection';
+export { default as AddressSection } from './checkout/AddressSection';
+export { default as OrderConfirmation } from './checkout/OrderConfirmation';

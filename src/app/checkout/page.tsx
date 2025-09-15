@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import CheckoutSection from '@/components/sections/CheckoutSection';
+import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
 
 export default function CheckoutPage() {
   const router = useRouter();

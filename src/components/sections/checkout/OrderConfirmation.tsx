@@ -14,7 +14,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-export function OrderConfirmation() {
+export default function OrderConfirmation() {
   const router = useRouter();
   const [quantities, setQuantities] = useState({ item1: 1, item2: 1 });
 
