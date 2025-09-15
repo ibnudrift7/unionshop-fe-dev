@@ -201,7 +201,10 @@ export function OrderConfirmation() {
               Rp {total.toLocaleString('id-ID')}
             </span>
           </div>
-          <Button className='w-full bg-brand hover:bg-brand/80 text-white py-3'>
+          <Button
+            className='w-full bg-brand hover:bg-brand/80 text-white py-3'
+            onClick={() => router.push('/checkout')}
+          >
             Pilih Pembayaran
           </Button>
         </div>

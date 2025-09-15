@@ -158,16 +158,17 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
       <Card className='border-0 shadow-sm'>
         <CardContent className='p-4'>
           <div className='flex items-center justify-between mb-3'>
-            <div>
+            <label htmlFor='use-points' className='cursor-pointer select-none'>
               <h3 className='text-sm font-semibold text-gray-900'>
                 Gunakan poin
               </h3>
               <p className='text-xs text-gray-600'>Total poin kamu : 10.050</p>
-            </div>
+            </label>
             <Checkbox
+              id='use-points'
               checked={usePoints}
               onCheckedChange={(v) => setUsePoints(!!v)}
-              className='data-[state=checked]:bg-brand data-[state=checked]:border-brand'
+              className='size-5 border-2 border-gray-400 data-[state=checked]:bg-brand data-[state=checked]:border-brand focus-visible:ring-brand/50'
             />
           </div>
 
