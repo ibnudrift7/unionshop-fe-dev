@@ -10,7 +10,7 @@ export { default as ProductReviews } from './product/ProductReview';
 export { default as ProductDetail } from './product/ProductDetail';
 export { default as PromoSection } from './shop/PromoSection';
 export { default as ChatAdminSection } from './shop/ChatAdminSection';
-export { default as FooterNavigationSection } from './FooterNavigationSection';
+export { default as FooterNavigationSection } from './shop/FooterNavigationSection';
 export { default as ShopSection } from './shop/ShopSection';
 export { default as CheckoutSection } from './checkout/CheckoutSection';
 export { default as AddressSection } from './checkout/AddressSection';

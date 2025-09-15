@@ -4,7 +4,7 @@ import { ArrowLeft, Star, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
-import BottomActionBar from '../BottomActionBar';
+import BottomActionBar from './BottomActionBar';
 import { useState } from 'react';
 
 export default function ProductReviews() {
