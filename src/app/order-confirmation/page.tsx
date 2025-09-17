@@ -1,7 +1,7 @@
 'use client';
 
 import { FooterNavigationSection } from '@/components/sections';
-import { OrderConfirmation } from '@/components/sections/OrderConfirmation';
+import { OrderConfirmation } from '@/components/sections';
 
 export default function OrderConfirmationPage() {
   return (

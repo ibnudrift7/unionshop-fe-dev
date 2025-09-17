@@ -15,7 +15,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import BottomActionBar from './BottomActionBar';
 
-export function ProductDetail() {
+export default function ProductDetail() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const productId = params?.id;

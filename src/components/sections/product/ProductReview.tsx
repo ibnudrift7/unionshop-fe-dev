@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import BottomActionBar from './BottomActionBar';
 import { useState } from 'react';
 
-export function ProductReviews() {
+export default function ProductReviews() {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const handleQuantityChange = (change: number) => {
@@ -22,7 +22,6 @@ export function ProductReviews() {
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
-      {/* Header */}
       <div className='flex items-center justify-between p-4 border-b border-gray-100'>
         <Button
           variant='ghost'
@@ -37,12 +36,10 @@ export function ProductReviews() {
       </div>
 
       <div className='p-4'>
-        {/* Product Title */}
         <h2 className='text-lg font-semibold text-brand mb-4'>
           Makna - Taro Milk Cheese
         </h2>
 
-        {/* Overall Rating */}
         <div className='flex items-center gap-2 mb-6'>
           <div className='flex items-center gap-1'>
             <Star className='h-5 w-5 fill-yellow-400 text-yellow-400' />
@@ -54,18 +51,15 @@ export function ProductReviews() {
 
         <div className='text-sm text-gray-500 mb-6'>6 rating</div>
 
-        {/* Reviews List */}
         <div className='space-y-4'>
           {reviews.map((review, index) => (
             <div key={index} className='flex items-start gap-3 py-3'>
-              {/* Avatar */}
               <Avatar className='h-10 w-10 bg-brand/10'>
                 <AvatarFallback className='bg-brand/10'>
                   <User className='h-5 w-5 text-brand' />
                 </AvatarFallback>
               </Avatar>
 
-              {/* Review Content */}
               <div className='flex-1'>
                 <div className='flex items-center justify-between mb-1'>
                   <span className='text-sm font-medium text-gray-900'>
@@ -73,7 +67,6 @@ export function ProductReviews() {
                   </span>
                 </div>
 
-                {/* Star Rating */}
                 <div className='flex items-center gap-1'>
                   {Array(5)
                     .fill(0)
@@ -90,7 +83,6 @@ export function ProductReviews() {
         </div>
       </div>
 
-      {/* Bottom action bar same as ProductDetail (add to cart with quantity) */}
       <BottomActionBar
         noteText='Hemat Rp 20.000'
         quantity={quantity}
@@ -100,7 +92,6 @@ export function ProductReviews() {
         onPrimaryClick={() => router.push('/order-confirmation')}
       />
 
-      {/* Spacer to avoid content being hidden behind fixed bars */}
       <div className='h-40 sm:h-44' />
     </div>
   );

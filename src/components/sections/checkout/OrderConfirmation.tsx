@@ -14,7 +14,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-export function OrderConfirmation() {
+export default function OrderConfirmation() {
   const router = useRouter();
   const [quantities, setQuantities] = useState({ item1: 1, item2: 1 });
 
@@ -93,6 +93,7 @@ export function OrderConfirmation() {
             <Button
               variant='outline'
               className='text-brand border-brand hover:bg-brand/5 bg-transparent flex items-center gap-1'
+              onClick={() => router.push('/orders/add')}
             >
               Tambah Pesanan
               <Plus className='h-4 w-4' />
@@ -200,7 +201,10 @@ export function OrderConfirmation() {
               Rp {total.toLocaleString('id-ID')}
             </span>
           </div>
-          <Button className='w-full bg-brand hover:bg-brand/80 text-white py-3'>
+          <Button
+            className='w-full bg-brand hover:bg-brand/80 text-white py-3'
+            onClick={() => router.push('/checkout')}
+          >
             Pilih Pembayaran
           </Button>
         </div>

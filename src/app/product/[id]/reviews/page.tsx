@@ -1,7 +1,7 @@
 'use client';
 
-import { ProductReviews } from '@/components/sections/ProductReview';
-import FooterNavigationSection from '@/components/sections/FooterNavigationSection';
+import { ProductReviews } from '@/components/sections';
+import FooterNavigationSection from '@/components/sections/shop/FooterNavigationSection';
 
 export default function ProductReviewsPage() {
   return (

@@ -1,7 +1,7 @@
 'use client';
 
-import { ProductDetail } from '@/components/sections/ProductDetail';
-import FooterNavigationSection from '@/components/sections/FooterNavigationSection';
+import { ProductDetail } from '@/components/sections';
+import FooterNavigationSection from '@/components/sections/shop/FooterNavigationSection';
 
 export default function ProductDetailPage() {
   return (
