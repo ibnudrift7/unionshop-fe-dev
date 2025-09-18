@@ -83,23 +83,25 @@ export default function HeroSection({
         </Carousel>
         <div className='absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none' />
 
-        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-10 px-6'>
-          <div className='flex items-center gap-0 w-full max-w-xl'>
-            <div className='ml-auto relative flex items-center'>
+        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-10 px-4'>
+          <div className='flex items-center gap-0 w-full'>
+            <div className='relative flex items-center w-full justify-end'>
               <div
                 className={cn(
-                  'relative overflow-hidden transition-all duration-300 ease-in-out',
-                  isSearchOpen ? 'w-64 sm:w-80 md:w-[28rem]' : 'w-0',
+                  'relative overflow-hidden min-w-0 transition-all duration-300 ease-in-out',
+                  isSearchOpen
+                    ? 'w-[calc(100%-80px)] sm:w-[calc(100%-96px)]'
+                    : 'w-0',
                 )}
               >
                 {isSearchOpen && (
-                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5' />
+                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 sm:w-5 sm:h-5' />
                 )}
                 <Input
                   ref={searchInputRef}
                   placeholder={searchPlaceholder}
                   className={cn(
-                    'pl-10 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-12 border-r-0',
+                    'pl-8 sm:pl-10 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-10 sm:h-12 border-r-0',
                     isSearchOpen
                       ? 'rounded-l-lg rounded-r-none opacity-100'
                       : 'rounded-l-lg rounded-r-none opacity-0 pointer-events-none',
@@ -115,23 +117,23 @@ export default function HeroSection({
                 aria-label='Search'
                 aria-expanded={isSearchOpen}
                 className={cn(
-                  'bg-brand hover:bg-brand/90 h-12 w-12',
+                  'bg-brand hover:bg-brand/90 h-10 w-10 sm:h-12 sm:w-12',
                   isSearchOpen
                     ? 'rounded-l-none rounded-r-none '
                     : 'rounded-l-lg rounded-r-none',
                 )}
                 onClick={toggleSearch}
               >
-                <Search className='w-5 h-5 text-white' />
+                <Search className='w-4 h-4 sm:w-5 sm:h-5 text-white' />
               </Button>
               <div className='relative'>
                 <Button
                   size='icon'
-                  className='bg-brand hover:bg-brand/90 rounded-r-lg rounded-l-none h-12 w-12'
+                  className='bg-brand hover:bg-brand/90 rounded-r-lg rounded-l-none h-10 w-10 sm:h-12 sm:w-12'
                   onClick={onCartClick}
                   aria-label='Cart'
                 >
-                  <ShoppingCart className='w-5 h-5 text-white' />
+                  <ShoppingCart className='w-4 h-4 sm:w-5 sm:h-5 text-white' />
                 </Button>
                 {cartCount > 0 && (
                   <Badge className='absolute -top-2 -right-2 bg-red-500 hover:bg-red-500 text-white rounded-full min-w-[24px] h-6 flex items-center justify-center text-xs'>
