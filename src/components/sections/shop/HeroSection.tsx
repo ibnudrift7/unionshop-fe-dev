@@ -83,13 +83,13 @@ export default function HeroSection({
         </Carousel>
         <div className='absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none' />
 
-        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-10 px-6'>
-          <div className='flex items-center gap-0 w-full max-w-xl'>
-            <div className='ml-auto relative flex items-center'>
+        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-10 px-4'>
+          <div className='flex items-center gap-0 w-full'>
+            <div className='relative flex items-center w-full justify-end'>
               <div
                 className={cn(
-                  'relative overflow-hidden transition-all duration-300 ease-in-out',
-                  isSearchOpen ? 'w-64 sm:w-80 md:w-[28rem]' : 'w-0',
+                  'relative overflow-hidden min-w-0 transition-all duration-300 ease-in-out',
+                  isSearchOpen ? 'w-[calc(100%-96px)]' : 'w-0',
                 )}
               >
                 {isSearchOpen && (

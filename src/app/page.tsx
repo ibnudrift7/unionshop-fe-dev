@@ -12,7 +12,6 @@ import {
   FooterNavigationSection,
   PromoSection,
 } from '@/components/sections';
-// types import removed (no longer used)
 import { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -25,8 +24,6 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  // Removed toast handlers as requested
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
