@@ -2,13 +2,12 @@
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Image from 'next/image';
 import Autoplay from 'embla-carousel-autoplay';
 import { useRef, useState } from 'react';
@@ -16,10 +15,8 @@ import { cn } from '@/lib/utils';
 
 interface HeroSectionProps {
   searchPlaceholder?: string;
-  cartCount?: number;
   images?: string[];
   onSearch?: (value: string) => void;
-  onCartClick?: () => void;
 }
 
 const defaultImages = [
@@ -30,10 +27,8 @@ const defaultImages = [
 
 export default function HeroSection({
   searchPlaceholder = 'Makna V4',
-  cartCount = 25,
   images = defaultImages,
   onSearch,
-  onCartClick,
 }: HeroSectionProps) {
   const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -83,63 +78,46 @@ export default function HeroSection({
         </Carousel>
         <div className='absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none' />
 
-        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-10 px-4'>
+        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-10 px-4'>
           <div className='flex items-center gap-0 w-full'>
-            <div className='relative flex items-center w-full justify-end'>
+            <div className='relative flex items-center w-full justify-start'>
+              {/* Toggle search button (now on the left) */}
+              <Button
+                size='icon'
+                aria-label='Search'
+                aria-expanded={isSearchOpen}
+                className={cn(
+                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-10 w-10 sm:h-12 sm:w-12 border border-gray-200',
+                  isSearchOpen
+                    ? 'rounded-l-lg rounded-r-none border-r-0'
+                    : 'rounded-lg',
+                )}
+                onClick={toggleSearch}
+              >
+                <Search className='w-4 h-4 sm:w-5 sm:h-5' />
+              </Button>
               <div
                 className={cn(
                   'relative overflow-hidden min-w-0 transition-all duration-300 ease-in-out',
                   isSearchOpen
-                    ? 'w-[calc(100%-80px)] sm:w-[calc(100%-96px)]'
+                    ? 'w-[calc(100%-40px)] sm:w-[calc(100%-48px)]'
                     : 'w-0',
                 )}
               >
-                {isSearchOpen && (
-                  <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4 sm:w-5 sm:h-5' />
-                )}
                 <Input
                   ref={searchInputRef}
                   placeholder={searchPlaceholder}
                   className={cn(
-                    'pl-8 sm:pl-10 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-10 sm:h-12 border-r-0',
+                    'pl-4 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-10 sm:h-12 border-l-0',
                     isSearchOpen
-                      ? 'rounded-l-lg rounded-r-none opacity-100'
-                      : 'rounded-l-lg rounded-r-none opacity-0 pointer-events-none',
+                      ? 'rounded-l-none rounded-r-lg opacity-100'
+                      : 'rounded-l-none rounded-r-lg opacity-0 pointer-events-none',
                   )}
                   onChange={(e) => onSearch?.(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Escape') setIsSearchOpen(false);
                   }}
                 />
-              </div>
-              <Button
-                size='icon'
-                aria-label='Search'
-                aria-expanded={isSearchOpen}
-                className={cn(
-                  'bg-brand hover:bg-brand/90 h-10 w-10 sm:h-12 sm:w-12',
-                  isSearchOpen
-                    ? 'rounded-l-none rounded-r-none '
-                    : 'rounded-l-lg rounded-r-none',
-                )}
-                onClick={toggleSearch}
-              >
-                <Search className='w-4 h-4 sm:w-5 sm:h-5 text-white' />
-              </Button>
-              <div className='relative'>
-                <Button
-                  size='icon'
-                  className='bg-brand hover:bg-brand/90 rounded-r-lg rounded-l-none h-10 w-10 sm:h-12 sm:w-12'
-                  onClick={onCartClick}
-                  aria-label='Cart'
-                >
-                  <ShoppingCart className='w-4 h-4 sm:w-5 sm:h-5 text-white' />
-                </Button>
-                {cartCount > 0 && (
-                  <Badge className='absolute -top-2 -right-2 bg-red-500 hover:bg-red-500 text-white rounded-full min-w-[24px] h-6 flex items-center justify-center text-xs'>
-                    {cartCount}
-                  </Badge>
-                )}
               </div>
             </div>
           </div>

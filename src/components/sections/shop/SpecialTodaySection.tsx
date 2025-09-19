@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { SpecialTodayCarouselSkeleton } from '@/components/ui/skeleton';
 import {
   Carousel,
@@ -120,7 +119,7 @@ export default function SpecialTodaySection({
                 >
                   <CardContent className='p-3'>
                     <div className='relative mb-2'>
-                      <div className='w-full h-20 bg-gray-200 rounded flex items-center justify-center relative overflow-hidden'>
+                      <div className='w-full h-20 bg-white rounded flex items-center justify-center relative overflow-hidden'>
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -135,9 +134,6 @@ export default function SpecialTodaySection({
                           </span>
                         )}
                       </div>
-                      <Badge className='absolute top-1 left-1 bg-red-500 text-white text-xs'>
-                        Promo
-                      </Badge>
                     </div>
                     <p className='text-sm font-semibold'>{product.name}</p>
                     <div className='flex flex-col space-x-1'>

@@ -13,7 +13,7 @@ export default function LocationSection({
 }: LocationSectionProps) {
   return (
     <div className='mx-4'>
-      <div className='bg-white rounded-2xl overflow-hidden shadow-lg'>
+      <div className='bg-white rounded-3xl overflow-hidden shadow-lg'>
         <div className='flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b border-black/5'>
           <div className='flex items-center'>
             <div className='flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
@@ -36,24 +36,26 @@ export default function LocationSection({
           </div>
         </div>
 
-        <div className='bg-gray-100 p-2'>
-          <div className='bg-white flex items-center justify-between rounded-xl px-3 py-2 sm:px-4 sm:py-3'>
-            <div className='flex-1'>
-              <h3 className='font-semibold text-lg text-gray-900'>
-                Ruko Mulyosari Surabaya
-              </h3>
-              <p className='text-gray-600 text-sm'>
-                Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
-              </p>
-            </div>
-            <div className='ml-4'>
-              <button
-                onClick={onLocationClick}
-                className='w-12 h-12 bg-white rounded-full flex items-center justify-center border-4 border-brand hover:bg-purple-200 transition-colors'
-                aria-label='Ubah lokasi'
-              >
-                <MapPin className='w-6 h-6 text-red-600' />
-              </button>
+        <div className='bg-white'>
+          <div className='bg-gray-200 rounded-2xl p-3'>
+            <div className='bg-white flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 sm:py-3'>
+              <div className='flex-1'>
+                <h3 className='font-semibold text-lg text-gray-900'>
+                  Ruko Mulyosari Surabaya
+                </h3>
+                <p className='text-gray-600 text-sm'>
+                  Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
+                </p>
+              </div>
+              <div className='ml-4'>
+                <button
+                  onClick={onLocationClick}
+                  className='w-12 h-12 bg-white rounded-full flex items-center justify-center border-4 border-brand hover:bg-purple-200 transition-colors'
+                  aria-label='Ubah lokasi'
+                >
+                  <MapPin className='w-6 h-6 text-red-600' />
+                </button>
+              </div>
             </div>
           </div>
         </div>

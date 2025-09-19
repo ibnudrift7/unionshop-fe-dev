@@ -132,33 +132,33 @@ export default function VoucherBannersSection({
               >
                 <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
                   <div className='p-3 sm:p-4 md:p-6'>
-                    <div className='flex items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
-                      <div className='flex-1'>
+                    <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
+                      <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
                         <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
                           {item.title1}
                         </h3>
                         <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
                           {item.title2}
                         </h3>
-                        <p className='text-xs sm:text-sm md:text-base text-gray-600'>
+                        <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
                           {item.description}
                         </p>
                       </div>
-                      <div className='flex justify-end'>
-                        <div className='relative'>
+                      <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
+                        <div className='relative overflow-visible'>
                           <Image
                             src={item.image}
                             alt='Voucher'
                             width={150}
                             height={150}
-                            className='w-12 h-12 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 object-contain'
+                            className='w-auto h-24 object-contain max-w-none'
                           />
                         </div>
                       </div>
                     </div>
 
                     <Button
-                      className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-2 sm:py-3 md:py-4 rounded-full text-sm sm:text-base md:text-lg'
+                      className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
                       onClick={item.onClaim}
                     >
                       {item.buttonText}
