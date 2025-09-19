@@ -13,7 +13,7 @@ interface OfficialMerchandiseSectionProps {
 }
 
 export default function OfficialMerchandiseSection({
-  title = 'OFFICIAL MERCHANDISE',
+  title = 'Official Merchandise',
   subtitle = 'Bisa dikirim langsung ke lokasimu',
   buttonText = 'Order',
   imageSrc = '/assets/OfficialMerch.png',
@@ -21,7 +21,7 @@ export default function OfficialMerchandiseSection({
 }: OfficialMerchandiseSectionProps) {
   return (
     <section className='p-4'>
-      <Card className='bg-white shadow-inner rounded-lg'>
+      <Card className='bg-white shadow-inner rounded-lg py-0'>
         <CardContent className='p-4'>
           <div className='grid grid-cols-4 items-center gap-4'>
             <div className='flex justify-center'>
@@ -38,9 +38,9 @@ export default function OfficialMerchandiseSection({
               </div>
             </div>
 
-            <div className='col-span-2 text-center'>
-              <h3 className='font-bold text-brand mb-1'>{title}</h3>
-              <p className='text-gray-600 text-sm'>{subtitle}</p>
+            <div className='col-span-2 text-start'>
+              <h3 className='font-bold text-brand mb-1 text-base md:text-lg leading-snug'>{title}</h3>
+              <p className='text-black text-sm md:text-base'>{subtitle}</p>
             </div>
 
             <div className='flex justify-center'>
@@ -48,7 +48,7 @@ export default function OfficialMerchandiseSection({
                 className='bg-brand hover:bg-brand/90 text-sm px-4 py-2'
                 onClick={onOrderClick}
               >
-                <span className='font-bold'>{buttonText}</span>
+                <span className='font-bold text-lg'>{buttonText}</span>
               </Button>
             </div>
           </div>
