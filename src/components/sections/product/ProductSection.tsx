@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { Product } from '@/types';
-import { ChevronRight, Package, Star } from 'lucide-react';
+import { Package, Star } from 'lucide-react';
 
 interface ProductSectionProps {
   title?: string;
@@ -18,7 +18,7 @@ interface ProductSectionProps {
 const defaultProducts: Product[] = [
   {
     id: '1',
-    name: 'Produk 1',
+    name: 'Makna - Taro Milk cheese 1',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -27,7 +27,7 @@ const defaultProducts: Product[] = [
   },
   {
     id: '2',
-    name: 'Produk 2',
+    name: 'Makna - Taro Milk cheese 2',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -36,7 +36,7 @@ const defaultProducts: Product[] = [
   },
   {
     id: '3',
-    name: 'Produk 3',
+    name: 'Makna - Taro Milk cheese 3',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -45,7 +45,7 @@ const defaultProducts: Product[] = [
   },
   {
     id: '4',
-    name: 'Produk 4',
+    name: 'Makna - Taro Milk cheese 4',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -54,7 +54,7 @@ const defaultProducts: Product[] = [
   },
   {
     id: '5',
-    name: 'Produk 5',
+    name: 'Makna - Taro Milk cheese 5',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -63,7 +63,7 @@ const defaultProducts: Product[] = [
   },
   {
     id: '6',
-    name: 'Produk 6',
+    name: 'Makna - Taro Milk cheese 6',
     image: '/assets/Product.png',
     price: 75000,
     rating: 5.0,
@@ -90,8 +90,16 @@ export default function ProductSection({
   return (
     <section className='px-4'>
       <div className='flex items-center justify-between mb-3'>
-        <div className='text-start font-bold text-gray-700'>{title}</div>
-        {showChevron && <ChevronRight className='w-5 h-5 text-gray-600' />}
+        <div className='text-start font-bold text-xl text-black'>{title}</div>
+        {showChevron && (
+          <Image
+            src='/assets/icon-arrow.png'
+            alt='Arrow'
+            width={20}
+            height={20}
+            className='w-5 h-5'
+          />
+        )}
       </div>
       <div className='grid grid-cols-2 gap-2'>
         {isLoading ? (
@@ -126,9 +134,11 @@ export default function ProductSection({
                     </Badge>
                   )}
                 </div>
-                <p className='text-sm font-semibold mb-1'>{product.name}</p>
+                <p className='text-sm md:text-base font-semibold mb-1'>
+                  {product.name}
+                </p>
                 <div className='flex flex-col md:flex-row md:items-center md:justify-between text-xs space-y-1 md:space-y-0'>
-                  <span className='font-bold text-green-600'>
+                  <span className='text-sm md:text-base text-gray-500'>
                     {formatPrice(product.price)}
                   </span>
                   <div className='flex items-center space-x-1'>
