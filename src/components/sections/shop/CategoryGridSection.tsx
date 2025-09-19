@@ -63,7 +63,7 @@ export default function CategoryGridSection({
                   className='object-cover w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16'
                 />
               </div>
-              <p className='text-xs sm:text-sm font-bold text-gray-700 whitespace-pre-line'>
+              <p className='text-sm font-bold text-black whitespace-pre-line'>
                 {category.name}
               </p>
             </button>

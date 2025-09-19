@@ -26,9 +26,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
+    <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='relative'>
-        <HeroSection searchPlaceholder='Makna V4' cartCount={25} />
+        <HeroSection searchPlaceholder='Makna V4' />
 
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>
           <LocationSection />
@@ -44,11 +44,7 @@ export default function Home() {
           title: 'Voucher buy 1 get 1 special',
           subtitle: 'UNIONLABS WEBSITE USER.',
         }}
-        voucher2={{
-          title1: 'Mau Voucher',
-          title2: 'Diskon 10RB?',
-          description: 'Gabung & Ambil Vouchernya Sekarang juga!',
-        }}
+        voucher2={{}}
       />
 
       <SpecialTodaySection isLoading={isLoading} />
@@ -59,10 +55,7 @@ export default function Home() {
 
       <PromoSection />
 
-      <ChatAdminSection
-        chatTitle='Buat User MAKNA (Chat Only)'
-        phoneNumber='+62 xxx xxx xxx'
-      />
+      <ChatAdminSection />
 
       <FooterNavigationSection activeTab='home' />
     </div>

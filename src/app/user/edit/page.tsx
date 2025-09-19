@@ -37,7 +37,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className='h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200 flex flex-col'>
+    <div className='h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200 flex flex-col'>
       <div className='flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3'>
         <h1 className='text-lg font-semibold text-gray-900'>Edit Profil</h1>
         <Button
@@ -86,7 +86,7 @@ export default function EditProfilePage() {
               </SheetTrigger>
               <SheetContent
                 side='bottom'
-                className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[720px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
+                className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[550px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
               >
                 <SheetHeader>
                   <SheetTitle className='text-center text-lg'>

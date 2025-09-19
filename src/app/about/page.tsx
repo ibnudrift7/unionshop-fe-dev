@@ -8,7 +8,7 @@ import { FooterNavigationSection } from '@/components/sections';
 export default function TentangMakna() {
   const router = useRouter();
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
+    <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='flex items-center p-4 border-b'>
         <Button
           variant='ghost'

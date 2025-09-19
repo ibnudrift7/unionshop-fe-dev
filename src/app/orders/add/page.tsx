@@ -24,7 +24,7 @@ export default function AddOrderPage() {
   );
 
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
+    <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='flex items-center gap-2 p-4 border-b border-gray-100 bg-white'>
         <Button
           variant='ghost'
@@ -45,7 +45,7 @@ export default function AddOrderPage() {
         onCartClick={() => console.log('Cart opened')}
       />
 
-      <div className='fixed left-1/2 -translate-x-1/2 bottom-6 sm:bottom-8 w-full max-w-[720px] px-4'>
+      <div className='fixed left-1/2 -translate-x-1/2 bottom-6 sm:bottom-8 w-full max-w-[550px] px-4'>
         <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
           <div className='flex flex-col leading-tight'>
             <span className='text-xs opacity-90'>{selectedCount} produk</span>

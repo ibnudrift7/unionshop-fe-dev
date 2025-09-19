@@ -2,13 +2,6 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
-import { useRef } from 'react';
 
 interface Voucher1Props {
   image?: string;
@@ -40,9 +33,8 @@ export default function VoucherBannersSection({
   voucher2List,
   className = '',
 }: VoucherBannersSectionProps) {
-  const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const v1: Required<Voucher1Props> = {
-    image: '/assets/Voucher2.png',
+    image: '/assets/voucher3.png',
     title: 'Voucher buy 1 get 1 special',
     subtitle: 'UNIONLABS WEBSITE USER.',
     buttonText: 'KLAIM',
@@ -51,8 +43,7 @@ export default function VoucherBannersSection({
   } as Required<Voucher1Props>;
 
   const v2: Required<Voucher2Props> = {
-    title1: 'Mau Voucher',
-    title2: 'Diskon 10RB?',
+    title1: 'Mau Voucher Diskon 10RB?',
     description: 'Gabung & Ambil Vouchernya Sekarang juga!',
     buttonText: 'CLAIM SEKARANG',
     image: '/assets/Voucher.png',
@@ -60,29 +51,18 @@ export default function VoucherBannersSection({
     ...voucher2,
   } as Required<Voucher2Props>;
 
-  const baseList =
-    voucher2List && voucher2List.length > 0
-      ? voucher2List
-      : [
-          v2,
-          {
-            ...v2,
-            title2:
-              (v2.title2 && v2.title2.replace(/10RB/i, '15RB')) || v2.title2,
-            image: '/assets/Voucher2.png',
-          },
-        ];
-
-  const vouchers = baseList.map((item) => ({
+  const secondVoucher: Required<Voucher2Props> = {
     ...v2,
-    ...item,
-  }));
+    ...((voucher2List && voucher2List.length > 0
+      ? voucher2List[0]
+      : voucher2) as Voucher2Props),
+  } as Required<Voucher2Props>;
 
   return (
-    <div className={`space-y-4 sm:space-y-6 md:space-y-8 mb-6 ${className}`}>
+    <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6'>
         <div className='bg-white rounded-2xl overflow-hidden shadow-lg border-2 sm:border-4 md:border-[5px] border-brand'>
-          <div className='p-1 sm:p-2 md:p-2 flex items-center gap-3'>
+          <div className='p-1 pt-0 md:p-2 md:pt-0  flex items-center gap-3'>
             <div className='flex-shrink-0 flex items-center justify-center'>
               <Image
                 src={v1.image}
@@ -94,17 +74,17 @@ export default function VoucherBannersSection({
             </div>
 
             <div className='flex-1 text-center'>
-              <p className='font-bold text-sm sm:text-base md:text-lg text-gray-900 leading-tight'>
+              <p className='font-extrabold text-sm md:text-lg text-black leading-tight tracking-tight'>
                 {v1.title}
               </p>
-              <p className='font-bold italic text-sm sm:text-sm md:text-lg text-gray-700'>
+              <p className='font-extrabold italic text-sm md:text-lg text-black'>
                 {v1.subtitle}
               </p>
             </div>
 
             <div className='flex-shrink-0'>
               <Button
-                className='bg-[#C70122] hover:bg-[#C70122]/90 text-white font-semibold w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-xs sm:text-sm md:text-sm'
+                className='bg-[#C70122] hover:bg-[#C70122]/90 text-white font-semibold w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center text-xs md:text-sm'
                 aria-label='Klaim Voucher'
                 onClick={v1.onClaim}
               >
@@ -115,61 +95,95 @@ export default function VoucherBannersSection({
         </div>
       </div>
 
-      {/* Voucher banner 2 */}
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
-        <Carousel
-          plugins={[plugin.current]}
-          className='w-full'
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
-          opts={{ align: 'start', loop: vouchers.length > 1 }}
-        >
-          <CarouselContent className='pr-4'>
-            {vouchers.map((item, idx) => (
-              <CarouselItem
-                key={idx}
-                className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
-              >
-                <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
-                  <div className='p-3 sm:p-4 md:p-6'>
-                    <div className='flex items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
-                      <div className='flex-1'>
-                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                          {item.title1}
-                        </h3>
-                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                          {item.title2}
-                        </h3>
-                        <p className='text-xs sm:text-sm md:text-base text-gray-600'>
-                          {item.description}
-                        </p>
-                      </div>
-                      <div className='flex justify-end'>
-                        <div className='relative'>
-                          <Image
-                            src={item.image}
-                            alt='Voucher'
-                            width={150}
-                            height={150}
-                            className='w-12 h-12 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 object-contain'
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <Button
-                      className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-2 sm:py-3 md:py-4 rounded-full text-sm sm:text-base md:text-lg'
-                      onClick={item.onClaim}
-                    >
-                      {item.buttonText}
-                    </Button>
-                  </div>
+        <div className='rounded-xl sm:rounded-2xl overflow-hidden [box-shadow:3px_6px_17px_-2px_rgba(0,0,0,0.19)] bg-white'>
+          <div className='p-3 sm:p-4 md:p-6'>
+            <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
+              <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
+                <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                  {secondVoucher.title1}
+                </h3>
+                <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
+                  {secondVoucher.description}
+                </p>
+              </div>
+              <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
+                <div className='relative overflow-visible'>
+                  <Image
+                    src={secondVoucher.image}
+                    alt='Voucher'
+                    width={150}
+                    height={150}
+                    className='w-auto h-24 object-contain max-w-none'
+                  />
                 </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+              </div>
+            </div>
+
+            <Button
+              className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
+              onClick={secondVoucher.onClaim}
+            >
+              {secondVoucher.buttonText}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+{/* <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
+  <Carousel
+    plugins={[plugin.current]}
+    className='w-full'
+    onMouseEnter={plugin.current.stop}
+    onMouseLeave={plugin.current.reset}
+    opts={{ align: 'start', loop: vouchers.length > 1 }}
+  >
+    <CarouselContent className='pr-4'>
+      {vouchers.map((item, idx) => (
+        <CarouselItem
+          key={idx}
+          className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
+        >
+          <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
+            <div className='p-3 sm:p-4 md:p-6'>
+              <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
+                <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
+                  <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                    {item.title1}
+                  </h3>
+                  <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                    {item.title2}
+                  </h3>
+                  <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
+                    {item.description}
+                  </p>
+                </div>
+                <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
+                  <div className='relative overflow-visible'>
+                    <Image
+                      src={item.image}
+                      alt='Voucher'
+                      width={150}
+                      height={150}
+                      className='w-auto h-24 object-contain max-w-none'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
+                onClick={item.onClaim}
+              >
+                {item.buttonText}
+              </Button>
+            </div>
+          </div>
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+  </Carousel>
+</div>; */}

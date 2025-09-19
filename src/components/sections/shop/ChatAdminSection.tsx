@@ -13,17 +13,16 @@ interface ChatAdminSectionProps {
 export default function ChatAdminSection({
   title = 'Curhat Ke Mimin?',
   chatTitle = 'Buat User MAKNA (Chat Only)',
-  phoneNumber = '+62 xxx xxx xxx',
+  phoneNumber = '+62 877-7699-9499',
   onChatClick,
 }: ChatAdminSectionProps) {
   return (
     <section className='px-4'>
-      <div className='text-start font-bold text-gray-700 mb-4'>{title}</div>
-      <Card
-        className='cursor-pointer hover:shadow-md transition-shadow'
-        onClick={onChatClick}
-      >
-        <CardContent className='p-4'>
+      <Card className='border-none shadow-none' onClick={onChatClick}>
+        <div className='text-start font-bold text-black mb-4 text-xl'>
+          {title}
+        </div>
+        <CardContent className='p-6 shadow rounded-2xl bg-white border border-gray-200'>
           <div className='flex items-center space-x-4'>
             <div className='w-12 h-12 flex items-center justify-center'>
               <Image
@@ -35,12 +34,18 @@ export default function ChatAdminSection({
               />
             </div>
             <div>
-              <p className='font-semibold'>{chatTitle}</p>
-              <p className='font-bold text-gray-600'>WhatsApp: {phoneNumber}</p>
+              <p className='font-medium'>{chatTitle}</p>
+              <p className='font-extrabold text-green-800'>{phoneNumber}</p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <div className='my-6'>
+        <p className='font-bold'>UNIONLABS.ID</p>
+        <p className='font-bold'>2022 CREATED BY Union Labs</p>
+        <p className='font-bold'>PT. Surya Hutama Anugerah.</p>
+      </div>
     </section>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { SpecialTodayCarouselSkeleton } from '@/components/ui/skeleton';
 import {
   Carousel,
@@ -10,7 +9,7 @@ import {
 } from '@/components/ui/carousel';
 import Image from 'next/image';
 import { SpecialProduct } from '@/types';
-import { Package, Star, ChevronRight } from 'lucide-react';
+import { Package, Star } from 'lucide-react';
 
 interface SpecialTodaySectionProps {
   title?: string;
@@ -22,56 +21,56 @@ interface SpecialTodaySectionProps {
 const defaultProducts: SpecialProduct[] = [
   {
     id: '1',
-    name: 'Produk 1',
+    name: 'Ova Vprime 60 + Freebase',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '2',
-    name: 'Produk 2',
+    name: 'Ova Vprime 60 + Freebase 2',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '3',
-    name: 'Produk 3',
+    name: 'Ova Vprime 60 + Freebase 3',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '4',
-    name: 'Produk 4',
+    name: 'Ova Vprime 60 + Freebase 4',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '5',
-    name: 'Produk 5',
+    name: 'Ova Vprime 60 + Freebase 5',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '6',
-    name: 'Produk 6',
+    name: 'Ova Vprime 60 + Freebase 6',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '7',
-    name: 'Produk 7',
+    name: 'Ova Vprime 60 + Freebase 7',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
   },
   {
     id: '8',
-    name: 'Produk 8',
+    name: 'Ova Vprime 60 + Freebase 8',
     image: '/assets/SpecialProduct.png',
     originalPrice: 100000,
     discountPrice: 50000,
@@ -95,8 +94,14 @@ export default function SpecialTodaySection({
   return (
     <section className='px-4'>
       <div className='flex items-center justify-between mb-4'>
-        <div className='text-start font-bold text-gray-700'>{title}</div>
-        <ChevronRight className='w-5 h-5 text-gray-600' />
+        <div className='text-start font-bold text-black text-xl'>{title}</div>
+        <Image
+          src='/assets/icon-arrow.png'
+          alt='Arrow'
+          width={20}
+          height={20}
+          className='w-5 h-5'
+        />
       </div>
       <Carousel
         opts={{
@@ -120,7 +125,7 @@ export default function SpecialTodaySection({
                 >
                   <CardContent className='p-3'>
                     <div className='relative mb-2'>
-                      <div className='w-full h-20 bg-gray-200 rounded flex items-center justify-center relative overflow-hidden'>
+                      <div className='w-full h-20 md:h-32 bg-white rounded flex items-center justify-center relative overflow-hidden'>
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -135,16 +140,13 @@ export default function SpecialTodaySection({
                           </span>
                         )}
                       </div>
-                      <Badge className='absolute top-1 left-1 bg-red-500 text-white text-xs'>
-                        Promo
-                      </Badge>
                     </div>
-                    <p className='text-sm font-semibold'>{product.name}</p>
+                    <p className='text-sm font-semibold pt-4'>{product.name}</p>
                     <div className='flex flex-col space-x-1'>
-                      <span className='text-sm font-bold text-red-500'>
+                      <span className='text-lg text-red-600 leading-snug'>
                         {formatPrice(product.discountPrice)}
                       </span>
-                      <span className='text-xs text-gray-500 line-through'>
+                      <span className='text-sm text-gray-500 line-through'>
                         {formatPrice(product.originalPrice)}
                       </span>
                     </div>

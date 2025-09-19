@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Star } from 'lucide-react';
+import Image from 'next/image';
 
 interface LocationSectionProps {
   onLocationClick?: () => void;
@@ -13,13 +13,16 @@ export default function LocationSection({
 }: LocationSectionProps) {
   return (
     <div className='mx-4'>
-      <div className='bg-white rounded-2xl overflow-hidden shadow-lg'>
+      <div className='bg-white rounded-3xl overflow-hidden shadow-lg'>
         <div className='flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b border-black/5'>
           <div className='flex items-center'>
-            <div className='flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
-              <Star
-                className='w-5 h-5 sm:w-6 sm:h-6 text-[#997B27]'
-                fill='currentColor'
+            <div className='flex items-center gap-2 px-3 py-1 rounded-xl shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
+              <Image
+                src='/assets/icon-star.png'
+                alt='Star Points'
+                width={24}
+                height={24}
+                className='w-6 h-6 md:w-8 md:h-8'
               />
               <span className='text-sm sm:text-base font-semibold text-[#997B27]'>
                 Poin kamu
@@ -36,24 +39,32 @@ export default function LocationSection({
           </div>
         </div>
 
-        <div className='bg-gray-100 p-2'>
-          <div className='bg-white flex items-center justify-between rounded-xl px-3 py-2 sm:px-4 sm:py-3'>
-            <div className='flex-1'>
-              <h3 className='font-semibold text-lg text-gray-900'>
-                Ruko Mulyosari Surabaya
-              </h3>
-              <p className='text-gray-600 text-sm'>
-                Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
-              </p>
-            </div>
-            <div className='ml-4'>
-              <button
-                onClick={onLocationClick}
-                className='w-12 h-12 bg-white rounded-full flex items-center justify-center border-4 border-brand hover:bg-purple-200 transition-colors'
-                aria-label='Ubah lokasi'
-              >
-                <MapPin className='w-6 h-6 text-red-600' />
-              </button>
+        <div className='bg-white'>
+          <div className='bg-[#f3f3f3] rounded-2xl p-2'>
+            <div className='bg-white flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 sm:py-3'>
+              <div className='flex-1'>
+                <h3 className='font-semibold text-lg text-gray-900'>
+                  Ruko Mulyosari Surabaya
+                </h3>
+                <p className='text-gray-600 text-sm font-light'>
+                  Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
+                </p>
+              </div>
+              <div className='ml-4'>
+                <button
+                  onClick={onLocationClick}
+                  className='w-12 h-12 bg-white rounded-full flex items-center justify-center border-4 border-brand hover:bg-purple-200 transition-colors'
+                  aria-label='Ubah lokasi'
+                >
+                  <Image
+                    src='/assets/icon-location.png'
+                    alt='Location Icon'
+                    width={24}
+                    height={24}
+                    className='w-5 h-auto'
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>
