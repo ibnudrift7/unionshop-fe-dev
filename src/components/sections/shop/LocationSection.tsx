@@ -37,7 +37,7 @@ export default function LocationSection({
         </div>
 
         <div className='bg-white'>
-          <div className='bg-gray-200 rounded-2xl p-3'>
+          <div className='bg-gray-200 rounded-2xl p-2'>
             <div className='bg-white flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 sm:py-3'>
               <div className='flex-1'>
                 <h3 className='font-semibold text-lg text-gray-900'>
