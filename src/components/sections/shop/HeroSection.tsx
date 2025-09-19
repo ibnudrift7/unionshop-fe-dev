@@ -78,16 +78,15 @@ export default function HeroSection({
         </Carousel>
         <div className='absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none' />
 
-        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-10 px-4'>
+        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-5 px-4'>
           <div className='flex items-center gap-0 w-full'>
             <div className='relative flex items-center w-full justify-start'>
-              {/* Toggle search button (now on the left) */}
               <Button
                 size='icon'
                 aria-label='Search'
                 aria-expanded={isSearchOpen}
                 className={cn(
-                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-10 w-10 sm:h-12 sm:w-12 border border-gray-200',
+                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-7 w-10 sm:h-9 sm:w-12 border border-gray-200',
                   isSearchOpen
                     ? 'rounded-l-lg rounded-r-none border-r-0'
                     : 'rounded-lg',

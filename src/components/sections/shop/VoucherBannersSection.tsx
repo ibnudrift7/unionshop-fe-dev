@@ -34,7 +34,7 @@ export default function VoucherBannersSection({
   className = '',
 }: VoucherBannersSectionProps) {
   const v1: Required<Voucher1Props> = {
-    image: '/assets/Voucher2.png',
+    image: '/assets/voucher3.png',
     title: 'Voucher buy 1 get 1 special',
     subtitle: 'UNIONLABS WEBSITE USER.',
     buttonText: 'KLAIM',
@@ -43,8 +43,7 @@ export default function VoucherBannersSection({
   } as Required<Voucher1Props>;
 
   const v2: Required<Voucher2Props> = {
-    title1: 'Mau Voucher',
-    title2: 'Diskon 10RB?',
+    title1: 'Mau Voucher Diskon 10RB?',
     description: 'Gabung & Ambil Vouchernya Sekarang juga!',
     buttonText: 'CLAIM SEKARANG',
     image: '/assets/Voucher.png',
@@ -52,7 +51,6 @@ export default function VoucherBannersSection({
     ...voucher2,
   } as Required<Voucher2Props>;
 
-  // Single voucher source: take first from list if provided, otherwise use v2
   const secondVoucher: Required<Voucher2Props> = {
     ...v2,
     ...((voucher2List && voucher2List.length > 0
@@ -64,7 +62,7 @@ export default function VoucherBannersSection({
     <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6'>
         <div className='bg-white rounded-2xl overflow-hidden shadow-lg border-2 sm:border-4 md:border-[5px] border-brand'>
-          <div className='p-1 sm:p-2 md:p-2 flex items-center gap-3'>
+          <div className='p-1 pt-0 md:p-2 md:pt-0  flex items-center gap-3'>
             <div className='flex-shrink-0 flex items-center justify-center'>
               <Image
                 src={v1.image}
@@ -76,7 +74,7 @@ export default function VoucherBannersSection({
             </div>
 
             <div className='flex-1 text-center'>
-              <p className='font-extrabold text-sm md:text-lg text-black leading-tight'>
+              <p className='font-extrabold text-sm md:text-lg text-black leading-tight tracking-tight'>
                 {v1.title}
               </p>
               <p className='font-extrabold italic text-sm md:text-lg text-black'>
@@ -97,17 +95,13 @@ export default function VoucherBannersSection({
         </div>
       </div>
 
-      {/* Voucher banner 2 (single card, no carousel) */}
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
-        <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
+        <div className='rounded-xl sm:rounded-2xl overflow-hidden [box-shadow:3px_6px_17px_-2px_rgba(0,0,0,0.19)] bg-white'>
           <div className='p-3 sm:p-4 md:p-6'>
             <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
               <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
                 <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
                   {secondVoucher.title1}
-                </h3>
-                <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                  {secondVoucher.title2}
                 </h3>
                 <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
                   {secondVoucher.description}

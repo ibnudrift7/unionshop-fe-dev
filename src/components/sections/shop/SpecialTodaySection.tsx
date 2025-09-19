@@ -125,7 +125,7 @@ export default function SpecialTodaySection({
                 >
                   <CardContent className='p-3'>
                     <div className='relative mb-2'>
-                      <div className='w-full h-20 bg-white rounded flex items-center justify-center relative overflow-hidden'>
+                      <div className='w-full h-20 md:h-32 bg-white rounded flex items-center justify-center relative overflow-hidden'>
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -141,9 +141,9 @@ export default function SpecialTodaySection({
                         )}
                       </div>
                     </div>
-                    <p className='text-sm font-semibold'>{product.name}</p>
+                    <p className='text-sm font-semibold pt-4'>{product.name}</p>
                     <div className='flex flex-col space-x-1'>
-                      <span className='text-lg text-red-400 leading-snug'>
+                      <span className='text-lg text-red-600 leading-snug'>
                         {formatPrice(product.discountPrice)}
                       </span>
                       <span className='text-sm text-gray-500 line-through'>

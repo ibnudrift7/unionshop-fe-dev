@@ -21,7 +21,7 @@ export default function OfficialMerchandiseSection({
 }: OfficialMerchandiseSectionProps) {
   return (
     <section className='p-4'>
-      <Card className='bg-white shadow-inner rounded-lg py-0'>
+      <Card className='bg-white shadow rounded-3xl py-0'>
         <CardContent className='p-4'>
           <div className='grid grid-cols-4 items-center gap-4'>
             <div className='flex justify-center'>
@@ -40,7 +40,7 @@ export default function OfficialMerchandiseSection({
 
             <div className='col-span-2 text-start'>
               <h3 className='font-bold text-brand mb-1 text-base md:text-lg leading-snug'>{title}</h3>
-              <p className='text-black text-sm md:text-base'>{subtitle}</p>
+              <p className='text-black text-sm font-light'>{subtitle}</p>
             </div>
 
             <div className='flex justify-center'>

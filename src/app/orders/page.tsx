@@ -47,7 +47,7 @@ export default function RiwayatPesanan() {
   ];
 
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
+    <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='flex items-center justify-between p-4 border-b border-gray-100'>
         <Button
           variant='ghost'

@@ -108,12 +108,12 @@ export default function ProductSection({
           products.map((product) => (
             <Card
               key={product.id}
-              className='rounded-md shadow-none hover:shadow-sm transition-shadow border border-gray-200 overflow-hidden py-0'
+              className='rounded-md shadow-none border-none overflow-hidden py-0'
               onClick={() => onProductClick?.(product)}
             >
               <CardContent className='p-3'>
                 <div className='relative mb-2'>
-                  <div className='w-full h-24 rounded-sm flex items-center justify-center relative overflow-hidden'>
+                  <div className='w-full h-24 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
                     {product.image ? (
                       <Image
                         src={product.image}
@@ -129,25 +129,25 @@ export default function ProductSection({
                     )}
                   </div>
                   {product.isNew && (
-                    <Badge className='absolute top-1 right-1 bg-brand text-white text-xs rounded-full w-10 h-10 flex items-center justify-center p-0'>
+                    <Badge className='absolute top-1 right-1 bg-brand text-white text-lg font-bold rounded-full w-10 h-10 md:h-15 md:w-15 flex items-center justify-center p-0'>
                       Baru!
                     </Badge>
                   )}
                 </div>
-                <p className='text-sm md:text-base font-semibold mb-1'>
+                <p className='text-sm md:text-base font-semibold mb-1 pt-4'>
                   {product.name}
                 </p>
-                <div className='flex flex-col md:flex-row md:items-center md:justify-between text-xs space-y-1 md:space-y-0'>
-                  <span className='text-sm md:text-base text-gray-500'>
+                <div className='flex flex-col text-xs space-y-1 md:space-y-0'>
+                  <span className='text-sm md:text-base text-black'>
                     {formatPrice(product.price)}
                   </span>
-                  <div className='flex items-center space-x-1'>
+                  <div className='flex items-center space-x-1 pt-2'>
                     <span>
                       <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
                     </span>
                     <span className='text-gray-600'>{product.rating}</span>
-                    <span className='text-gray-500'>
-                      • {product.sold} terjual
+                    <span className='text-gray-600'>
+                      • {product.sold}+ terjual
                     </span>
                   </div>
                 </div>

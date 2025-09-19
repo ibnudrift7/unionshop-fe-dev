@@ -12,20 +12,20 @@ interface FooterNavigationSectionProps {
 }
 
 const defaultTabs: NavigationTab[] = [
-  { id: 'home', iconSrc: '/assets/nav/home-icon.png', label: 'Home' },
+  { id: 'home', iconSrc: '/assets/nav/home.png', label: 'Home' },
   {
     id: 'shop',
-    iconSrc: '/assets/nav/shop-icon.png',
+    iconSrc: '/assets/nav/shop.png',
     label: 'Shop',
     badge: '3',
   },
   {
     id: 'promo',
-    iconSrc: '/assets/nav/promo-icon.png',
+    iconSrc: '/assets/nav/promo.png',
     label: 'Promo',
     badge: '2',
   },
-  { id: 'profile', iconSrc: '/assets/nav/saya-icon.png', label: 'Saya' },
+  { id: 'profile', iconSrc: '/assets/nav/saya.png', label: 'Saya' },
 ];
 
 export default function FooterNavigationSection({
@@ -50,7 +50,7 @@ export default function FooterNavigationSection({
       <div className='h-16 sm:h-20' aria-hidden />
       <footer
         role='contentinfo'
-        className='fixed bottom-0 left-0 right-0 mx-auto max-w-[720px] bg-gray-50 border-t p-4 z-50'
+        className='fixed bottom-0 left-0 right-0 mx-auto max-w-[550px] bg-gray-50 border-t p-4 z-50'
       >
         <div className='flex justify-around'>
           {tabs.map((tab) => {
