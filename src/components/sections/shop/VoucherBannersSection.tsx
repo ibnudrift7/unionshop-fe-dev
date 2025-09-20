@@ -2,6 +2,13 @@
 
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
+import * as React from 'react';
 
 interface Voucher1Props {
   image?: string;
@@ -33,6 +40,9 @@ export default function VoucherBannersSection({
   voucher2List,
   className = '',
 }: VoucherBannersSectionProps) {
+  const plugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: false }),
+  );
   const v1: Required<Voucher1Props> = {
     image: '/assets/voucher3.png',
     title: 'Voucher buy 1 get 1 special',
@@ -51,12 +61,20 @@ export default function VoucherBannersSection({
     ...voucher2,
   } as Required<Voucher2Props>;
 
-  const secondVoucher: Required<Voucher2Props> = {
-    ...v2,
-    ...((voucher2List && voucher2List.length > 0
-      ? voucher2List[0]
-      : voucher2) as Voucher2Props),
-  } as Required<Voucher2Props>;
+  // Build vouchers array to always contain exactly 2 items.
+  // Prefer provided list (up to 2), else pad with a second default using a different image.
+  const baseList: Voucher2Props[] =
+    voucher2List && voucher2List.length > 0
+      ? voucher2List.slice(0, 2)
+      : [voucher2];
+  const paddedList: Voucher2Props[] = [...baseList];
+  if (paddedList.length < 2) {
+    paddedList.push({ ...v2, image: '/assets/Voucher2.png' });
+  }
+  const vouchers: Required<Voucher2Props>[] = paddedList.map(
+    (item) =>
+      ({ ...v2, ...(item as Voucher2Props) } as Required<Voucher2Props>),
+  );
 
   return (
     <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
@@ -96,94 +114,61 @@ export default function VoucherBannersSection({
       </div>
 
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
-        <div className='rounded-xl sm:rounded-2xl overflow-hidden [box-shadow:3px_6px_17px_-2px_rgba(0,0,0,0.19)] bg-white'>
-          <div className='p-3 sm:p-4 md:p-6'>
-            <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
-              <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
-                <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                  {secondVoucher.title1}
-                </h3>
-                <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
-                  {secondVoucher.description}
-                </p>
-              </div>
-              <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
-                <div className='relative overflow-visible'>
-                  <Image
-                    src={secondVoucher.image}
-                    alt='Voucher'
-                    width={150}
-                    height={150}
-                    className='w-auto h-24 object-contain max-w-none'
-                  />
-                </div>
-              </div>
-            </div>
+        <Carousel
+          plugins={[plugin.current]}
+          className='w-full'
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+          opts={{ align: 'start', loop: vouchers.length > 1 }}
+        >
+          <CarouselContent className='pr-4 pb-4'>
+            {vouchers.map((item, idx) => (
+              <CarouselItem
+                key={idx}
+                className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
+              >
+                <div className='rounded-xl sm:rounded-2xl overflow-hidden [box-shadow:3px_6px_17px_-2px_rgba(0,0,0,0.19)] bg-white'>
+                  <div className='p-3 sm:p-4 md:p-6'>
+                    <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
+                      <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
+                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                          {item.title1}
+                        </h3>
+                        {item.title2 && (
+                          <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                            {item.title2}
+                          </h3>
+                        )}
+                        <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
+                          {item.description}
+                        </p>
+                      </div>
+                      <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
+                        <div className='relative overflow-visible'>
+                          <Image
+                            src={item.image}
+                            alt='Voucher'
+                            width={150}
+                            height={150}
+                            className='w-auto h-24 object-contain max-w-none'
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-            <Button
-              className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
-              onClick={secondVoucher.onClaim}
-            >
-              {secondVoucher.buttonText}
-            </Button>
-          </div>
-        </div>
+                    <Button
+                      className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
+                      onClick={item.onClaim}
+                    >
+                      {item.buttonText}
+                    </Button>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
     </div>
   );
 }
-
-{/* <div className='mx-2 sm:mx-4 mb-4 sm:mb-6 md:mb-8'>
-  <Carousel
-    plugins={[plugin.current]}
-    className='w-full'
-    onMouseEnter={plugin.current.stop}
-    onMouseLeave={plugin.current.reset}
-    opts={{ align: 'start', loop: vouchers.length > 1 }}
-  >
-    <CarouselContent className='pr-4'>
-      {vouchers.map((item, idx) => (
-        <CarouselItem
-          key={idx}
-          className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
-        >
-          <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
-            <div className='p-3 sm:p-4 md:p-6'>
-              <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
-                <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
-                  <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                    {item.title1}
-                  </h3>
-                  <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
-                    {item.title2}
-                  </h3>
-                  <p className='text-xs sm:text-sm md:text-base text-gray-600 break-words leading-snug'>
-                    {item.description}
-                  </p>
-                </div>
-                <div className='flex justify-end justify-self-end shrink-0 min-w-[48px] sm:min-w-[80px] md:min-w-[112px] lg:min-w-[144px]'>
-                  <div className='relative overflow-visible'>
-                    <Image
-                      src={item.image}
-                      alt='Voucher'
-                      width={150}
-                      height={150}
-                      className='w-auto h-24 object-contain max-w-none'
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
-                onClick={item.onClaim}
-              >
-                {item.buttonText}
-              </Button>
-            </div>
-          </div>
-        </CarouselItem>
-      ))}
-    </CarouselContent>
-  </Carousel>
-</div>; */}
