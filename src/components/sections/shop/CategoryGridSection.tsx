@@ -14,25 +14,25 @@ const defaultCategories: Category[] = [
   {
     id: 'starter-kit',
     name: 'Starter\nKit',
-    image: '/assets/Section.png',
+    image: '/assets/starter-kit.png',
     alt: 'Starter Kit',
   },
   {
     id: 'freebase-liquid',
     name: 'Freebase\nLiquid',
-    image: '/assets/Section2.png',
+    image: '/assets/freebase.png',
     alt: 'Freebase Liquid',
   },
   {
     id: 'saltnic-liquid',
     name: 'Saltnic\nLiquid',
-    image: '/assets/Section3.png',
+    image: '/assets/saltnic.png',
     alt: 'Saltnic Liquid',
   },
   {
     id: 'official-merchandise',
     name: 'Official\nMerchandise',
-    image: '/assets/Section4.png',
+    image: '/assets/official-merch.png',
     alt: 'Official Merchandise',
   },
 ];
@@ -54,15 +54,13 @@ export default function CategoryGridSection({
               onClick={() => onCategoryClick?.(category)}
               className='text-center bg-white rounded-lg shadow-lg p-2 sm:p-3 md:p-4 hover:shadow-xl transition-shadow'
             >
-              <div className='w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto mb-2 rounded-full bg-brand flex items-center justify-center relative overflow-hidden'>
-                <Image
-                  src={category.image}
-                  alt={category.alt}
-                  width={64}
-                  height={64}
-                  className='object-cover w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16'
-                />
-              </div>
+              <Image
+                src={category.image}
+                alt={category.alt}
+                width={80}
+                height={80}
+                className='mx-auto mb-2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain'
+              />
               <p className='text-sm font-bold text-black whitespace-pre-line'>
                 {category.name}
               </p>
