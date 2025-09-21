@@ -30,6 +30,7 @@ export interface Product {
 export interface NavigationTab {
   icon?: LucideIcon;
   iconSrc?: string;
+  activeIconSrc?: string;
   label: string;
   badge?: string;
   id: string;
