@@ -15,8 +15,7 @@ const defaultTabs: NavigationTab[] = [
   {
     id: 'home',
     iconSrc: '/assets/nav/home.png',
-    // No dedicated active icon yet; use the same as default per request
-    activeIconSrc: '/assets/nav/home.png',
+    activeIconSrc: '/assets/nav/home-active.png',
     label: 'Home',
   },
   {
