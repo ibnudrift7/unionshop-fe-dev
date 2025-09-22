@@ -7,10 +7,11 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import { type CarouselApi } from '@/components/ui/carousel';
 import { Search } from 'lucide-react';
 import Image from 'next/image';
 import Autoplay from 'embla-carousel-autoplay';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface HeroSectionProps {
@@ -33,13 +34,29 @@ export default function HeroSection({
   const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const [api, setApi] = useState<CarouselApi | undefined>(undefined);
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap());
+      setCount(api.scrollSnapList().length);
+    };
+    onSelect();
+    api.on('select', onSelect);
+    api.on('reInit', onSelect);
+    return () => {
+      api.off('select', onSelect);
+      api.off('reInit', onSelect);
+    };
+  }, [api]);
 
   const toggleSearch = () => {
     setIsSearchOpen((prev) => {
       const next = !prev;
-      // focus the input after opening
       if (!prev) {
-        // queue to next tick so width transition doesn't block focus
         setTimeout(() => searchInputRef.current?.focus(), 0);
       }
       return next;
@@ -54,6 +71,7 @@ export default function HeroSection({
           className='w-full'
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
+          setApi={setApi}
           opts={{
             align: 'start',
             loop: true,
@@ -86,7 +104,7 @@ export default function HeroSection({
                 aria-label='Search'
                 aria-expanded={isSearchOpen}
                 className={cn(
-                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-7 w-10 sm:h-9 sm:w-12 border border-gray-200',
+                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-8 w-10 sm:h-9 sm:w-12 border border-gray-200',
                   isSearchOpen
                     ? 'rounded-l-lg rounded-r-none border-r-0'
                     : 'rounded-lg',
@@ -107,7 +125,7 @@ export default function HeroSection({
                   ref={searchInputRef}
                   placeholder={searchPlaceholder}
                   className={cn(
-                    'pl-4 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-10 sm:h-12 border-l-0',
+                    'pl-4 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-8 md:h-9 border-l-0',
                     isSearchOpen
                       ? 'rounded-l-none rounded-r-lg opacity-100'
                       : 'rounded-l-none rounded-r-lg opacity-0 pointer-events-none',
@@ -120,6 +138,21 @@ export default function HeroSection({
               </div>
             </div>
           </div>
+        </div>
+
+        <div className='absolute left-5 bottom-11 sm:left-6 sm:bottom-14 flex items-center gap-1.5 sm:gap-2 z-10'>
+          {Array.from({ length: count }).map((_, i) => (
+            <button
+              key={i}
+              aria-label={`Slide ${i + 1}`}
+              aria-current={current === i}
+              onClick={() => api?.scrollTo(i)}
+              className={cn(
+                'h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full border border-white/80 transition-colors',
+                current === i ? 'bg-white' : 'bg-white/40 hover:bg-white/60',
+              )}
+            />
+          ))}
         </div>
       </div>
     </div>

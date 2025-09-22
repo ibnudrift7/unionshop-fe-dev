@@ -12,20 +12,32 @@ interface FooterNavigationSectionProps {
 }
 
 const defaultTabs: NavigationTab[] = [
-  { id: 'home', iconSrc: '/assets/nav/home.png', label: 'Home' },
+  {
+    id: 'home',
+    iconSrc: '/assets/nav/home.png',
+    activeIconSrc: '/assets/nav/home-active.png',
+    label: 'Home',
+  },
   {
     id: 'shop',
     iconSrc: '/assets/nav/shop.png',
+    activeIconSrc: '/assets/nav/shop-active.png',
     label: 'Shop',
     badge: '3',
   },
   {
     id: 'promo',
     iconSrc: '/assets/nav/promo.png',
+    activeIconSrc: '/assets/nav/promo-active.png',
     label: 'Promo',
     badge: '2',
   },
-  { id: 'profile', iconSrc: '/assets/nav/saya.png', label: 'Saya' },
+  {
+    id: 'profile',
+    iconSrc: '/assets/nav/saya.png',
+    activeIconSrc: '/assets/nav/saya-active.png',
+    label: 'Saya',
+  },
 ];
 
 export default function FooterNavigationSection({
@@ -66,7 +78,11 @@ export default function FooterNavigationSection({
                 <div className='relative'>
                   {tab.iconSrc ? (
                     <Image
-                      src={tab.iconSrc}
+                      src={
+                        isActive && tab.activeIconSrc
+                          ? tab.activeIconSrc
+                          : tab.iconSrc
+                      }
                       alt={tab.label}
                       width={24}
                       height={24}
