@@ -23,16 +23,13 @@ export default function BottomActionBar({
   primaryLabel,
   onPrimaryClick,
 }: BottomActionBarProps) {
-  const savingValue = noteText
-    ? noteText.replace(/^(Hemat\s*)/i, '').trim()
-    : '';
   return (
     <div className='fixed left-1/2 -translate-x-1/2 bottom-[72px] sm:bottom-[76px] w-full max-w-[550px] bg-white p-4'>
       {noteText && (
         <div className='-m-4 bg-[#e6e6e6] flex items-center justify-center mb-3 px-4 py-2'>
           <span className='text-sm text-black font-medium mr-1'>Hemat</span>
           <span className='text-sm text-green-600 font-semibold'>
-            {savingValue}
+            {noteText}
           </span>
         </div>
       )}
