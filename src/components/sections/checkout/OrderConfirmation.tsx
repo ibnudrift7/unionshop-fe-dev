@@ -209,18 +209,20 @@ export default function OrderConfirmation() {
         </div>
 
         <div className='fixed left-1/2 -translate-x-1/2 bottom-[72px] sm:bottom-[76px] w-full max-w-[550px] bg-white border-t p-4'>
-          <div className='flex flex-col items-start mb-3'>
-            <span className='text-gray-400'>Total</span>
-            <span className='text-lg font-semibold text-gray-900'>
-              Rp {total.toLocaleString('id-ID')}
-            </span>
+          <div className='flex items-center justify-between gap-4'>
+            <div className='flex flex-col items-start'>
+              <span className='text-gray-400'>Total</span>
+              <span className='text-lg font-semibold text-gray-900'>
+                Rp {total.toLocaleString('id-ID')}
+              </span>
+            </div>
+            <Button
+              className='bg-brand hover:bg-brand/80 text-white py-5 px-4 shrink-0'
+              onClick={() => router.push('/checkout')}
+            >
+              Pilih Pembayaran
+            </Button>
           </div>
-          <Button
-            className='w-full bg-brand hover:bg-brand/80 text-white py-3'
-            onClick={() => router.push('/checkout')}
-          >
-            Pilih Pembayaran
-          </Button>
         </div>
 
         <div className='h-40 sm:h-44' />
