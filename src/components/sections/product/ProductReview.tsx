@@ -1,11 +1,11 @@
 'use client';
 
-import { ArrowLeft, Star, User } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import BottomActionBar from './BottomActionBar';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function ProductReviews() {
   const router = useRouter();
@@ -53,29 +53,35 @@ export default function ProductReviews() {
 
         <div className='space-y-4'>
           {reviews.map((review, index) => (
-            <div key={index} className='flex items-start gap-3 py-3'>
-              <Avatar className='h-10 w-10 bg-brand/10'>
-                <AvatarFallback className='bg-brand/10'>
-                  <User className='h-5 w-5 text-brand' />
-                </AvatarFallback>
-              </Avatar>
+            <div
+              key={index}
+              className='flex items-center gap-3 py-3'
+            >
+              <div className='h-10 w-10 flex items-center justify-center'>
+                <Image
+                  src='/assets/user-icon.png'
+                  alt='User'
+                  width={40}
+                  height={40}
+                  className='h-10 w-10 object-contain'
+                />
+              </div>
 
               <div className='flex-1'>
-                <div className='flex items-center justify-between mb-1'>
+                <div className='flex items-center justify-between'>
                   <span className='text-sm font-medium text-gray-900'>
                     {review.userName}
                   </span>
-                </div>
-
-                <div className='flex items-center gap-1'>
-                  {Array(5)
-                    .fill(0)
-                    .map((_, starIndex) => (
-                      <Star
-                        key={starIndex}
-                        className='h-4 w-4 fill-yellow-400 text-yellow-400'
-                      />
-                    ))}
+                  <div className='flex items-center gap-1'>
+                    {Array(5)
+                      .fill(0)
+                      .map((_, starIndex) => (
+                        <Star
+                          key={starIndex}
+                          className='h-7 w-7 fill-yellow-400 text-yellow-400'
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
             </div>
