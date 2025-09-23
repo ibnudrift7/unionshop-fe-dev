@@ -1,16 +1,11 @@
 'use client';
 
-import {
-  MapPin,
-  ShoppingBag,
-  AlertTriangle,
-  Calendar,
-  Truck,
-} from 'lucide-react';
+import { Coins, ShoppingBag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 
 interface CheckoutSectionProps {
   onTotalChange?: (total: number) => void;
@@ -35,12 +30,16 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
 
   return (
     <div className='p-4 space-y-4'>
-      <Card className='border border-gray-200 rounded-lg shadow-sm'>
+      <Card className='border-0 m-0 p-0'>
         <CardContent className='px-4 py-2'>
           <div className='flex items-start gap-2'>
-            <div className='w-7 h-7 bg-brand/10 rounded-full flex items-center justify-center mt-0.5'>
-              <MapPin className='h-4 w-4 text-brand' />
-            </div>
+            <Image
+              src='/assets/icon-check.png'
+              alt='Alamat terpilih'
+              width={28}
+              height={28}
+              className='mt-0.5 flex-shrink-0'
+            />
             <div className='flex-1'>
               <p className='text-xs text-gray-600 mb-0.5'>Dikirim ke</p>
               <h3 className='text-sm font-semibold text-gray-900'>Kantor</h3>
@@ -52,9 +51,9 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
         </CardContent>
       </Card>
 
-      <Card className='border-0 shadow-sm'>
+      <Card className='border-2 pt-0 mt-4'>
         <CardContent className='p-4'>
-          <div className='flex items-center gap-3 mb-3'>
+          <div className='flex items-center gap-3 pb-3 mb-3 border-b-2'>
             <div className='w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center'>
               <ShoppingBag className='h-4 w-4 text-brand' />
             </div>
@@ -63,10 +62,10 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
           </div>
 
           <div className='space-y-4'>
-            <div className='flex justify-between items-start'>
+            <div className='flex justify-between items-center'>
               <div className='flex-1'>
-                <span className='text-xs font-medium text-gray-700'>1 x</span>
-                <p className='text-sm font-medium text-gray-900 mt-1'>
+                <span className='text-xs font-semibold text-gray-700'>1 x</span>
+                <p className='text-sm font-semibold text-gray-900 mt-1'>
                   Freebase Makna Ice Sea Salt Caramel latte 35 MG
                 </p>
               </div>
@@ -77,10 +76,10 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
 
             <hr className='border-dashed border-gray-400' />
 
-            <div className='flex justify-between items-start'>
+            <div className='flex justify-between items-center'>
               <div className='flex-1'>
-                <span className='text-xs font-medium text-gray-700'>1 x</span>
-                <p className='text-sm font-medium text-gray-900 mt-1'>
+                <span className='text-xs font-semibold text-gray-700'>1 x</span>
+                <p className='text-sm font-semibold text-gray-900 mt-1'>
                   Makna - Jersey Boxy Oversized Purple, XXL
                 </p>
               </div>
@@ -92,9 +91,14 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
         </CardContent>
       </Card>
 
-      <Alert className='bg-yellow-50 border-yellow-200'>
-        <AlertTriangle className='h-4 w-4 text-yellow-700' />
-        <AlertDescription className='text-yellow-800 text-xs'>
+      <Alert className='bg-brand/50 border-brand/60 grid-cols-[auto_1fr] gap-x-3 items-center'>
+        <Image
+          src='/assets/attention-icon.png'
+          alt='Perhatian'
+          width={25}
+          height={25}
+        />
+        <AlertDescription className='text-black text-base font-bold'>
           Pastikan nomor kamu dapat dihubungi oleh pihak kurir.
         </AlertDescription>
       </Alert>
@@ -106,33 +110,45 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
 
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            <div className='w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center'>
-              <Calendar className='h-4 w-4 text-brand' />
-            </div>
+            <Image
+              src='/assets/icon-check.png'
+              alt='Alamat terpilih'
+              width={28}
+              height={28}
+              className='mt-0.5 flex-shrink-0'
+            />
             <div>
-              <p className='text-xs font-medium text-gray-900'>
+              <p className='text-base font-semibold text-black'>
                 Tanggal dipesan :
               </p>
-              <p className='text-xs text-gray-600'>17 - Agustus - 2025</p>
+              <p className='text-base font-semibold text-black'>
+                17 - Agustus - 2025
+              </p>
             </div>
           </div>
 
           <div className='flex items-center gap-3'>
-            <div className='w-8 h-8 bg-brand/10 rounded-full flex items-center justify-center'>
-              <Truck className='h-4 w-4 text-brand' />
-            </div>
+            <Image
+              src='/assets/icon-check.png'
+              alt='Alamat terpilih'
+              width={28}
+              height={28}
+              className='mt-0.5 flex-shrink-0'
+            />
             <div>
-              <p className='text-xs font-medium text-gray-900'>
+              <p className='text-base font-semibold text-black'>
                 Estimasi terkirim :
               </p>
-              <p className='text-xs text-gray-600'>20 - Agustus - 2025</p>
+              <p className='text-base font-semibold text-black'>
+                20 - Agustus - 2025
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       <Card className='border-0 shadow-sm'>
-        <CardContent className='p-4 space-y-3'>
+        <CardContent className='p-4 space-y-1'>
           <div className='flex justify-between items-center'>
             <p className='text-sm text-gray-600'>Subtotal produk</p>
             <p className='text-sm font-medium text-gray-900'>
@@ -146,8 +162,8 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
             </p>
           </div>
           <hr className='border-gray-200' />
-          <div className='flex justify-between items-center'>
-            <p className='text-sm font-semibold text-gray-900'>Total Pesanan</p>
+          <div className='flex justify-end items-center gap-2'>
+            <p className='text-base text-gray-900'>Total Pesanan:</p>
             <p className='text-base font-bold text-gray-900'>
               Rp {format(totalOrder)}
             </p>
@@ -172,13 +188,11 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
             />
           </div>
 
-          <div className='bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-3'>
-            <div className='w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center'>
-              <span className='text-yellow-900 text-xs font-bold'>!</span>
-            </div>
-            <p className='text-xs text-gray-900'>
+          <div className='border border-brand rounded-lg p-3 flex items-center gap-3'>
+            <Coins className='h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0' />
+            <p className='text-base text-brand'>
               Kamu akan mendapatkan{' '}
-              <span className='font-semibold'>50 point</span> dari total belanja
+              <span className='font-bold text-brand'>50 point</span> dari total belanja
               ini.
             </p>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
@@ -21,8 +21,8 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
-      <div className='flex items-center gap-2 p-4 border-b border-gray-100 bg-white'>
+    <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
+      <div className='flex items-center gap-2 p-4 pt-8 border-b border-gray-100 bg-white'>
         <Button
           variant='ghost'
           size='icon'
@@ -36,24 +36,15 @@ export default function CheckoutPage() {
 
       <CheckoutSection onTotalChange={setTotal} />
 
-      <div className='fixed left-1/2 -translate-x-1/2 bottom-6 sm:bottom-8 w-full max-w-[550px] px-4'>
-        <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
-          <div className='flex flex-col leading-tight'>
-            <span className='text-xs opacity-90'>Total Pesanan</span>
-            <span className='text-lg font-semibold'>{totalFormatted}</span>
-          </div>
-          <Button
-            size='icon'
-            className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90'
-            onClick={() => console.log('Proceed to payment')}
-            aria-label='Lanjut ke pembayaran'
-          >
-            <ArrowRight className='h-5 w-5' />
-          </Button>
-        </div>
+      <div className='px-4 py-6 sm:py-8'>
+        <Button
+          className='w-full bg-brand hover:bg-brand/80 text-white font-bold text-lg py-7 rounded-xl justify-center'
+          onClick={() => console.log('Proceed to payment')}
+          aria-label='Bayar sekarang'
+        >
+          Bayar - {totalFormatted}
+        </Button>
       </div>
-
-      <div className='h-32 sm:h-36' />
     </div>
   );
 }
