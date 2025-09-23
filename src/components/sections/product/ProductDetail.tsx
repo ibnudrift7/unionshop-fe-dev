@@ -126,18 +126,18 @@ export default function ProductDetail() {
           <h3 className='text-sm font-medium text-gray-900 mb-3'>
             Color <span className='text-brand'>Pilih 1</span>
           </h3>
-          <div className='flex space-x-4'>
+          <div className='grid grid-cols-2 gap-4'>
             {colors.map((color) => (
               <Card
                 key={color.code}
-                className={`p-4 cursor-pointer transition-colors ${
+                className={`w-full md:h-32 p-4 cursor-pointer transition-colors ${
                   selectedColor === color.code
                     ? 'border-brand border-2'
                     : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedColor(color.code)}
               >
-                <div className='flex flex-col items-center space-y-2'>
+                <div className='flex flex-col items-center justify-center h-full space-y-2'>
                   <div
                     className='w-8 h-8 rounded-full border-2 border-gray-300'
                     style={{ backgroundColor: color.value }}
@@ -153,12 +153,12 @@ export default function ProductDetail() {
           <h3 className='text-sm font-medium text-gray-900 mb-3'>
             Size <span className='text-brand'>Pilih 1</span>
           </h3>
-          <div className='flex space-x-2'>
+          <div className='flex w-full gap-2'>
             {sizes.map((size) => (
               <Button
                 key={size}
                 variant={selectedSize === size ? 'default' : 'outline'}
-                className={`px-6 py-2 ${
+                className={`flex-1 py-2 ${
                   selectedSize === size
                     ? 'bg-brand text-white border-brand'
                     : 'border-gray-300 text-gray-700 hover:border-brand'
