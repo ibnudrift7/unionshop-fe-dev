@@ -197,7 +197,7 @@ export default function ProductDetail() {
       {!noCart && (
         <>
           <BottomActionBar
-            noteText='Hemat Rp 20.000'
+            noteText='Rp 20.000'
             quantity={quantity}
             onDecrease={() => handleQuantityChange(-1)}
             onIncrease={() => handleQuantityChange(1)}

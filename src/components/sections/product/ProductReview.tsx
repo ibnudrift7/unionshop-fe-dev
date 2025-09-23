@@ -22,7 +22,7 @@ export default function ProductReviews() {
 
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[720px] border-x border-gray-200'>
-      <div className='flex items-center justify-between p-4 border-b border-gray-100'>
+      <div className='flex items-center justify-between p-3 pt-8 border-b border-gray-100'>
         <Button
           variant='ghost'
           size='icon'
@@ -53,10 +53,7 @@ export default function ProductReviews() {
 
         <div className='space-y-4'>
           {reviews.map((review, index) => (
-            <div
-              key={index}
-              className='flex items-center gap-3 py-3'
-            >
+            <div key={index} className='flex items-center gap-3 py-3'>
               <div className='h-10 w-10 flex items-center justify-center'>
                 <Image
                   src='/assets/user-icon.png'
