@@ -3,8 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search } from 'lucide-react';
 import ProductSection from '../product/ProductSection';
 import { Product } from '@/types';
 import { useRouter } from 'next/navigation';
@@ -111,10 +110,8 @@ const sampleProducts: Record<ShopFilter, Product[]> = {
 };
 
 export default function ShopSection({
-  cartCount = 0,
   onProductClick,
   onSearch,
-  onCartClick,
 }: ShopSectionProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -212,17 +209,12 @@ export default function ShopSection({
             </div>
             <div className='relative'>
               <Button
-                size='icon'
-                className='bg-brand hover:bg-brand/90 rounded-l-none rounded-r-lg h-12 w-12 border-l-0'
-                onClick={onCartClick}
+                className='bg-brand hover:bg-brand/90 rounded-l-none rounded-r-lg h-12 px-4 border-l-0 text-white flex items-center gap-2'
+                onClick={() => onSearch?.(query)}
+                aria-label='Search'
               >
-                <ShoppingCart className='w-5 h-5' />
+                <span className='text-sm font-medium'>SEARCH</span>
               </Button>
-              {cartCount > 0 && (
-                <Badge className='absolute -top-2 -right-2 bg-red-500 hover:bg-red-500 text-white rounded-full min-w-[24px] h-6 flex items-center justify-center text-xs'>
-                  {cartCount}
-                </Badge>
-              )}
             </div>
           </div>
         </div>

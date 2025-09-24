@@ -24,15 +24,18 @@ export default function BottomActionBar({
   onPrimaryClick,
 }: BottomActionBarProps) {
   return (
-    <div className='fixed left-1/2 -translate-x-1/2 bottom-[72px] sm:bottom-[76px] w-full max-w-[720px] bg-white border-t border-gray-200 p-4'>
+    <div className='fixed left-1/2 -translate-x-1/2 bottom-[72px] sm:bottom-[76px] w-full max-w-[550px] bg-white p-4'>
       {noteText && (
-        <div className='flex items-center justify-between mb-3'>
-          <span className='text-sm text-green-600 font-medium'>{noteText}</span>
+        <div className='-m-4 bg-[#e6e6e6] flex items-center justify-center mb-3 px-4 py-2'>
+          <span className='text-sm text-black font-medium mr-1'>Hemat</span>
+          <span className='text-sm text-green-600 font-semibold'>
+            {noteText}
+          </span>
         </div>
       )}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center gap-4'>
         {showQuantity ? (
-          <div className='flex items-center border border-gray-300 rounded-lg'>
+          <div className='flex items-center border border-gray-300 rounded-lg shrink-0'>
             <Button
               variant='ghost'
               size='icon'
@@ -58,10 +61,11 @@ export default function BottomActionBar({
         )}
 
         <Button
-          className='bg-brand hover:bg-brand/80 text-white px-6 py-3 rounded-lg flex-1 ml-4'
+          className='bg-brand hover:bg-brand/80 text-white py-3 rounded-lg flex-1 ml-4 min-w-0'
           onClick={onPrimaryClick}
+          aria-label={primaryLabel}
         >
-          {primaryLabel}
+          <span className='truncate'>{primaryLabel}</span>
         </Button>
       </div>
     </div>
