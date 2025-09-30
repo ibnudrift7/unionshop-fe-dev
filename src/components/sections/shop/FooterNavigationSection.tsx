@@ -55,6 +55,8 @@ export default function FooterNavigationSection({
       router.push('/user');
     } else if (tab.id === 'shop') {
       router.push('/shop');
+    } else if (tab.id === 'promo') {
+      router.push('/promo');
     }
   };
   return (
