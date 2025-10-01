@@ -150,46 +150,17 @@ export default function ShopSection({
         </div>
       );
     }
-
+    const allProducts = FILTERS.flatMap((f) => sampleProducts[f.id]);
     return (
-      <div className='space-y-6'>
-        <ProductSection
-          title='Starter kit'
-          products={filterProducts(sampleProducts.starter)}
-          onProductClick={(p) => {
-            onProductClick?.(p);
-            router.push(`/product/${p.id}`);
-          }}
-          showChevron={false}
-        />
-        <ProductSection
-          title='Freebase'
-          products={filterProducts(sampleProducts.freebase)}
-          onProductClick={(p) => {
-            onProductClick?.(p);
-            router.push(`/product/${p.id}`);
-          }}
-          showChevron={false}
-        />
-        <ProductSection
-          title='Saltnic'
-          products={filterProducts(sampleProducts.saltnic)}
-          onProductClick={(p) => {
-            onProductClick?.(p);
-            router.push(`/product/${p.id}`);
-          }}
-          showChevron={false}
-        />
-        <ProductSection
-          title='Official merchandise'
-          products={filterProducts(sampleProducts.official)}
-          onProductClick={(p) => {
-            onProductClick?.(p);
-            router.push(`/product/${p.id}`);
-          }}
-          showChevron={false}
-        />
-      </div>
+      <ProductSection
+        title='Semua Produk'
+        products={filterProducts(allProducts)}
+        onProductClick={(p) => {
+          onProductClick?.(p);
+          router.push(`/product/${p.id}`);
+        }}
+        showChevron={false}
+      />
     );
   }, [active, onProductClick, filterProducts, router]);
 
@@ -229,7 +200,7 @@ export default function ShopSection({
                   role='tab'
                   aria-selected={isActive}
                   onClick={() => setActive(isActive ? null : f.id)}
-                  className='px-1 text-sm font-medium transition-colors'
+                  className='px-1 text-sm font-medium transition-colors cursor-pointer'
                 >
                   <span
                     className={
