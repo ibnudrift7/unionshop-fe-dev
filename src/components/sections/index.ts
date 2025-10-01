@@ -15,3 +15,4 @@ export { default as ShopSection } from './shop/ShopSection';
 export { default as CheckoutSection } from './checkout/CheckoutSection';
 export { default as AddressSection } from './checkout/AddressSection';
 export { default as OrderConfirmation } from './checkout/OrderConfirmation';
+export { default as PromoDetail } from './promo/PromoDetail';

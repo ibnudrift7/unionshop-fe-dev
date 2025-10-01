@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 type PromoItem = {
   id: string;
@@ -58,6 +59,7 @@ function formatIDR(n: number) {
 
 export function PromoCarouselSection() {
   const scrollerRef = React.useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   return (
     <section aria-labelledby='promo-title'>
@@ -73,6 +75,7 @@ export function PromoCarouselSection() {
           size='sm'
           className='rounded-full bg-[#e0cae1] hover:bg-[#e0cae1]/90 text-brand border-none font-bold'
           aria-label='Lihat semua promo'
+          onClick={() => router.push('/promo/all')}
         >
           Lihat semua
         </Button>
