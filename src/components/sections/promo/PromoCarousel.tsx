@@ -75,7 +75,7 @@ export function PromoCarouselSection() {
           size='sm'
           className='rounded-full bg-[#e0cae1] hover:bg-[#e0cae1]/90 text-brand border-none font-bold'
           aria-label='Lihat semua promo'
-          onClick={() => router.push('/promo/lihat-semua')}
+          onClick={() => router.push('/promo/all')}
         >
           Lihat semua
         </Button>
