@@ -101,7 +101,7 @@ export default function ProductSection({
                       </div>
                     )}
                   </div>
-                  <p className='text-sm md:text-base font-semibold mb-1 pt-4'>
+                  <p className='text-sm md:text-base font-semibold mb-1 pt-4 whitespace-nowrap overflow-hidden text-ellipsis'>
                     {product.name}
                   </p>
                   <div className='flex flex-col text-xs space-y-1 md:space-y-0'>
