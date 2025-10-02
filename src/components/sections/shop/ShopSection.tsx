@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import ProductSection from '../product/ProductSection';
 import { Product } from '@/types';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   shopFilters as FILTERS,
   shopProductsByFilter,
@@ -26,8 +26,19 @@ export default function ShopSection({
   onSearch,
 }: ShopSectionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState<ShopFilter | null>(null);
+
+  // Sync active filter with URL ?filter=
+  useEffect(() => {
+    const f = searchParams.get('filter');
+    if (f && FILTERS.some((fi) => fi.id === f)) {
+      setActive(f as ShopFilter);
+    } else if (!f) {
+      setActive(null);
+    }
+  }, [searchParams]);
 
   const handleSearchChange = (value: string) => {
     setQuery(value);
@@ -111,7 +122,22 @@ export default function ShopSection({
                   key={f.id}
                   role='tab'
                   aria-selected={isActive}
-                  onClick={() => setActive(isActive ? null : f.id)}
+                  onClick={() => {
+                    const next = isActive ? null : f.id;
+                    setActive(next);
+                    // Update URL without full reload
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (next) {
+                      params.set('filter', next);
+                    } else {
+                      params.delete('filter');
+                    }
+                    router.push(
+                      `/shop${
+                        params.toString() ? `?${params.toString()}` : ''
+                      }`,
+                    );
+                  }}
                   className='px-1 text-sm font-medium transition-colors cursor-pointer'
                 >
                   <span
