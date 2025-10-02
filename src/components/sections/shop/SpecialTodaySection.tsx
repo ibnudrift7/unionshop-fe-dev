@@ -61,7 +61,7 @@ export default function SpecialTodaySection({
                 className='pl-2 md:pl-4 basis-[48%] sm:basis-[47%] md:basis-[46%]'
               >
                 <Card
-                  className='shadow-sm cursor-pointer hover:shadow-md transition-shadow'
+                  className='cursor-pointer transition-shadow border-none'
                   onClick={() => onProductClick?.(product)}
                 >
                   <CardContent className='p-3'>
@@ -82,12 +82,14 @@ export default function SpecialTodaySection({
                         )}
                       </div>
                     </div>
-                    <p className='text-sm font-semibold pt-4'>{product.name}</p>
-                    <div className='flex flex-col space-x-1'>
-                      <span className='text-lg text-red-600 leading-snug'>
+                    <p className='text-sm font-semibold pt-1 leading-tight'>
+                      {product.name}
+                    </p>
+                    <div className='flex flex-col leading-tight'>
+                      <span className='text-lg text-red-600 leading-tight'>
                         {formatPrice(product.discountPrice)}
                       </span>
-                      <span className='text-sm text-gray-500 line-through'>
+                      <span className='text-xs text-gray-500 line-through leading-tight'>
                         {formatPrice(product.originalPrice)}
                       </span>
                     </div>
@@ -106,6 +108,7 @@ export default function SpecialTodaySection({
           )}
         </CarouselContent>
       </Carousel>
+      <div className='border-t-2 border-gray-200 my-4' />
     </section>
   );
 }
