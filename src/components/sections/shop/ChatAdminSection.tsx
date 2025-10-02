@@ -19,7 +19,7 @@ export default function ChatAdminSection({
   return (
     <section className='px-4'>
       <Card className='border-none shadow-none' onClick={onChatClick}>
-        <div className='text-start font-bold text-black mb-4 text-xl'>
+        <div className='text-start font-bold text-black text-xl'>
           {title}
         </div>
         <CardContent className='p-6 shadow rounded-2xl bg-white border border-gray-200'>

@@ -23,7 +23,7 @@ export interface LocationData {
 export const locationData: LocationData = {
   points: 100,
   name: 'Ruko Mulyosari Surabaya',
-  address: 'Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....',
+  address: 'Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec. Dukuh Pakis, Kota SBY, Jawa Timur 60112',
 };
 
 // Categories

@@ -31,7 +31,7 @@ export default function PromoSection({ images }: PromoSectionProps) {
       >
         <CarouselContent>
           {images.map((image, index) => (
-            <CarouselItem key={index} className='basis-[80%]'>
+            <CarouselItem key={index} className='basis-full'>
               <Card className='overflow-hidden h-48 md:h-56 p-0'>
                 <CardContent className='p-0'>
                   <div className='relative w-full h-48 md:h-56'>

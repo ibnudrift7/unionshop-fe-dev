@@ -69,7 +69,7 @@ export default function ProductSection({
               >
                 <CardContent className='p-3 cursor-pointer'>
                   <div className='relative mb-2'>
-                    <div className='w-full h-24 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
+                    <div className='w-full h-28 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
                       {product.image ? (
                         <Image
                           src={product.image}
@@ -104,11 +104,11 @@ export default function ProductSection({
                   <p className='text-sm md:text-base font-semibold mb-1 pt-4 whitespace-nowrap overflow-hidden text-ellipsis'>
                     {product.name}
                   </p>
-                  <div className='flex flex-col text-xs space-y-1 md:space-y-0'>
+                  <div className='flex flex-col text-xs'>
                     <span className='text-sm md:text-base text-black'>
                       {formatPrice(product.price)}
                     </span>
-                    <div className='flex items-center space-x-1 pt-2'>
+                    <div className='flex items-center pt-2'>
                       <span>
                         <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
                       </span>
