@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ProductGridSkeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import { Package, Star } from 'lucide-react';
 
@@ -26,6 +27,7 @@ export default function ProductSection({
   selectionMode = false,
   selectedIds = [],
 }: ProductSectionProps) {
+  const router = useRouter();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -39,13 +41,20 @@ export default function ProductSection({
       <div className='flex items-center justify-between mb-3'>
         <div className='text-start font-bold text-xl text-black'>{title}</div>
         {showChevron && (
-          <Image
-            src='/assets/icon-arrow.png'
-            alt='Arrow'
-            width={20}
-            height={20}
-            className='w-5 h-5'
-          />
+          <button
+            type='button'
+            onClick={() => router.push('/shop')}
+            aria-label='Lihat semua produk'
+            className='p-1 rounded-md hover:bg-gray-100 active:scale-95 transition w-7 h-7 flex items-center justify-center cursor-pointer'
+          >
+            <Image
+              src='/assets/icon-arrow.png'
+              alt='Arrow'
+              width={20}
+              height={20}
+              className='w-5 h-5'
+            />
+          </button>
         )}
       </div>
       <div className='grid grid-cols-2 gap-2'>

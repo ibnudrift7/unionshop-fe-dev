@@ -13,6 +13,7 @@ import {
   PromoSection,
 } from '@/components/sections';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   heroImages,
   locationData,
@@ -27,6 +28,7 @@ import {
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,7 +73,11 @@ export default function Home() {
         imageSrc={officialMerchData.imageSrc}
       />
 
-      <ProductSection products={mockProducts} isLoading={isLoading} />
+      <ProductSection
+        products={mockProducts}
+        isLoading={isLoading}
+        onProductClick={(p) => router.push(`/product/${p.id}`)}
+      />
 
       <PromoSection images={promoImages} />
 
