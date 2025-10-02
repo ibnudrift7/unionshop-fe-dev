@@ -10,71 +10,38 @@ import {
 import Autoplay from 'embla-carousel-autoplay';
 import * as React from 'react';
 
-interface Voucher1Props {
-  image?: string;
-  title?: string;
-  subtitle?: string;
-  buttonText?: string;
+export interface Voucher1Props {
+  image: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
   onClaim?: () => void;
 }
 
-interface Voucher2Props {
-  title1?: string;
+export interface Voucher2Props {
+  title1: string;
   title2?: string;
-  description?: string;
-  buttonText?: string;
-  image?: string;
+  description: string;
+  buttonText: string;
+  image: string;
   onClaim?: () => void;
 }
 
 export interface VoucherBannersSectionProps {
-  voucher1?: Voucher1Props;
-  voucher2?: Voucher2Props;
-  voucher2List?: Voucher2Props[];
+  voucher1: Voucher1Props;
+  vouchers: Voucher2Props[];
   className?: string;
 }
 
 export default function VoucherBannersSection({
-  voucher1 = {},
-  voucher2 = {},
-  voucher2List,
+  voucher1,
+  vouchers,
   className = '',
 }: VoucherBannersSectionProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 3000, stopOnInteraction: false }),
   );
-  const v1: Required<Voucher1Props> = {
-    image: '/assets/voucher3.png',
-    title: 'Voucher buy 1 get 1 special',
-    subtitle: 'UNIONLABS WEBSITE USER.',
-    buttonText: 'KLAIM',
-    onClaim: undefined,
-    ...voucher1,
-  } as Required<Voucher1Props>;
-
-  const v2: Required<Voucher2Props> = {
-    title1: 'Mau Voucher Diskon 10RB?',
-    description: 'Gabung & Ambil Vouchernya Sekarang juga!',
-    buttonText: 'CLAIM SEKARANG',
-    image: '/assets/Voucher.png',
-    onClaim: undefined,
-    ...voucher2,
-  } as Required<Voucher2Props>;
-
-  // Build vouchers array to always contain exactly 2 items.
-  // Prefer provided list (up to 2), else pad with a second default using a different image.
-  const baseList: Voucher2Props[] =
-    voucher2List && voucher2List.length > 0
-      ? voucher2List.slice(0, 2)
-      : [voucher2];
-  const paddedList: Voucher2Props[] = [...baseList];
-  if (paddedList.length < 2) {
-    paddedList.push({ ...v2, image: '/assets/Voucher2.png' });
-  }
-  const vouchers: Required<Voucher2Props>[] = paddedList.map(
-    (item) =>
-      ({ ...v2, ...(item as Voucher2Props) } as Required<Voucher2Props>),
-  );
+  const vouchersSafe = vouchers.length > 0 ? vouchers : [];
 
   return (
     <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
@@ -83,7 +50,7 @@ export default function VoucherBannersSection({
           <div className='p-1 pt-0 md:p-2 md:pt-0  flex items-center gap-3'>
             <div className='flex-shrink-0 flex items-center justify-center'>
               <Image
-                src={v1.image}
+                src={voucher1.image}
                 alt='Voucher'
                 width={96}
                 height={96}
@@ -93,10 +60,10 @@ export default function VoucherBannersSection({
 
             <div className='flex-1 text-center'>
               <p className='font-extrabold text-sm md:text-lg text-black leading-tight tracking-tight'>
-                {v1.title}
+                {voucher1.title}
               </p>
               <p className='font-extrabold italic text-sm md:text-lg text-black'>
-                {v1.subtitle}
+                {voucher1.subtitle}
               </p>
             </div>
 
@@ -104,9 +71,9 @@ export default function VoucherBannersSection({
               <Button
                 className='bg-[#C70122] hover:bg-[#C70122]/90 text-white font-semibold w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center text-xs md:text-sm'
                 aria-label='Klaim Voucher'
-                onClick={v1.onClaim}
+                onClick={voucher1.onClaim}
               >
-                {v1.buttonText}
+                {voucher1.buttonText}
               </Button>
             </div>
           </div>
@@ -119,10 +86,10 @@ export default function VoucherBannersSection({
           className='w-full'
           onMouseEnter={plugin.current.stop}
           onMouseLeave={plugin.current.reset}
-          opts={{ align: 'start', loop: vouchers.length > 1 }}
+          opts={{ align: 'start', loop: vouchersSafe.length > 1 }}
         >
           <CarouselContent className='pr-4 pb-4'>
-            {vouchers.map((item, idx) => (
+            {vouchersSafe.map((item, idx) => (
               <CarouselItem
                 key={idx}
                 className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
@@ -131,11 +98,11 @@ export default function VoucherBannersSection({
                   <div className='p-3 sm:p-4 md:p-6'>
                     <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
                       <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
-                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                        <h3 className='text-sm sm:text-xl md:text-xl lg:text-2xl font-bold text-[#26d367] mb-1 sm:mb-2'>
                           {item.title1}
                         </h3>
                         {item.title2 && (
-                          <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                          <h3 className='text-sm sm:text-xl md:text-xl lg:text-2xl font-bold text-[#26d367] mb-1 sm:mb-2'>
                             {item.title2}
                           </h3>
                         )}
@@ -157,7 +124,7 @@ export default function VoucherBannersSection({
                     </div>
 
                     <Button
-                      className='w-full bg-green-500 hover:bg-green-500/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
+                      className='w-full bg-[#26d367] hover:bg-[#26d367]/90 text-white font-semibold py-6 sm:py-8 rounded-3xl text-sm sm:text-base md:text-lg'
                       onClick={item.onClaim}
                     >
                       {item.buttonText}

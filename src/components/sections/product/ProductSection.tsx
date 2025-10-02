@@ -9,75 +9,22 @@ import { Package, Star } from 'lucide-react';
 
 interface ProductSectionProps {
   title?: string;
-  products?: Product[];
+  products: Product[];
   isLoading?: boolean;
   onProductClick?: (product: Product) => void;
   showChevron?: boolean;
+  selectionMode?: boolean;
+  selectedIds?: string[];
 }
-
-const defaultProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Makna - Taro Milk cheese 1',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: true,
-  },
-  {
-    id: '2',
-    name: 'Makna - Taro Milk cheese 2',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: true,
-  },
-  {
-    id: '3',
-    name: 'Makna - Taro Milk cheese 3',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: false,
-  },
-  {
-    id: '4',
-    name: 'Makna - Taro Milk cheese 4',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: false,
-  },
-  {
-    id: '5',
-    name: 'Makna - Taro Milk cheese 5',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: false,
-  },
-  {
-    id: '6',
-    name: 'Makna - Taro Milk cheese 6',
-    image: '/assets/Product.png',
-    price: 75000,
-    rating: 5.0,
-    sold: 500,
-    isNew: false,
-  },
-];
 
 export default function ProductSection({
   title = 'Lihat Semua',
-  products = defaultProducts,
+  products,
   isLoading = false,
   onProductClick,
   showChevron = true,
+  selectionMode = false,
+  selectedIds = [],
 }: ProductSectionProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -105,55 +52,76 @@ export default function ProductSection({
         {isLoading ? (
           <ProductGridSkeleton count={6} />
         ) : (
-          products.map((product) => (
-            <Card
-              key={product.id}
-              className='rounded-md shadow-none border-none overflow-hidden py-0'
-              onClick={() => onProductClick?.(product)}
-            >
-              <CardContent className='p-3 cursor-pointer'>
-                <div className='relative mb-2'>
-                  <div className='w-full h-24 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
-                    {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={80}
-                        height={80}
-                        className='object-contain w-full h-full'
-                      />
-                    ) : (
-                      <span className='text-2xl'>
-                        <Package className='w-8 h-8 text-gray-500' />
-                      </span>
+          products.map((product) => {
+            const isSelected =
+              selectionMode && selectedIds.includes(product.id);
+            return (
+              <Card
+                key={product.id}
+                className={`rounded-md shadow-none overflow-hidden py-0 transition-colors ${
+                  selectionMode
+                    ? isSelected
+                      ? 'border border-brand bg-brand/5'
+                      : 'border border-transparent hover:border-brand/40'
+                    : 'border-none'
+                }`}
+                onClick={() => onProductClick?.(product)}
+              >
+                <CardContent className='p-3 cursor-pointer'>
+                  <div className='relative mb-2'>
+                    <div className='w-full h-24 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
+                      {product.image ? (
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          width={80}
+                          height={80}
+                          className='object-contain w-full h-full'
+                        />
+                      ) : (
+                        <span className='text-2xl'>
+                          <Package className='w-8 h-8 text-gray-500' />
+                        </span>
+                      )}
+                    </div>
+                    {product.isNew && (
+                      <Badge className='absolute top-1 right-1 bg-brand text-white text-lg font-bold rounded-full w-10 h-10 md:h-15 md:w-15 flex items-center justify-center p-0'>
+                        Baru!
+                      </Badge>
+                    )}
+                    {selectionMode && (
+                      <div
+                        className={`absolute top-1 left-1 w-5 h-5 rounded-sm border flex items-center justify-center text-[10px] font-bold ${
+                          isSelected
+                            ? 'bg-brand text-white border-brand'
+                            : 'bg-white text-gray-400 border-gray-300'
+                        }`}
+                      >
+                        {isSelected ? '✓' : ''}
+                      </div>
                     )}
                   </div>
-                  {product.isNew && (
-                    <Badge className='absolute top-1 right-1 bg-brand text-white text-lg font-bold rounded-full w-10 h-10 md:h-15 md:w-15 flex items-center justify-center p-0'>
-                      Baru!
-                    </Badge>
-                  )}
-                </div>
-                <p className='text-sm md:text-base font-semibold mb-1 pt-4'>
-                  {product.name}
-                </p>
-                <div className='flex flex-col text-xs space-y-1 md:space-y-0'>
-                  <span className='text-sm md:text-base text-black'>
-                    {formatPrice(product.price)}
-                  </span>
-                  <div className='flex items-center space-x-1 pt-2'>
-                    <span>
-                      <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
+                  <p className='text-sm md:text-base font-semibold mb-1 pt-4'>
+                    {product.name}
+                  </p>
+                  <div className='flex flex-col text-xs space-y-1 md:space-y-0'>
+                    <span className='text-sm md:text-base text-black'>
+                      {formatPrice(product.price)}
                     </span>
-                    <span className='text-gray-600'>{product.rating}</span>
-                    <span className='text-gray-600'>
-                      • {product.sold}+ terjual
-                    </span>
+                    <div className='flex items-center space-x-1 pt-2'>
+                      <span>
+                        <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
+                      </span>
+                      <span className='text-gray-600'>{product.rating}</span>
+                      <span className='text-gray-600'>
+                        • {product.sold}+ terjual
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </section>

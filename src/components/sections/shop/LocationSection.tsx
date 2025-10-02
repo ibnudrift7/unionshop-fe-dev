@@ -4,12 +4,16 @@ import Image from 'next/image';
 
 interface LocationSectionProps {
   onLocationClick?: () => void;
-  points?: number;
+  points: number;
+  name: string;
+  address: string;
 }
 
 export default function LocationSection({
   onLocationClick,
-  points = 100,
+  points,
+  name,
+  address,
 }: LocationSectionProps) {
   return (
     <div className='mx-4'>
@@ -43,12 +47,8 @@ export default function LocationSection({
           <div className='bg-[#f3f3f3] rounded-2xl p-2'>
             <div className='bg-white flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 sm:py-3'>
               <div className='flex-1'>
-                <h3 className='font-semibold text-lg text-gray-900'>
-                  Ruko Mulyosari Surabaya
-                </h3>
-                <p className='text-gray-600 text-sm font-light'>
-                  Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
-                </p>
+                <h3 className='font-semibold text-lg text-gray-900'>{name}</h3>
+                <p className='text-gray-600 text-sm font-light'>{address}</p>
               </div>
               <div className='ml-4'>
                 <button

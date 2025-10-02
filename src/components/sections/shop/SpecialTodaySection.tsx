@@ -13,73 +13,14 @@ import { Package, Star } from 'lucide-react';
 
 interface SpecialTodaySectionProps {
   title?: string;
-  products?: SpecialProduct[];
+  products: SpecialProduct[];
   isLoading?: boolean;
   onProductClick?: (product: SpecialProduct) => void;
 }
 
-const defaultProducts: SpecialProduct[] = [
-  {
-    id: '1',
-    name: 'Ova Vprime 60 + Freebase',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '2',
-    name: 'Ova Vprime 60 + Freebase 2',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '3',
-    name: 'Ova Vprime 60 + Freebase 3',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '4',
-    name: 'Ova Vprime 60 + Freebase 4',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '5',
-    name: 'Ova Vprime 60 + Freebase 5',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '6',
-    name: 'Ova Vprime 60 + Freebase 6',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '7',
-    name: 'Ova Vprime 60 + Freebase 7',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '8',
-    name: 'Ova Vprime 60 + Freebase 8',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-];
-
 export default function SpecialTodaySection({
   title = 'Spesial Hari Ini',
-  products = defaultProducts,
+  products,
   isLoading = false,
   onProductClick,
 }: SpecialTodaySectionProps) {

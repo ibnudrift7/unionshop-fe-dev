@@ -1,52 +1,24 @@
 'use client';
 
-import {
-  ArrowLeft,
-  Minus,
-  Plus,
-  Pencil,
-  // ArrowRight,
-  Coins,
-} from 'lucide-react';
+import { ArrowLeft, Minus, Plus, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useCartStore } from '@/store/cart';
 
 export default function OrderConfirmation() {
   const router = useRouter();
-  const [quantities, setQuantities] = useState({ item1: 1, item2: 1 });
+  const { items, updateQuantity, removeItem, getTotal } = useCartStore();
+  const total = useMemo(() => getTotal(), [getTotal]);
 
-  const updateQuantity = (item: string, change: number) => {
-    setQuantities((prev) => ({
-      ...prev,
-      [item]: Math.max(1, prev[item as keyof typeof prev] + change),
-    }));
+  const handleDecrease = (productId: string, current: number) => {
+    updateQuantity(productId, Math.max(1, current - 1));
   };
-
-  const items = [
-    {
-      id: 'item1',
-      productId: '1',
-      name: 'Freebase Makna Ice Sea Salt Caramel latte 35 MG',
-      price: 130000,
-      image: '/assets/Product.png',
-    },
-    {
-      id: 'item2',
-      productId: '2',
-      name: 'Makna - Jersey Boxy Oversized Purple, XXL',
-      price: 150000,
-      image: '/assets/SpecialProduct.png',
-    },
-  ];
-
-  const total = items.reduce(
-    (sum, item) =>
-      sum + item.price * quantities[item.id as keyof typeof quantities],
-    0,
-  );
+  const handleIncrease = (productId: string, current: number) => {
+    updateQuantity(productId, current + 1);
+  };
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
@@ -101,63 +73,64 @@ export default function OrderConfirmation() {
           </div>
 
           <div className='space-y-4'>
-            {items.map((item) => (
-              <Card key={item.id} className='p-4 border-1'>
+            {items.length === 0 && (
+              <div className='text-sm text-gray-500 px-2'>
+                Keranjang kosong.
+              </div>
+            )}
+            {items.map(({ product, quantity }) => (
+              <Card key={product.id} className='p-4 border-1'>
                 <div className='flex flex-col gap-3'>
                   <div className='flex items-start justify-between gap-3'>
                     <div className='flex-1 min-w-0'>
                       <h3 className='font-bold text-base mb-1 line-clamp-2'>
-                        {item.name}
+                        {product.name}
                       </h3>
                       <p className='text-base font-semibold'>
-                        Rp {item.price.toLocaleString('id-ID')}
+                        {new Intl.NumberFormat('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                          minimumFractionDigits: 0,
+                        }).format(product.price)}
                       </p>
                     </div>
                     <div className='relative w-25 h-25 rounded-lg overflow-hidden flex-shrink-0'>
                       <Image
-                        src={item.image}
-                        alt={item.name}
+                        src={product.image || '/assets/Product.png'}
+                        alt={product.name}
                         fill
                         sizes='100px'
                         className='object-cover'
                       />
                     </div>
                   </div>
-
                   <div className='flex items-center justify-between'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className='h-8 px-2 text-xs rounded-xl text-black border-brand/20 bg-transparent hover:bg-brand/5 flex items-center gap-1'
-                      onClick={() =>
-                        router.push(`/product/${item.productId}?noCart=1`)
-                      }
-                    >
-                      <Pencil className='h-3.5 w-3.5' />
-                      Ganti
-                    </Button>
-
                     <div className='flex items-center gap-2'>
                       <Button
                         variant='outline'
                         size='icon'
                         className='h-7 w-7 rounded-full bg-transparent border-brand text-brand hover:bg-brand/10'
-                        onClick={() => updateQuantity(item.id, -1)}
+                        onClick={() => handleDecrease(product.id, quantity)}
                       >
                         <Minus className='h-5 w-5 text-brand' />
                       </Button>
-                      <span className='w-7 text-center'>
-                        {quantities[item.id as keyof typeof quantities]}
-                      </span>
+                      <span className='w-7 text-center'>{quantity}</span>
                       <Button
                         variant='outline'
                         size='icon'
                         className='h-7 w-7 rounded-full bg-transparent border-brand text-brand hover:bg-brand/10'
-                        onClick={() => updateQuantity(item.id, 1)}
+                        onClick={() => handleIncrease(product.id, quantity)}
                       >
                         <Plus className='h-5 w-5 text-brand' />
                       </Button>
                     </div>
+                    <Button
+                      variant='ghost'
+                      className='text-xs text-red-500 hover:text-red-600'
+                      onClick={() => removeItem(product.id)}
+                    >
+                      Hapus
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -213,7 +186,11 @@ export default function OrderConfirmation() {
             <div className='flex flex-col items-start'>
               <span className='text-gray-400'>Total</span>
               <span className='text-lg font-semibold text-gray-900'>
-                Rp {total.toLocaleString('id-ID')}
+                {new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  minimumFractionDigits: 0,
+                }).format(total)}
               </span>
             </div>
             <Button

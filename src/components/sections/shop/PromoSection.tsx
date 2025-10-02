@@ -11,18 +11,10 @@ import Image from 'next/image';
 import { useRef } from 'react';
 
 interface PromoSectionProps {
-  images?: string[];
+  images: string[];
 }
 
-const defaultImages = [
-  '/assets/Cashback.png',
-  '/assets/Cashback.png',
-  '/assets/Cashback.png',
-];
-
-export default function PromoSection({
-  images = defaultImages,
-}: PromoSectionProps) {
+export default function PromoSection({ images }: PromoSectionProps) {
   const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
 
   return (

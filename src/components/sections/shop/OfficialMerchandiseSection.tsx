@@ -5,18 +5,18 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 interface OfficialMerchandiseSectionProps {
-  title?: string;
-  subtitle?: string;
-  buttonText?: string;
-  imageSrc?: string;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  imageSrc: string;
   onOrderClick?: () => void;
 }
 
 export default function OfficialMerchandiseSection({
-  title = 'Official Merchandise',
-  subtitle = 'Bisa dikirim langsung ke lokasimu',
-  buttonText = 'Order',
-  imageSrc = '/assets/OfficialMerch.png',
+  title,
+  subtitle,
+  buttonText,
+  imageSrc,
   onOrderClick,
 }: OfficialMerchandiseSectionProps) {
   return (
@@ -28,18 +28,20 @@ export default function OfficialMerchandiseSection({
               <div className='relative'>
                 <div className='w-15 h-15 md:w-18 md:h-18 bg-brand rounded-full flex items-center justify-center'>
                   <Image
-                  src={imageSrc}
-                  alt='Official Merchandise'
-                  width={70}
-                  height={70}
-                  className='object-contain'
+                    src={imageSrc}
+                    alt='Official Merchandise'
+                    width={70}
+                    height={70}
+                    className='object-contain'
                   />
                 </div>
               </div>
             </div>
 
             <div className='col-span-2 text-start'>
-              <h3 className='font-bold text-brand mb-1 text-base md:text-lg leading-snug'>{title}</h3>
+              <h3 className='font-bold text-brand mb-1 text-base md:text-lg leading-snug'>
+                {title}
+              </h3>
               <p className='text-black text-sm font-light'>{subtitle}</p>
             </div>
 

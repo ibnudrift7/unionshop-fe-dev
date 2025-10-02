@@ -5,40 +5,13 @@ import { CategoryGridSkeleton } from '@/components/ui/skeleton';
 import { Category } from '@/types';
 
 interface CategoryGridSectionProps {
-  categories?: Category[];
+  categories: Category[]; // required
   isLoading?: boolean;
   onCategoryClick?: (category: Category) => void;
 }
 
-const defaultCategories: Category[] = [
-  {
-    id: 'starter-kit',
-    name: 'Starter\nKit',
-    image: '/assets/starter-kit.png',
-    alt: 'Starter Kit',
-  },
-  {
-    id: 'freebase-liquid',
-    name: 'Freebase\nLiquid',
-    image: '/assets/freebase.png',
-    alt: 'Freebase Liquid',
-  },
-  {
-    id: 'saltnic-liquid',
-    name: 'Saltnic\nLiquid',
-    image: '/assets/saltnic.png',
-    alt: 'Saltnic Liquid',
-  },
-  {
-    id: 'official-merchandise',
-    name: 'Official\nMerchandise',
-    image: '/assets/official-merch.png',
-    alt: 'Official Merchandise',
-  },
-];
-
 export default function CategoryGridSection({
-  categories = defaultCategories,
+  categories,
   isLoading = false,
   onCategoryClick,
 }: CategoryGridSectionProps) {
