@@ -111,7 +111,7 @@ export default function ProductSection({
               className='rounded-md shadow-none border-none overflow-hidden py-0'
               onClick={() => onProductClick?.(product)}
             >
-              <CardContent className='p-3'>
+              <CardContent className='p-3 cursor-pointer'>
                 <div className='relative mb-2'>
                   <div className='w-full h-24 md:h-36 py-2 rounded-sm flex items-center justify-center relative overflow-hidden'>
                     {product.image ? (

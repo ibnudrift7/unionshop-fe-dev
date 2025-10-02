@@ -88,7 +88,9 @@ export default function FooterNavigationSection({
                       alt={tab.label}
                       width={24}
                       height={24}
-                      className={`w-6 h-auto ${isActive ? '' : 'opacity-70'}`}
+                      className={`w-6 h-auto cursor-pointer ${
+                        isActive ? '' : 'opacity-70'
+                      }`}
                     />
                   ) : (
                     tab.icon && <tab.icon className='w-6 h-6' />

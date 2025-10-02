@@ -107,7 +107,7 @@ export function PromoCarouselSection() {
 function PromoCard({ item }: { item: PromoItem }) {
   return (
     <Card className='w-[200px] md:w-[280px] shrink-0 overflow-hidden p-0 flex flex-col'>
-      <div className='relative aspect-[16/10] w-full overflow-hidden rounded-xl'>
+      <div className='relative aspect-[16/10] w-full overflow-hidden rounded-xl cursor-pointer'>
         <Badge
           className='absolute left-2 top-2 z-10 rounded-full px-2 py-0.5'
           variant='destructive'
