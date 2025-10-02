@@ -1,21 +1,18 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import ProductSection from '../product/ProductSection';
 import { Product } from '@/types';
-import { useRouter } from 'next/navigation';
-
-type ShopFilter = 'starter' | 'freebase' | 'saltnic' | 'official';
-
-const FILTERS: { id: ShopFilter; label: string }[] = [
-  { id: 'starter', label: 'Starter kit' },
-  { id: 'freebase', label: 'Freebase' },
-  { id: 'saltnic', label: 'Saltnic' },
-  { id: 'official', label: 'Official merchandise' },
-];
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  shopFilters as FILTERS,
+  shopProductsByFilter,
+  ShopFilter,
+  shopAllProducts,
+} from './data';
 
 interface ShopSectionProps {
   cartCount?: number;
@@ -24,98 +21,24 @@ interface ShopSectionProps {
   onCartClick?: () => void;
 }
 
-const sampleProducts: Record<ShopFilter, Product[]> = {
-  starter: [
-    {
-      id: 'st-1',
-      name: 'Starter Kit Alpha',
-      image: '/assets/Product.png',
-      price: 250000,
-      rating: 4.8,
-      sold: 320,
-      isNew: true,
-    },
-    {
-      id: 'st-2',
-      name: 'Starter Kit Beta',
-      image: '/assets/Product.png',
-      price: 299000,
-      rating: 4.7,
-      sold: 210,
-    },
-    {
-      id: 'st-3',
-      name: 'Starter Kit Gamma',
-      image: '/assets/Product.png',
-      price: 199000,
-      rating: 4.6,
-      sold: 185,
-    },
-  ],
-  freebase: [
-    {
-      id: 'fb-1',
-      name: 'Freebase English Breakfast 7MG',
-      image: '/assets/Product.png',
-      price: 75000,
-      rating: 5.0,
-      sold: 500,
-      isNew: true,
-    },
-    {
-      id: 'fb-2',
-      name: 'Freebase Morning Citrus 9MG',
-      image: '/assets/Product.png',
-      price: 85000,
-      rating: 4.9,
-      sold: 420,
-    },
-  ],
-  saltnic: [
-    {
-      id: 'sn-1',
-      name: 'Saltnic Tropical Punch 25MG',
-      image: '/assets/SpecialProduct.png',
-      price: 95000,
-      rating: 4.9,
-      sold: 390,
-    },
-    {
-      id: 'sn-2',
-      name: 'Saltnic Cool Mint 35MG',
-      image: '/assets/SpecialProduct.png',
-      price: 99000,
-      rating: 4.7,
-      sold: 280,
-    },
-  ],
-  official: [
-    {
-      id: 'om-1',
-      name: 'Makna - Jersey Boxy Oversized Purple (M)',
-      image: '/assets/OfficialMerch.png',
-      price: 375000,
-      rating: 5.0,
-      sold: 150,
-    },
-    {
-      id: 'om-2',
-      name: 'Makna - Kaos Basic Hitam (L)',
-      image: '/assets/OfficialMerch.png',
-      price: 249000,
-      rating: 4.8,
-      sold: 260,
-    },
-  ],
-};
-
 export default function ShopSection({
   onProductClick,
   onSearch,
 }: ShopSectionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState<ShopFilter | null>(null);
+
+  // Sync active filter with URL ?filter=
+  useEffect(() => {
+    const f = searchParams.get('filter');
+    if (f && FILTERS.some((fi) => fi.id === f)) {
+      setActive(f as ShopFilter);
+    } else if (!f) {
+      setActive(null);
+    }
+  }, [searchParams]);
 
   const handleSearchChange = (value: string) => {
     setQuery(value);
@@ -137,20 +60,20 @@ export default function ShopSection({
         <div className='space-y-6'>
           <ProductSection
             title={FILTERS.find((f) => f.id === active)?.label}
-            products={filterProducts(sampleProducts[active])}
+            products={filterProducts(shopProductsByFilter[active])}
             onProductClick={(p) => {
               onProductClick?.(p);
               router.push(`/product/${p.id}`);
             }}
             showChevron={false}
           />
-          {filterProducts(sampleProducts[active]).length === 0 && (
+          {filterProducts(shopProductsByFilter[active]).length === 0 && (
             <div className='px-4 text-sm text-gray-500'>Tidak ada produk.</div>
           )}
         </div>
       );
     }
-    const allProducts = FILTERS.flatMap((f) => sampleProducts[f.id]);
+    const allProducts = shopAllProducts;
     return (
       <ProductSection
         title='Semua Produk'
@@ -199,7 +122,22 @@ export default function ShopSection({
                   key={f.id}
                   role='tab'
                   aria-selected={isActive}
-                  onClick={() => setActive(isActive ? null : f.id)}
+                  onClick={() => {
+                    const next = isActive ? null : f.id;
+                    setActive(next);
+                    // Update URL without full reload
+                    const params = new URLSearchParams(searchParams.toString());
+                    if (next) {
+                      params.set('filter', next);
+                    } else {
+                      params.delete('filter');
+                    }
+                    router.push(
+                      `/shop${
+                        params.toString() ? `?${params.toString()}` : ''
+                      }`,
+                    );
+                  }}
                   className='px-1 text-sm font-medium transition-colors cursor-pointer'
                 >
                   <span

@@ -16,19 +16,13 @@ import { cn } from '@/lib/utils';
 
 interface HeroSectionProps {
   searchPlaceholder?: string;
-  images?: string[];
+  images: string[];
   onSearch?: (value: string) => void;
 }
 
-const defaultImages = [
-  '/assets/Background.png',
-  '/assets/Background.png',
-  '/assets/Background.png',
-];
-
 export default function HeroSection({
   searchPlaceholder = 'Makna V4',
-  images = defaultImages,
+  images,
   onSearch,
 }: HeroSectionProps) {
   const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));

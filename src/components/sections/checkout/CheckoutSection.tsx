@@ -6,19 +6,24 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import { useCartStore } from '@/store/cart';
 
 interface CheckoutSectionProps {
   onTotalChange?: (total: number) => void;
 }
 
 export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
+  const { items } = useCartStore();
   const [usePoints, setUsePoints] = useState(false);
 
-  const subtotalProduct = 280000;
-  const subtotalShipping = 10000;
-  const pointsDiscount = usePoints ? 50 : 0;
+  const subtotalProduct = useMemo(
+    () => items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
+    [items],
+  );
+  const subtotalShipping = items.length > 0 ? 10000 : 0;
+  const pointsDiscount = usePoints ? 5000 : 0; 
   const totalOrder = useMemo(
-    () => subtotalProduct + subtotalShipping - pointsDiscount,
+    () => Math.max(0, subtotalProduct + subtotalShipping - pointsDiscount),
     [subtotalProduct, subtotalShipping, pointsDiscount],
   );
 
@@ -58,35 +63,36 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
               <ShoppingBag className='h-4 w-4 text-brand' />
             </div>
             <h3 className='text-sm font-semibold text-gray-900'>Pesanan</h3>
-            <span className='text-xs text-gray-500 ml-auto'>Total 2 Item</span>
+            <span className='text-xs text-gray-500 ml-auto'>
+              Total {items.reduce((acc, i) => acc + i.quantity, 0)} Item
+            </span>
           </div>
 
           <div className='space-y-4'>
-            <div className='flex justify-between items-center'>
-              <div className='flex-1'>
-                <span className='text-xs font-semibold text-gray-700'>1 x</span>
-                <p className='text-sm font-semibold text-gray-900 mt-1'>
-                  Freebase Makna Ice Sea Salt Caramel latte 35 MG
+            {items.length === 0 && (
+              <p className='text-xs text-gray-500'>Keranjang kosong.</p>
+            )}
+            {items.map((i, idx) => (
+              <div
+                key={i.product.id}
+                className='flex justify-between items-center relative'
+              >
+                <div className='flex-1 pr-2'>
+                  <span className='text-xs font-semibold text-gray-700'>
+                    {i.quantity} x
+                  </span>
+                  <p className='text-sm font-semibold text-gray-900 mt-1 line-clamp-2'>
+                    {i.product.name}
+                  </p>
+                </div>
+                <p className='text-sm font-semibold text-gray-900 ml-4 whitespace-nowrap'>
+                  Rp {format(i.product.price * i.quantity)}
                 </p>
+                {idx !== items.length - 1 && (
+                  <hr className='border-dashed border-gray-300 absolute -bottom-2 left-0 right-0' />
+                )}
               </div>
-              <p className='text-sm font-semibold text-gray-900 ml-4'>
-                Rp {format(130000)}
-              </p>
-            </div>
-
-            <hr className='border-dashed border-gray-400' />
-
-            <div className='flex justify-between items-center'>
-              <div className='flex-1'>
-                <span className='text-xs font-semibold text-gray-700'>1 x</span>
-                <p className='text-sm font-semibold text-gray-900 mt-1'>
-                  Makna - Jersey Boxy Oversized Purple, XXL
-                </p>
-              </div>
-              <p className='text-sm font-semibold text-gray-900 ml-4'>
-                Rp {format(150000)}
-              </p>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -122,7 +128,11 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
                 Tanggal dipesan :
               </p>
               <p className='text-base font-semibold text-black'>
-                17 - Agustus - 2025
+                {new Date().toLocaleDateString('id-ID', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
               </p>
             </div>
           </div>
@@ -140,7 +150,13 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
                 Estimasi terkirim :
               </p>
               <p className='text-base font-semibold text-black'>
-                20 - Agustus - 2025
+                {new Date(
+                  Date.now() + 3 * 24 * 60 * 60 * 1000,
+                ).toLocaleDateString('id-ID', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                })}
               </p>
             </div>
           </div>
@@ -161,6 +177,14 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
               Rp {format(subtotalShipping)}
             </p>
           </div>
+          {pointsDiscount > 0 && (
+            <div className='flex justify-between items-center text-green-600'>
+              <p className='text-sm'>Diskon Poin</p>
+              <p className='text-sm font-medium'>
+                - Rp {format(pointsDiscount)}
+              </p>
+            </div>
+          )}
           <hr className='border-gray-200' />
           <div className='flex justify-end items-center gap-2'>
             <p className='text-base text-gray-900'>Total Pesanan:</p>
@@ -192,8 +216,10 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
             <Coins className='h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0' />
             <p className='text-base text-brand'>
               Kamu akan mendapatkan{' '}
-              <span className='font-bold text-brand'>50 point</span> dari total belanja
-              ini.
+              <span className='font-bold text-brand'>
+                {Math.max(0, Math.round(subtotalProduct / 10000) * 10)} point
+              </span>{' '}
+              dari total belanja ini.
             </p>
           </div>
         </CardContent>

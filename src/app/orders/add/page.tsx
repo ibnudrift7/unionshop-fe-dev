@@ -1,16 +1,33 @@
 'use client';
 
-import { ShopSection } from '@/components/sections';
 import { Button } from '@/components/ui/button';
 import { X, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import ProductSection from '@/components/sections/product/ProductSection';
+import { shopAllProducts } from '@/components/sections/shop/data';
+import { Product } from '@/types';
+import { useCartStore } from '@/store/cart';
 
 export default function AddOrderPage() {
   const router = useRouter();
 
-  const [selectedCount] = useState(0);
-  const [totalAmount] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { addItem } = useCartStore();
+
+  const toggleSelect = useCallback((p: Product) => {
+    setSelectedIds((prev) =>
+      prev.includes(p.id) ? prev.filter((id) => id !== p.id) : [...prev, p.id],
+    );
+  }, []);
+
+  const selectedProducts = useMemo(
+    () => shopAllProducts.filter((p) => selectedIds.includes(p.id)),
+    [selectedIds],
+  );
+
+  const selectedCount = selectedProducts.length;
+  const totalAmount = selectedProducts.reduce((sum, p) => sum + p.price, 0);
 
   const totalFormatted = useMemo(
     () =>
@@ -38,11 +55,16 @@ export default function AddOrderPage() {
         </h1>
       </div>
 
-      <ShopSection
-        cartCount={0}
-        onSearch={(v) => console.log('search:', v)}
-        onCartClick={() => console.log('Cart opened')}
-      />
+      <div className='mt-2'>
+        <ProductSection
+          title='Pilih Produk'
+          products={shopAllProducts}
+          onProductClick={toggleSelect}
+          showChevron={false}
+          selectionMode
+          selectedIds={selectedIds}
+        />
+      </div>
 
       <div className='fixed left-1/2 -translate-x-1/2 bottom-6 sm:bottom-8 w-full max-w-[550px] px-4'>
         <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
@@ -52,9 +74,13 @@ export default function AddOrderPage() {
           </div>
           <Button
             size='icon'
-            className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90'
-            onClick={() => router.push('/order-confirmation')}
-            aria-label='Lanjut ke checkout'
+            disabled={selectedCount === 0}
+            className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90 disabled:opacity-50'
+            onClick={() => {
+              selectedProducts.forEach((p) => addItem(p, 1));
+              router.push('/order-confirmation');
+            }}
+            aria-label='Tambahkan & lanjut'
           >
             <ArrowRight className='h-5 w-5' />
           </Button>

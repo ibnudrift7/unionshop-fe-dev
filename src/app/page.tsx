@@ -13,9 +13,22 @@ import {
   PromoSection,
 } from '@/components/sections';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  heroImages,
+  locationData,
+  categories as mockCategories,
+  voucher1Data,
+  voucher2List,
+  specialTodayProducts,
+  officialMerchData,
+  products as mockProducts,
+  promoImages,
+} from '@/components/sections/shop/data';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,32 +41,45 @@ export default function Home() {
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='relative'>
-        <HeroSection searchPlaceholder='Makna V4' />
+        <HeroSection searchPlaceholder='Makna V4' images={heroImages} />
 
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>
-          <LocationSection />
+          <LocationSection
+            points={locationData.points}
+            name={locationData.name}
+            address={locationData.address}
+          />
         </div>
       </div>
 
       <div className='pt-45'>
-        <CategoryGridSection isLoading={isLoading} />
+        <CategoryGridSection
+          categories={mockCategories}
+          isLoading={isLoading}
+        />
       </div>
 
-      <VoucherBannersSection
-        voucher1={{
-          title: 'Voucher buy 1 get 1 special',
-          subtitle: 'UNIONLABS WEBSITE USER.',
-        }}
-        voucher2={{}}
+      <VoucherBannersSection voucher1={voucher1Data} vouchers={voucher2List} />
+
+      <SpecialTodaySection
+        products={specialTodayProducts}
+        isLoading={isLoading}
       />
 
-      <SpecialTodaySection isLoading={isLoading} />
+      <OfficialMerchandiseSection
+        title={officialMerchData.title}
+        subtitle={officialMerchData.subtitle}
+        buttonText={officialMerchData.buttonText}
+        imageSrc={officialMerchData.imageSrc}
+      />
 
-      <OfficialMerchandiseSection />
+      <ProductSection
+        products={mockProducts}
+        isLoading={isLoading}
+        onProductClick={(p) => router.push(`/product/${p.id}`)}
+      />
 
-      <ProductSection isLoading={isLoading} />
-
-      <PromoSection />
+      <PromoSection images={promoImages} />
 
       <ChatAdminSection />
 

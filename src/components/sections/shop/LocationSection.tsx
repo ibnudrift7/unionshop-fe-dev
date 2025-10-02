@@ -4,19 +4,27 @@ import Image from 'next/image';
 
 interface LocationSectionProps {
   onLocationClick?: () => void;
-  points?: number;
+  points: number;
+  name: string;
+  address: string;
 }
 
 export default function LocationSection({
   onLocationClick,
-  points = 100,
+  points,
+  name,
+  address,
 }: LocationSectionProps) {
+  const truncatedAddressMobile =
+    address.length > 37 ? address.slice(0, 37) + '…' : address;
+  const truncatedAddressDesktop =
+    address.length > 55 ? address.slice(0, 55) + '…' : address;
   return (
     <div className='mx-4'>
       <div className='bg-white rounded-3xl overflow-hidden shadow-lg'>
         <div className='flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 bg-white border-b border-black/5'>
           <div className='flex items-center'>
-            <div className='flex items-center gap-2 px-3 py-1 rounded-xl shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
+            <div className='flex items-center gap-2 px-3 py-1 rounded-xl border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
               <Image
                 src='/assets/icon-star.png'
                 alt='Star Points'
@@ -43,11 +51,18 @@ export default function LocationSection({
           <div className='bg-[#f3f3f3] rounded-2xl p-2'>
             <div className='bg-white flex items-center justify-between rounded-2xl px-3 py-2 sm:px-4 sm:py-3'>
               <div className='flex-1'>
-                <h3 className='font-semibold text-lg text-gray-900'>
-                  Ruko Mulyosari Surabaya
-                </h3>
-                <p className='text-gray-600 text-sm font-light'>
-                  Ruko Mulyosari Surabaya, Jl Mulyosari No 76G Kec....
+                <h3 className='font-semibold text-lg text-gray-900'>{name}</h3>
+                <p
+                  className='text-gray-600 text-sm font-light whitespace-nowrap overflow-hidden text-ellipsis md:hidden'
+                  title={address}
+                >
+                  {truncatedAddressMobile}
+                </p>
+                <p
+                  className='text-gray-600 text-sm font-light whitespace-nowrap overflow-hidden text-ellipsis hidden md:block'
+                  title={address}
+                >
+                  {truncatedAddressDesktop}
                 </p>
               </div>
               <div className='ml-4'>

@@ -13,73 +13,14 @@ import { Package, Star } from 'lucide-react';
 
 interface SpecialTodaySectionProps {
   title?: string;
-  products?: SpecialProduct[];
+  products: SpecialProduct[];
   isLoading?: boolean;
   onProductClick?: (product: SpecialProduct) => void;
 }
 
-const defaultProducts: SpecialProduct[] = [
-  {
-    id: '1',
-    name: 'Ova Vprime 60 + Freebase',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '2',
-    name: 'Ova Vprime 60 + Freebase 2',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '3',
-    name: 'Ova Vprime 60 + Freebase 3',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '4',
-    name: 'Ova Vprime 60 + Freebase 4',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '5',
-    name: 'Ova Vprime 60 + Freebase 5',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '6',
-    name: 'Ova Vprime 60 + Freebase 6',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '7',
-    name: 'Ova Vprime 60 + Freebase 7',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-  {
-    id: '8',
-    name: 'Ova Vprime 60 + Freebase 8',
-    image: '/assets/SpecialProduct.png',
-    originalPrice: 100000,
-    discountPrice: 50000,
-  },
-];
-
 export default function SpecialTodaySection({
   title = 'Spesial Hari Ini',
-  products = defaultProducts,
+  products,
   isLoading = false,
   onProductClick,
 }: SpecialTodaySectionProps) {
@@ -120,7 +61,7 @@ export default function SpecialTodaySection({
                 className='pl-2 md:pl-4 basis-[48%] sm:basis-[47%] md:basis-[46%]'
               >
                 <Card
-                  className='shadow-sm cursor-pointer hover:shadow-md transition-shadow'
+                  className='cursor-pointer transition-shadow border-none'
                   onClick={() => onProductClick?.(product)}
                 >
                   <CardContent className='p-3'>
@@ -141,12 +82,14 @@ export default function SpecialTodaySection({
                         )}
                       </div>
                     </div>
-                    <p className='text-sm font-semibold pt-4'>{product.name}</p>
-                    <div className='flex flex-col space-x-1'>
-                      <span className='text-lg text-red-600 leading-snug'>
+                    <p className='text-sm font-semibold pt-1 leading-tight'>
+                      {product.name}
+                    </p>
+                    <div className='flex flex-col leading-tight'>
+                      <span className='text-lg text-red-600 leading-tight'>
                         {formatPrice(product.discountPrice)}
                       </span>
-                      <span className='text-sm text-gray-500 line-through'>
+                      <span className='text-xs text-gray-500 line-through leading-tight'>
                         {formatPrice(product.originalPrice)}
                       </span>
                     </div>
@@ -165,6 +108,7 @@ export default function SpecialTodaySection({
           )}
         </CarouselContent>
       </Carousel>
+      <div className='border-t-2 border-gray-200 my-4' />
     </section>
   );
 }
