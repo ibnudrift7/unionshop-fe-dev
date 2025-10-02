@@ -85,7 +85,7 @@ export default function ProductSection({
                       )}
                     </div>
                     {product.isNew && (
-                      <Badge className='absolute top-1 right-1 bg-brand text-white text-lg font-bold rounded-full w-10 h-10 md:h-15 md:w-15 flex items-center justify-center p-0'>
+                      <Badge className='absolute top-1 right-1 bg-brand text-white text-sm md:text-lg font-bold rounded-full w-10 h-10 md:h-15 md:w-15 flex items-center justify-center p-0'>
                         Baru!
                       </Badge>
                     )}
