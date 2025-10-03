@@ -1,10 +1,11 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FooterNavigationSection } from '@/components/sections';
+import { useState } from 'react';
 
 export default function RiwayatPesanan() {
   const router = useRouter();
@@ -22,13 +23,43 @@ export default function RiwayatPesanan() {
         },
       ],
       statusSteps: [
-        { label: 'Pengemasan', active: true },
+        { label: 'Pengemasan', active: false },
         { label: 'Diterima Kurir', active: false },
         { label: 'Dalam Pengiriman', active: false },
-        { label: 'Diterima', active: false },
+        { label: 'Diterima', active: true },
       ],
     },
   ];
+
+  // Manage open/close state per order for rating section
+  const [openRatings, setOpenRatings] = useState<Record<string, boolean>>({});
+
+  const toggleRating = (id: string) =>
+    setOpenRatings((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  interface RatingState {
+    rating: number;
+    hover: number;
+  }
+  const [ratings, setRatings] = useState<Record<string, RatingState>>({});
+
+  const ensureRatingState = (id: string) => {
+    if (!ratings[id]) {
+      setRatings((prev) => ({ ...prev, [id]: { rating: 0, hover: 0 } }));
+    }
+    return ratings[id] || { rating: 0, hover: 0 };
+  };
+
+  const setRating = (id: string, value: number) =>
+    setRatings((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || { hover: 0 }), rating: value },
+    }));
+  const setHover = (id: string, value: number) =>
+    setRatings((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || { rating: 0 }), hover: value },
+    }));
 
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x'>
@@ -99,6 +130,7 @@ export default function RiwayatPesanan() {
                   </span>
                 </p>
 
+                <div className='border-t border-gray-200 mb-4' />
                 <div className='inline-flex rounded-3xl items-center bg-white px-2 py-2 border border-gray-100 [box-shadow:0_0_5px_rgba(0,0,0,0.15)] relative'>
                   {order.statusSteps.map((step, index) => (
                     <div key={index} className='flex items-center relative'>
@@ -114,10 +146,10 @@ export default function RiwayatPesanan() {
                       <Button
                         variant={step.active ? 'default' : 'outline'}
                         size='sm'
-                        className={`px-2 py-0.5 text-[9px] sm:px-3 sm:py-1 sm:text-xs font-bold rounded-lg sm:rounded-xl whitespace-normal break-words text-center leading-tight ${
+                        className={`px-2 py-0.5 text-[9px] sm:px-3 sm:py-1 sm:text-xs font-bold rounded-lg sm:rounded-xl whitespace-normal break-words text-center leading-tight transition-colors ${
                           step.active
-                            ? 'bg-brand/30 text-brand border-brand border-2 hover:bg-brand/50'
-                            : 'bg-white text-black border-black'
+                            ? 'bg-brand/30 text-brand border-brand border-2 hover:bg-brand/40'
+                            : 'bg-white text-black border-black hover:bg-gray-50'
                         }`}
                       >
                         {step.label}
@@ -127,6 +159,91 @@ export default function RiwayatPesanan() {
                       )}
                     </div>
                   ))}
+                </div>
+                <div className='border-t border-gray-200 mt-4' />
+
+                {/* Rating Section */}
+                <div className='mt-4'>
+                  <div className='bg-[#F5F5F5] rounded-2xl p-3 sm:p-4'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-1.5'>
+                        <h2 className='text-sm sm:text-base font-semibold text-gray-900'>
+                          Nilai
+                        </h2>
+                        <span className='text-xs sm:text-sm font-medium text-brand'>
+                          +50 pts
+                        </span>
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => toggleRating(order.id)}
+                        aria-label={
+                          openRatings[order.id]
+                            ? 'Tutup penilaian'
+                            : 'Buka penilaian'
+                        }
+                        className='w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center'
+                      >
+                        <Image
+                          src={
+                            openRatings[order.id]
+                              ? '/assets/icon-up.png'
+                              : '/assets/icon-down.png'
+                          }
+                          alt={openRatings[order.id] ? 'Collapse' : 'Expand'}
+                          width={40}
+                          height={40}
+                          className='w-full h-full object-contain'
+                        />
+                      </button>
+                    </div>
+                    {openRatings[order.id] && (
+                      <div className='mt-3 bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100'>
+                        <div className='flex items-center justify-between mb-3'>
+                          <h3 className='text-xs sm:text-sm font-medium text-gray-900'>
+                            Nilai Produk
+                          </h3>
+                          <div className='flex gap-1'>
+                            {[1, 2, 3, 4, 5].map((s) => {
+                              const state = ensureRatingState(order.id);
+                              const filled = s <= (state.hover || state.rating);
+                              return (
+                                <button
+                                  key={s}
+                                  onClick={() => setRating(order.id, s)}
+                                  onMouseEnter={() => setHover(order.id, s)}
+                                  onMouseLeave={() => setHover(order.id, 0)}
+                                  className='transition-transform hover:scale-105'
+                                >
+                                  <Star
+                                    className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                                      filled
+                                        ? 'fill-yellow-400 text-yellow-400'
+                                        : 'fill-none text-yellow-400'
+                                    } stroke-[1.75]`}
+                                  />
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() =>
+                            console.log(
+                              'Rating submitted:',
+                              ensureRatingState(order.id).rating,
+                            )
+                          }
+                          disabled={!ensureRatingState(order.id).rating}
+                          className='w-full bg-brand text-white hover:bg-brand/90 text-xs sm:text-sm font-semibold py-2 sm:py-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed'
+                        >
+                          {ensureRatingState(order.id).rating
+                            ? 'Kirim'
+                            : 'Pilih rating'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
