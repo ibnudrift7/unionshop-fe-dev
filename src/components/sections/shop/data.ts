@@ -284,7 +284,7 @@ export const shopProductsByFilter: Record<ShopFilter, Product[]> = {
 };
 
 export const shopAllProducts: Product[] = [
-  ...products, // include general products shown on home page if needed
+  ...products,
   ...Object.values(shopProductsByFilter).flat(),
 ];
 
@@ -292,7 +292,6 @@ export function getProductById(id: string): Product | undefined {
   return shopAllProducts.find((p) => p.id === id);
 }
 
-// Utility helper if later we want a single object
 export const shopMockData = {
   heroImages,
   promoImages,
