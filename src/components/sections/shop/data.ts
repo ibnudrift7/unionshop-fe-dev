@@ -268,7 +268,8 @@ export const shopProductsByFilter: Record<ShopFilter, Product[]> = {
       id: 'om-1',
       name: 'Makna - Jersey Boxy Oversized Purple (M)',
       image: '/assets/OfficialMerch.png',
-      price: 375000,
+      price: 200000,
+      discountPrice: 220000,
       rating: 5.0,
       sold: 150,
     },
@@ -276,7 +277,8 @@ export const shopProductsByFilter: Record<ShopFilter, Product[]> = {
       id: 'om-2',
       name: 'Makna - Kaos Basic Hitam (L)',
       image: '/assets/OfficialMerch.png',
-      price: 249000,
+      price: 200000,
+      discountPrice: 220000,
       rating: 4.8,
       sold: 260,
     },
@@ -284,7 +286,7 @@ export const shopProductsByFilter: Record<ShopFilter, Product[]> = {
 };
 
 export const shopAllProducts: Product[] = [
-  ...products, // include general products shown on home page if needed
+  ...products,
   ...Object.values(shopProductsByFilter).flat(),
 ];
 
@@ -292,7 +294,6 @@ export function getProductById(id: string): Product | undefined {
   return shopAllProducts.find((p) => p.id === id);
 }
 
-// Utility helper if later we want a single object
 export const shopMockData = {
   heroImages,
   promoImages,
