@@ -18,11 +18,11 @@ export default function ChatAdminSection({
 }: ChatAdminSectionProps) {
   return (
     <section className='px-4'>
-      <Card className='border-none shadow-none' onClick={onChatClick}>
-        <div className='text-start font-bold text-black text-xl'>
+      <Card className='border-none shadow-none gap-4' onClick={onChatClick}>
+        <div className='text-start font-bold text-black text-xl leading-tight mx-0'>
           {title}
         </div>
-        <CardContent className='p-6 shadow rounded-2xl bg-white border border-gray-200'>
+        <CardContent className='p-6 shadow rounded-2xl bg-white border border-gray-200 mx-0'>
           <div className='flex items-center space-x-4'>
             <div className='w-12 h-12 flex items-center justify-center'>
               <Image
