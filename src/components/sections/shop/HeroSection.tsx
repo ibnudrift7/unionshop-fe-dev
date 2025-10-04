@@ -115,20 +115,48 @@ export default function HeroSection({
                     : 'w-0',
                 )}
               >
-                <Input
-                  ref={searchInputRef}
-                  placeholder={searchPlaceholder}
+                <div
                   className={cn(
-                    'pl-4 pr-0 bg-white/50 backdrop-blur-sm border-gray-200 h-8 md:h-9 border-l-0',
+                    'relative h-8 md:h-9 flex-1 overflow-visible',
                     isSearchOpen
-                      ? 'rounded-l-none rounded-r-lg opacity-100'
-                      : 'rounded-l-none rounded-r-lg opacity-0 pointer-events-none',
+                      ? 'opacity-100'
+                      : 'opacity-0 pointer-events-none',
                   )}
-                  onChange={(e) => onSearch?.(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') setIsSearchOpen(false);
-                  }}
-                />
+                >
+                  <Input
+                    ref={searchInputRef}
+                    placeholder={searchPlaceholder}
+                    className={cn(
+                      'pl-4 pr-3 bg-white/60 hover:bg-white/70 backdrop-blur-sm border-gray-200 h-full w-17/22 md:w-18/22 border-l-0 rounded-r-xl rounded-l-none relative z-10 transition-colors',
+                      isSearchOpen ? 'shadow-sm' : '',
+                    )}
+                    onChange={(e) => onSearch?.(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setIsSearchOpen(false);
+                      if (e.key === 'Enter') {
+                        const value = (e.target as HTMLInputElement).value;
+                        onSearch?.(value);
+                      }
+                    }}
+                  />
+                  <Button
+                    type='button'
+                    aria-label='Execute search'
+                    className='absolute right-0 top-1/2 -translate-y-1/2 
+                    h-7 md:h-8 w-[82px] md:w-[96px] 
+                    bg-brand text-white 
+                    rounded-r-lg rounded-l-none 
+                    text-[10px] md:text-xs font-semibold tracking-wide 
+                    hover:bg-brand/90  
+                    z-[5] border border-brand/80'
+                    onClick={() => {
+                      const value = searchInputRef.current?.value || '';
+                      onSearch?.(value);
+                    }}
+                  >
+                    SEARCH
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
