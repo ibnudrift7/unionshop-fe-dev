@@ -36,20 +36,23 @@ export default function ProductReviews() {
       </div>
 
       <div className='p-4'>
-        <h2 className='text-lg font-semibold text-brand mb-4'>
+        <h2 className='text-lg font-semibold text-center text-brand mb-4'>
           Makna - Taro Milk Cheese
         </h2>
 
         <div className='flex items-center gap-2 mb-6'>
           <div className='flex items-center gap-1'>
             <Star className='h-5 w-5 fill-yellow-400 text-yellow-400' />
-            <span className='text-lg font-semibold text-gray-900'>4.9</span>
+            <span className='text-xl font-semibold text-gray-900'>4.9</span>
             <span className='text-sm text-gray-500'>/5.0</span>
           </div>
-          <div className='text-sm text-gray-600'>97% pembeli merasa puas</div>
+          <div className='flex flex-col items-start ms-3'>
+            <div className='text-sm text-black font-semibold'>
+              97% pembeli merasa puas
+            </div>
+            <div className='text-sm text-black font-light'>6 rating</div>
+          </div>
         </div>
-
-        <div className='text-sm text-gray-500 mb-6'>6 rating</div>
 
         <div className='space-y-4'>
           {reviews.map((review, index) => (

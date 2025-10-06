@@ -20,7 +20,7 @@ export default function OfficialMerchandiseSection({
   onOrderClick,
 }: OfficialMerchandiseSectionProps) {
   return (
-    <section className='p-4'>
+    <section className='p-4 pt-0'>
       <Card className='bg-white shadow rounded-3xl py-0'>
         <CardContent className='p-4'>
           <div className='grid grid-cols-4 items-center gap-4'>

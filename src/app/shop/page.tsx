@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 
 export default function ShopPage() {
   return (
-    <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
+    <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
       <Suspense
         fallback={
           <div className='p-4 text-sm text-gray-500'>Memuat data shop...</div>
