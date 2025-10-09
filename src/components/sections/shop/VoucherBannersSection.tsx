@@ -47,7 +47,7 @@ export default function VoucherBannersSection({
     <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
       <div className='mx-2 sm:mx-4 mb-4 sm:mb-6'>
         <div className='bg-white rounded-2xl overflow-hidden shadow-lg border-2 sm:border-4 md:border-[5px] border-brand'>
-          <div className='p-1 pt-0 md:p-2 md:pt-0  flex items-center gap-3'>
+          <div className='p-1 pt-0 md:p-2 md:pt-0 flex items-center gap-3'>
             <div className='flex-shrink-0 flex items-center justify-center'>
               <Image
                 src={voucher1.image}
@@ -95,7 +95,7 @@ export default function VoucherBannersSection({
                 className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
               >
                 <div className='rounded-xl sm:rounded-2xl overflow-hidden [box-shadow:3px_6px_17px_-2px_rgba(0,0,0,0.19)] bg-white'>
-                  <div className='p-3 sm:p-4 md:p-6'>
+                  <div className='p-3 md:p-6'>
                     <div className='grid grid-cols-2 items-center mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
                       <div className='justify-self-start max-w-[32ch] sm:max-w-[36ch] md:max-w-[40ch]'>
                         <h3 className='text-sm sm:text-xl md:text-xl lg:text-2xl font-bold text-[#26d367] mb-1 sm:mb-2'>

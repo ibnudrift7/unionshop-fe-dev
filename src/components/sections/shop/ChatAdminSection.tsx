@@ -17,9 +17,9 @@ export default function ChatAdminSection({
   onChatClick,
 }: ChatAdminSectionProps) {
   return (
-    <section className='px-4'>
+    <section className='px-4 border-t-8 border-gray-100 my-5'>
       <Card className='border-none shadow-none gap-4' onClick={onChatClick}>
-        <div className='text-start font-bold text-black text-xl leading-tight mx-0'>
+        <div className='text-start font-bold text-black text-xl leading-tight mx-0 mt-7'>
           {title}
         </div>
         <CardContent className='p-6 shadow rounded-2xl bg-white border border-gray-200 mx-0'>
@@ -40,7 +40,11 @@ export default function ChatAdminSection({
           </div>
         </CardContent>
       </Card>
-
+      {/* Full-width divider */}
+      <div
+        className='-mx-4 my-6 mt-8 border-t-8 border-gray-100'
+        aria-hidden='true'
+      ></div>
       <div className='my-6'>
         <p className='font-bold'>UNIONLABS.ID</p>
         <p className='font-bold'>2022 CREATED BY Union Labs</p>

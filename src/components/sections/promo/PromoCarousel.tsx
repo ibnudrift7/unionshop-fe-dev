@@ -84,7 +84,7 @@ export function PromoCarouselSection() {
       <div className='relative'>
         <div
           ref={scrollerRef}
-          className='flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1'
+          className='flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1'
           role='list'
           aria-label='Promo pilihan'
         >
@@ -106,7 +106,7 @@ export function PromoCarouselSection() {
 
 function PromoCard({ item }: { item: PromoItem }) {
   return (
-    <Card className='w-[200px] md:w-[280px] shrink-0 overflow-hidden p-0 flex flex-col'>
+    <Card className='w-[175px] md:w-[245px] shrink-0 overflow-hidden p-0 flex flex-col border-1'>
       <div className='relative aspect-[16/10] w-full overflow-hidden rounded-xl cursor-pointer'>
         <Badge
           className='absolute left-2 top-2 z-10 rounded-full px-2 py-0.5'

@@ -52,7 +52,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className='pt-45'>
+      <div className='pt-36'>
         <CategoryGridSection
           categories={mockCategories}
           isLoading={isLoading}

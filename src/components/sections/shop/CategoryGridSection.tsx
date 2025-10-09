@@ -34,7 +34,7 @@ export default function CategoryGridSection({
     }
   };
   return (
-    <div className='mx-4 mb-6'>
+    <div className='mx-4 mb-3'>
       <div className='grid grid-cols-4 gap-2 sm:gap-3 md:gap-4'>
         {isLoading ? (
           <CategoryGridSkeleton count={4} />

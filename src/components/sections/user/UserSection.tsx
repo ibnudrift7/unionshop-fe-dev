@@ -2,22 +2,13 @@
 
 import type React from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { RegisterSheet } from '@/components/sections/auth/RegisterSheet';
 import { ForgotPasswordSheet } from '@/components/sections/auth/ForgotPasswordSheet';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Menu,
-  MapPin,
-  Phone,
-  Crown,
-  Star,
-  LogOut,
-  Edit2,
-} from 'lucide-react';
+import { Menu, MapPin, Phone, LogOut, Edit2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Carousel,
@@ -34,22 +25,30 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    icon: <Menu className='w-5 h-5 text-purple-600' />,
+    icon: <Menu className='w-5 h-5 text-brand' />,
     label: 'Riwayat Pesanan',
     href: '/orders',
   },
   {
-    icon: <MapPin className='w-5 h-5 text-purple-600' />,
+    icon: <MapPin className='w-5 h-5 text-brand' />,
     label: 'Data Pengiriman',
     href: '/shipping',
   },
   {
-    icon: <Phone className='w-5 h-5 text-purple-600' />,
+    icon: <Phone className='w-5 h-5 text-brand' />,
     label: 'Pelayanan Whatsapp',
     href: '/whatsapp',
   },
   {
-    icon: <Crown className='w-5 h-5 text-purple-600' />,
+    icon: (
+      <Image
+        src='/assets/logo-makna-about.jpg'
+        alt='Tentang Makna'
+        width={10}
+        height={10}
+        className='w-6 h-3 object-cover'
+      />
+    ),
     label: 'Tentang Makna',
     href: '/about',
   },
@@ -79,22 +78,23 @@ export default function MobileMenu() {
 
   return (
     <div className='w-full bg-white min-h-screen relative'>
-      <div className='p-6 border-b border-gray-100'>
+      <div className='p-6 pb-3 border-b-2 border-gray-200'>
         <div className='-mx-6 -mt-6 -mb-6'>
-          <div className='w-full h-16 sm:h-20 bg-gradient-to-r from-brand to-brand/70' />
+          <div className='w-full h-16 sm:h-20 bg-gradient-to-r from-brand to-brand/80' />
         </div>
-        <div className='flex items-center justify-between mb-4 relative z-10'>
-          <div className='flex items-center gap-3'>
-            <Avatar className='w-12 h-12'>
-              <AvatarImage src='/placeholder.svg?height=48&width=48' />
-              <AvatarFallback className='bg-gray-200 text-gray-600'>
-                G
-              </AvatarFallback>
-            </Avatar>
+        <div className='flex items-center justify-between mb-4 relative z-10 -mt-12'>
+          <div className='h-15 w-15 flex items-center justify-center'>
+            <Image
+              src='/assets/user-icon.png'
+              alt='User'
+              width={70}
+              height={70}
+              className='h-15 w-15 object-contain'
+            />
           </div>
           <Button
             variant='ghost'
-            className='bg-white text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-0 h-auto font-medium'
+            className='text-brand p-0 h-auto font-bold mt-14'
             onClick={() => router.push('/user/edit')}
           >
             Ganti
@@ -102,23 +102,27 @@ export default function MobileMenu() {
           </Button>
         </div>
         <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <div className='flex items-center gap-1 px-2 py-1 rounded-lg shadow-sm border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
-              <Star className='w-4 h-4 text-[#997B27]' fill='currentColor' />
-              <span className='text-xs font-semibold text-[#997B27]'>
+          <div className='flex items-center gap-2 bg-gradient-to-l from-[#f6eac7] to-white rounded-full'>
+            <div className='flex items-center gap-1'>
+              <Image
+                src='/assets/icon-star-user.png'
+                alt='Poin kamu'
+                width={16}
+                height={16}
+                className='w-6 h-6'
+              />
+              <span className='text-[10px] md:text-sm font-semibold text-[#997B27]'>
                 Poin kamu
               </span>
             </div>
-            <div className='flex items-end gap-1 text-gray-900'>
+            <div className='flex items-end gap-1 text-black bg-white rounded-full p-1 px-3 border-2 border-gray-200'>
               <span className='text-sm font-bold leading-none'>100</span>
-              <span className='text-[10px] font-medium leading-none text-gray-700'>
+              <span className='text-[10px] font-medium leading-none text-[#9a7b29]'>
                 pts
               </span>
             </div>
           </div>
-          <h2 className='text-lg font-medium text-gray-800'>
-            Hey, there gorgeous
-          </h2>
+          <h2 className='text-lg font-bold text-black'>Bombom Ganteng</h2>
         </div>
       </div>
 
@@ -132,21 +136,18 @@ export default function MobileMenu() {
         >
           <CarouselContent className='pr-4'>
             {vouchers.map((item, idx) => (
-              <CarouselItem
-                key={idx}
-                className='basis-[88%] sm:basis-[86%] md:basis-[80%]'
-              >
-                <div className='rounded-xl sm:rounded-2xl overflow-hidden border-2 border-gray-200 bg-white'>
-                  <div className='p-3 sm:p-4 md:p-6'>
+              <CarouselItem key={idx} className='basis-full'>
+                <div className='rounded-xl sm:rounded-2xl overflow-hidden border-3 border-gray-300 bg-white'>
+                  <div className='p-4 px-6 md:p-6 md:px-8'>
                     <div className='flex items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
                       <div className='flex-1'>
-                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                        <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-0 sm:mb-0 leading-tight'>
                           {item.title1}
                         </h3>
-                        <h3 className='text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-green-500 mb-1 sm:mb-2'>
+                        <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-1 sm:mb-2'>
                           {item.title2}
                         </h3>
-                        <p className='text-xs sm:text-sm md:text-base text-gray-600'>
+                        <p className='text-[9px] md:text-sm font-semibold text-[#7c7c7c]'>
                           {item.description}
                         </p>
                       </div>
@@ -157,13 +158,13 @@ export default function MobileMenu() {
                             alt='Voucher'
                             width={150}
                             height={150}
-                            className='w-12 h-12 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 object-contain'
+                            className='w-auto h-20 md:w-auto md:h-28 object-contain'
                           />
                         </div>
                       </div>
                     </div>
 
-                    <Button className='w-full bg-brand hover:bg-brand/90 text-white font-semibold py-2 sm:py-3 md:py-4 rounded-full text-sm sm:text-base md:text-lg'>
+                    <Button className='w-full bg-brand hover:bg-brand/90 text-white font-base py-6 md:py-8 rounded-4xl text-sm md:text-base'>
                       {item.buttonText}
                     </Button>
                   </div>
@@ -174,7 +175,7 @@ export default function MobileMenu() {
         </Carousel>
       </div>
 
-      <div className='p-4 space-y-2 pb-28'>
+      <div className='p-4 space-y-2'>
         {menuItems.map((item, index) => (
           <Card
             key={index}
@@ -208,16 +209,21 @@ export default function MobileMenu() {
       <ForgotPasswordSheet
         trigger={<button ref={forgotTriggerRef} className='hidden' />}
       />
-
-      <div className='absolute bottom-16 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] max-w-[720px] px-4'>
-        <Button variant='outline' className='w-full'>
-          <LogOut className='w-4 h-4' />
-          Logout
+      <div className='p-4 pt-2 space-y-7'>
+        <Button
+          variant='outline'
+          className='w-full h-auto py-5 md:py-6 text-base gap-3'
+        >
+          <LogOut
+            className='w-7 h-7 text-black'
+            strokeWidth={2.5}
+            aria-hidden='true'
+          />
+          <span className='text-brand font-normal'>Logout</span>
         </Button>
-      </div>
-
-      <div className='absolute bottom-6 left-1/2 transform -translate-x-1/2'>
-        <p className='text-xs text-gray-400 text-center'>Versi Website 1.0</p>
+        <p className='text-sm text-black text-center mb-10'>
+          Versi Website 0 01.00.00
+        </p>
       </div>
     </div>
   );
