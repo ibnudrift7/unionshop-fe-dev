@@ -162,15 +162,14 @@ export default function RiwayatPesanan() {
                 </div>
                 <div className='border-t border-gray-200 mt-4' />
 
-                {/* Rating Section */}
                 <div className='mt-4'>
                   <div className='bg-[#F5F5F5] rounded-2xl p-3 sm:p-4'>
                     <div className='flex items-center justify-between'>
                       <div className='flex items-center gap-1.5'>
-                        <h2 className='text-sm sm:text-base font-semibold text-gray-900'>
+                        <h2 className='text-sm md:text-base font-semibold text-black'>
                           Nilai
                         </h2>
-                        <span className='text-xs sm:text-sm font-medium text-brand'>
+                        <span className='text-sm md:text-base font-semibold text-black'>
                           +50 pts
                         </span>
                       </div>
@@ -182,7 +181,7 @@ export default function RiwayatPesanan() {
                             ? 'Tutup penilaian'
                             : 'Buka penilaian'
                         }
-                        className='w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center'
+                        className='w-5 h-5 md:w-5 md:h-5 flex items-center justify-center'
                       >
                         <Image
                           src={
