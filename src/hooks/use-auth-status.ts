@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const TOKEN_KEY = 'auth_token';
+const TOKEN_KEY = 'laksdjfhlaksjdfhlaksjdfh_token_123456789';
 
 export function useAuthStatus() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);

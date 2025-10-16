@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner'; // optional jika kamu pakai toast
 
 export interface EditAddressPayload {
   province: string;
@@ -31,6 +32,7 @@ export default function EditAddressSheet({
   initial,
   onSubmit,
 }: EditAddressSheetProps) {
+  const [open, setOpen] = useState(false);
   const [province, setProvince] = useState(initial?.province ?? '');
   const [city, setCity] = useState(initial?.city ?? '');
   const [district, setDistrict] = useState(initial?.district ?? '');
@@ -40,11 +42,18 @@ export default function EditAddressSheet({
   );
 
   const handleSubmit = () => {
+    if (!province || !city || !district || !postalCode || !addressDetail) {
+      toast?.error?.('Semua kolom harus diisi!');
+      return;
+    }
+
     onSubmit?.({ province, city, district, postalCode, addressDetail });
+    toast?.success?.('Alamat berhasil diperbarui');
+    setOpen(false);
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side='bottom'
@@ -60,6 +69,7 @@ export default function EditAddressSheet({
               id='edit-province'
               type='text'
               placeholder='Provinsi'
+              required
               value={province}
               onChange={(e) => setProvince(e.target.value)}
             />
@@ -70,6 +80,7 @@ export default function EditAddressSheet({
               id='edit-city'
               type='text'
               placeholder='Kota atau Kabupaten'
+              required
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
@@ -80,6 +91,7 @@ export default function EditAddressSheet({
               id='edit-district'
               type='text'
               placeholder='Kecamatan'
+              required
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
             />
@@ -91,6 +103,7 @@ export default function EditAddressSheet({
               type='text'
               inputMode='numeric'
               placeholder='Kode pos'
+              required
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
             />
@@ -100,6 +113,7 @@ export default function EditAddressSheet({
             <textarea
               id='edit-detail'
               rows={3}
+              required
               className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm'
               placeholder='Nama jalan, no rumah, RT/RW, patokan, dsb.'
               value={addressDetail}
@@ -109,6 +123,7 @@ export default function EditAddressSheet({
 
           <div className='pt-2'>
             <Button
+              type='button'
               className='w-full bg-brand hover:bg-brand/90 text-white'
               onClick={handleSubmit}
             >
