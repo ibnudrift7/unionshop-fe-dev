@@ -109,7 +109,10 @@ export default function MobileMenu() {
       loginMutation.mutate(payload, {
         onSuccess: (response) => {
           setIsLoggedIn(true);
-          const nameFromResponse = response?.data?.user?.name ?? null;
+          const nameFromResponse =
+            response?.data?.user?.full_name ??
+            response?.data?.user?.name ??
+            null;
           setUserName(nameFromResponse);
           setLoginError(null);
           toast.success(
@@ -140,7 +143,9 @@ export default function MobileMenu() {
           loginMutation.reset();
           setRegisterError(null);
           setLoginError(null);
-          const nameFromResponse = response?.data?.user?.name ?? null;
+          const nameFromResponse =
+            response?.data?.user?.full_name ??
+            null;
           if (nameFromResponse) {
             setUserName(nameFromResponse);
           }
@@ -236,9 +241,7 @@ export default function MobileMenu() {
               </div>
             </div>
           ) : (
-            <div className='py-2 text-brand text-lg font-semibold'>
-              Guest
-            </div>
+            <div className='py-2 text-brand text-lg font-semibold'>Guest</div>
           )}
           <h2 className='text-lg font-bold text-black'>
             {isLoggedIn && userName ? userName : 'Hey, there gorgeous'}
