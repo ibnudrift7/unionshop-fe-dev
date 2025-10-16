@@ -109,6 +109,10 @@ export default function MobileMenu() {
       loginMutation.mutate(payload, {
         onSuccess: (response) => {
           setIsLoggedIn(true);
+          try {
+            const token = response?.data?.token as string | undefined;
+            if (token) localStorage.setItem('auth_token', token);
+          } catch {}
           const nameFromResponse =
             response?.data?.user?.full_name ??
             response?.data?.user?.name ??
@@ -143,9 +147,7 @@ export default function MobileMenu() {
           loginMutation.reset();
           setRegisterError(null);
           setLoginError(null);
-          const nameFromResponse =
-            response?.data?.user?.full_name ??
-            null;
+          const nameFromResponse = response?.data?.user?.full_name ?? null;
           if (nameFromResponse) {
             setUserName(nameFromResponse);
           }
@@ -179,6 +181,9 @@ export default function MobileMenu() {
     setLoginError(null);
     setRegisterError(null);
     setUserName(null);
+    try {
+      localStorage.removeItem('auth_token');
+    } catch {}
     toast.message('Anda telah keluar dari akun.');
   }, []);
 

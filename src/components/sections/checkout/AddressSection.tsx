@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Plus, Star, Edit2 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2 } from 'lucide-react';
 import AddAddressSheet, {
   AddressPayload,
 } from '@/components/sections/address/AddAddressSheet';
 import EditAddressSheet, {
   EditAddressPayload,
 } from '@/components/sections/address/EditAddressSheet';
+import Image from 'next/image';
 
 export interface Address {
   id: string;
@@ -108,19 +109,19 @@ export default function AddressSection() {
       <div className='p-4 space-y-3'>
         {addresses.map((address) => (
           <Card key={address.id} className='p-4 bg-white shadow-sm'>
-            <div className='flex items-start gap-3'>
+            <div className='flex items-center gap-3'>
               <Button
                 variant='ghost'
                 size='icon'
                 onClick={() => handleToggleFavorite(address.id)}
-                className='h-8 w-8 mt-1 flex-shrink-0'
+                className='h-8 w-8 flex-shrink-0'
               >
-                <Star
-                  className={`h-5 w-5 ${
-                    address.isFavorite
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-gray-400'
-                  }`}
+                <Image
+                  src='/assets/alamat-utama-icon.png'
+                  alt='Alamat Utama Icon'
+                  width={60}
+                  height={60}
+                  className='w-20 h-auto'
                 />
               </Button>
 
@@ -137,7 +138,7 @@ export default function AddressSection() {
                   <Button
                     variant='ghost'
                     size='icon'
-                    className='h-8 w-8 mt-1 flex-shrink-0'
+                    className='h-8 w-8 flex-shrink-0'
                   >
                     <Edit2 className='h-4 w-4 text-gray-400' />
                   </Button>
