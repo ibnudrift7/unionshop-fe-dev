@@ -27,17 +27,22 @@ export interface AuthTokens {
 export interface AuthUser {
   id?: string;
   name?: string;
+  full_name?: string;
   email?: string;
   phone?: string;
   gender?: string;
+  date_of_birth?: string;
 }
 
 export interface AuthResponse {
   message?: string;
   data?: {
     user?: AuthUser;
+    token?: string;
     tokens?: AuthTokens;
     [key: string]: unknown;
   };
+  statusCode?: number;
+  success?: boolean;
   [key: string]: unknown;
 }

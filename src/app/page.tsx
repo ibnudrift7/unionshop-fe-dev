@@ -14,6 +14,7 @@ import {
 } from '@/components/sections';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthStatus } from '@/hooks/use-auth-status';
 import {
   heroImages,
   locationData,
@@ -29,6 +30,7 @@ import {
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { isLoggedIn } = useAuthStatus();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,6 +50,7 @@ export default function Home() {
             points={locationData.points}
             name={locationData.name}
             address={locationData.address}
+            isGuest={!isLoggedIn}
           />
         </div>
       </div>
