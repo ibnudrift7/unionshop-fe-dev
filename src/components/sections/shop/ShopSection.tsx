@@ -30,7 +30,6 @@ export default function ShopSection({
   const [query, setQuery] = useState('');
   const [active, setActive] = useState<ShopFilter | null>(null);
 
-  // Sync active filter with URL ?filter=
   useEffect(() => {
     const f = searchParams.get('filter');
     if (f && FILTERS.some((fi) => fi.id === f)) {

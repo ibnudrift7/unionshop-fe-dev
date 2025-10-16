@@ -18,6 +18,8 @@ export interface LoginSheetProps {
   onSubmit?: (payload: { email: string; password: string }) => void;
   onForgotPassword?: () => void;
   onSwitchToRegister?: () => void;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
 }
 
 export function LoginSheet({
@@ -25,6 +27,8 @@ export function LoginSheet({
   onSubmit,
   onForgotPassword,
   onSwitchToRegister,
+  isSubmitting = false,
+  errorMessage = null,
 }: LoginSheetProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +57,7 @@ export function LoginSheet({
               placeholder='nama@email.com'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -63,6 +68,7 @@ export function LoginSheet({
               placeholder='••••••••'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='flex items-center gap-2 pt-1'>
@@ -72,23 +78,31 @@ export function LoginSheet({
               className='h-4 w-4 rounded border-gray-300'
               checked={showPassword}
               onChange={(e) => setShowPassword(e.target.checked)}
+              disabled={isSubmitting}
             />
             <Label htmlFor='login-show-password' className='text-sm'>
               Perlihatkan password
             </Label>
           </div>
+          {errorMessage ? (
+            <p className='text-sm text-red-600'>{errorMessage}</p>
+          ) : null}
           <div className='pt-2'>
             <Button
               className='w-full bg-brand hover:bg-brand/90 text-white'
               onClick={handleSubmit}
+              type='button'
+              disabled={isSubmitting}
             >
-              Masuk
+              {isSubmitting ? 'Memproses...' : 'Masuk'}
             </Button>
           </div>
           <div className='pt-1'>
             <button
               className='w-full text-center text-sm font-medium text-black'
               onClick={onForgotPassword}
+              type='button'
+              disabled={isSubmitting}
             >
               Lupa password?
             </button>
@@ -99,6 +113,8 @@ export function LoginSheet({
               <button
                 className='font-semibold text-brand'
                 onClick={onSwitchToRegister}
+                type='button'
+                disabled={isSubmitting}
               >
                 Daftar sekarang
               </button>

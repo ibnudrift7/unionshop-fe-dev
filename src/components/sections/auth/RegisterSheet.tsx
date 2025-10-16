@@ -29,12 +29,16 @@ export interface RegisterSheetProps {
     addressDetail?: string;
   }) => void;
   onSwitchToLogin?: () => void;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
 }
 
 export function RegisterSheet({
   trigger,
   onSubmit,
   onSwitchToLogin,
+  isSubmitting = false,
+  errorMessage = null,
 }: RegisterSheetProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,6 +90,7 @@ export function RegisterSheet({
               placeholder='Nama lengkap'
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -96,6 +101,7 @@ export function RegisterSheet({
               placeholder='nama@email.com'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -106,6 +112,7 @@ export function RegisterSheet({
               placeholder='••••••••'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -118,6 +125,7 @@ export function RegisterSheet({
               placeholder='••••••••'
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='flex items-center gap-2 pt-1'>
@@ -127,6 +135,7 @@ export function RegisterSheet({
               className='h-4 w-4 rounded border-gray-300'
               checked={showPassword}
               onChange={(e) => setShowPassword(e.target.checked)}
+              disabled={isSubmitting}
             />
             <Label htmlFor='register-show-password' className='text-sm'>
               Perlihatkan password
@@ -145,6 +154,7 @@ export function RegisterSheet({
               placeholder='08xxxxxxxxxx'
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -161,6 +171,7 @@ export function RegisterSheet({
                     : 'bg-white text-black border-gray-300')
                 }
                 onClick={() => setGender('wanita')}
+                disabled={isSubmitting}
               >
                 Wanita
               </Button>
@@ -174,6 +185,7 @@ export function RegisterSheet({
                     : 'bg-white text-black border-gray-300')
                 }
                 onClick={() => setGender('pria')}
+                disabled={isSubmitting}
               >
                 Pria
               </Button>
@@ -187,6 +199,7 @@ export function RegisterSheet({
                 <button
                   type='button'
                   className='w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                  disabled={isSubmitting}
                 >
                   {dateOfBirth ? (
                     <span>
@@ -214,6 +227,7 @@ export function RegisterSheet({
                       type='date'
                       value={dobDraft || dateOfBirth}
                       onChange={(e) => setDobDraft(e.target.value)}
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className='pt-2 flex gap-2'>
@@ -222,6 +236,7 @@ export function RegisterSheet({
                         type='button'
                         variant='outline'
                         className='flex-1'
+                        disabled={isSubmitting}
                       >
                         Batal
                       </Button>
@@ -234,6 +249,7 @@ export function RegisterSheet({
                           setDateOfBirth(dobDraft || dateOfBirth);
                           setDobDraft('');
                         }}
+                        disabled={isSubmitting}
                       >
                         Simpan tanggal
                       </Button>
@@ -252,6 +268,7 @@ export function RegisterSheet({
               placeholder='Provinsi'
               value={province}
               onChange={(e) => setProvince(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -262,6 +279,7 @@ export function RegisterSheet({
               placeholder='Kota atau Kabupaten'
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -272,6 +290,7 @@ export function RegisterSheet({
               placeholder='Kecamatan'
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -283,6 +302,7 @@ export function RegisterSheet({
               placeholder='Kode pos'
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
           <div className='space-y-1'>
@@ -294,14 +314,20 @@ export function RegisterSheet({
               placeholder='Nama jalan, no rumah, RT/RW, patokan, dsb.'
               value={addressDetail}
               onChange={(e) => setAddressDetail(e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
+          {errorMessage ? (
+            <p className='text-sm text-red-600'>{errorMessage}</p>
+          ) : null}
           <div className='pt-2'>
             <Button
               className='w-full bg-brand hover:bg-brand/90 text-white'
               onClick={handleSubmit}
+              type='button'
+              disabled={isSubmitting}
             >
-              Simpan
+              {isSubmitting ? 'Memproses...' : 'Simpan'}
             </Button>
           </div>
           <div className='pt-2 text-center text-sm'>
@@ -310,6 +336,8 @@ export function RegisterSheet({
               <button
                 className='font-semibold text-brand'
                 onClick={onSwitchToLogin}
+                type='button'
+                disabled={isSubmitting}
               >
                 Masuk sekarang
               </button>
