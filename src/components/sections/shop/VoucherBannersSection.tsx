@@ -69,7 +69,7 @@ export default function VoucherBannersSection({
 
             <div className='flex-shrink-0'>
               <Button
-                className='bg-[#C70122] hover:bg-[#C70122]/90 text-white font-semibold w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center text-xs md:text-sm'
+                className='bg-[#C70122] hover:bg-[#C70122]/90 text-white font-semibold w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl flex items-center justify-center text-[10px] md:text-sm'
                 aria-label='Klaim Voucher'
                 onClick={voucher1.onClaim}
               >

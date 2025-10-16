@@ -48,9 +48,9 @@ export const categories: Category[] = [
   },
   {
     id: 'official-merchandise',
-    name: 'Official\nMerchandise',
+    name: 'Official\nMerch',
     image: '/assets/official-merch.png',
-    alt: 'Official Merchandise',
+    alt: 'Official Merch',
   },
 ];
 
