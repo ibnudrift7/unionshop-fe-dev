@@ -2,20 +2,25 @@
 
 import type React from 'react';
 
+import { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { ArrowRight, Edit2, LogOut, MapPin, Menu, Phone } from 'lucide-react';
+import Autoplay from 'embla-carousel-autoplay';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { RegisterSheet } from '@/components/sections/auth/RegisterSheet';
 import { ForgotPasswordSheet } from '@/components/sections/auth/ForgotPasswordSheet';
-import { useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Menu, MapPin, Phone, LogOut, Edit2 } from 'lucide-react';
-import Image from 'next/image';
+import { LoginSheet } from '@/components/sections/auth/LoginSheet';
+import { RegisterSheet } from '@/components/sections/auth/RegisterSheet';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import Autoplay from 'embla-carousel-autoplay';
+import { useLoginMutation, useRegisterMutation } from '@/hooks/use-auth';
+import type { LoginPayload, RegisterPayload } from '@/types/auth';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -37,7 +42,7 @@ const menuItems: MenuItem[] = [
   {
     icon: <Phone className='w-5 h-5 text-brand' />,
     label: 'Pelayanan Whatsapp',
-    href: '/whatsapp',
+    href: 'https://wa.me/6283854560095',
   },
   {
     icon: (
@@ -55,9 +60,17 @@ const menuItems: MenuItem[] = [
 ];
 
 export default function MobileMenu() {
-  const registerTriggerRef = useRef<HTMLButtonElement>(null);
-  const forgotTriggerRef = useRef<HTMLButtonElement>(null);
+  const registerTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const forgotTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const loginTriggerRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  const loginMutation = useLoginMutation();
+  const registerMutation = useRegisterMutation();
 
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const voucherBase = {
@@ -76,13 +89,101 @@ export default function MobileMenu() {
     },
   ];
 
+  const closeActiveSheet = useCallback(() => {
+    const activeSheet = document.querySelector<HTMLElement>(
+      '[data-state="open"]',
+    );
+    activeSheet?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+  }, []);
+
+  const openSheet = useCallback(
+    (ref: React.RefObject<HTMLButtonElement | null>) => {
+      ref.current?.click();
+    },
+    [],
+  );
+
+  const handleLoginSubmit = useCallback(
+    (payload: LoginPayload) => {
+      setLoginError(null);
+      loginMutation.mutate(payload, {
+        onSuccess: (response) => {
+          setIsLoggedIn(true);
+          const nameFromResponse = response?.data?.user?.name ?? null;
+          setUserName(nameFromResponse);
+          setLoginError(null);
+          toast.success(
+            response?.message ?? 'Berhasil masuk. Selamat berbelanja!',
+          );
+          closeActiveSheet();
+        },
+        onError: (error) => {
+          const message = error.message || 'Gagal masuk. Silakan coba lagi.';
+          setLoginError(message);
+          toast.error(message);
+        },
+      });
+    },
+    [closeActiveSheet, loginMutation],
+  );
+
+  const handleRegisterSubmit = useCallback(
+    (payload: RegisterPayload) => {
+      setRegisterError(null);
+      registerMutation.mutate(payload, {
+        onSuccess: (response) => {
+          toast.success(
+            response?.message ?? 'Registrasi berhasil. Silakan masuk.',
+          );
+          closeActiveSheet();
+          registerMutation.reset();
+          loginMutation.reset();
+          setRegisterError(null);
+          setLoginError(null);
+          const nameFromResponse = response?.data?.user?.name ?? null;
+          if (nameFromResponse) {
+            setUserName(nameFromResponse);
+          }
+          setTimeout(() => openSheet(loginTriggerRef), 0);
+        },
+        onError: (error) => {
+          const message =
+            error.message || 'Gagal mendaftar. Silakan coba lagi.';
+          setRegisterError(message);
+          toast.error(message);
+        },
+      });
+    },
+    [closeActiveSheet, loginMutation, openSheet, registerMutation],
+  );
+
+  const handleOpenLogin = useCallback(() => {
+    loginMutation.reset();
+    setLoginError(null);
+    openSheet(loginTriggerRef);
+  }, [loginMutation, openSheet]);
+
+  const handleOpenRegister = useCallback(() => {
+    registerMutation.reset();
+    setRegisterError(null);
+    openSheet(registerTriggerRef);
+  }, [openSheet, registerMutation]);
+
+  const handleLogout = useCallback(() => {
+    setIsLoggedIn(false);
+    setLoginError(null);
+    setRegisterError(null);
+    setUserName(null);
+    toast.message('Anda telah keluar dari akun.');
+  }, []);
+
   return (
     <div className='w-full bg-white min-h-screen relative'>
       <div className='p-6 pb-3 border-b-2 border-gray-200'>
         <div className='-mx-6 -mt-6 -mb-6'>
           <div className='w-full h-16 sm:h-20 bg-gradient-to-r from-brand to-brand/80' />
         </div>
-        <div className='flex items-center justify-between mb-4 relative z-10 -mt-12'>
+        <div className='flex items-center justify-between relative z-10 -mt-12'>
           <div className='h-15 w-15 flex items-center justify-center'>
             <Image
               src='/assets/user-icon.png'
@@ -92,37 +193,56 @@ export default function MobileMenu() {
               className='h-15 w-15 object-contain'
             />
           </div>
-          <Button
-            variant='ghost'
-            className='text-brand p-0 h-auto font-bold mt-14'
-            onClick={() => router.push('/user/edit')}
-          >
-            Ganti
-            <Edit2 className='ml-2 w-4 h-4' />
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              variant='ghost'
+              className='text-brand p-0 h-auto font-bold mt-14'
+              onClick={() => router.push('/user/edit')}
+            >
+              Ganti
+              <Edit2 className='ml-2 w-4 h-4' />
+            </Button>
+          ) : (
+            <Button
+              variant='ghost'
+              className='text-brand p-0 h-auto font-bold mt-14'
+              onClick={handleOpenLogin}
+            >
+              Masuk
+              <ArrowRight className='ml-2 w-4 h-4 text-brand' />
+            </Button>
+          )}
         </div>
         <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2 bg-gradient-to-l from-[#f6eac7] to-white rounded-full'>
-            <div className='flex items-center gap-1'>
-              <Image
-                src='/assets/icon-star-user.png'
-                alt='Poin kamu'
-                width={16}
-                height={16}
-                className='w-6 h-6'
-              />
-              <span className='text-[10px] md:text-sm font-semibold text-[#997B27]'>
-                Poin kamu
-              </span>
+          {isLoggedIn ? (
+            <div className='flex items-center gap-2 bg-gradient-to-l from-[#f6eac7] to-white rounded-full'>
+              <div className='flex items-center gap-1'>
+                <Image
+                  src='/assets/icon-star-user.png'
+                  alt='Poin kamu'
+                  width={16}
+                  height={16}
+                  className='w-6 h-6'
+                />
+                <span className='text-[10px] md:text-sm font-semibold text-[#997B27]'>
+                  Poin kamu
+                </span>
+              </div>
+              <div className='flex items-end gap-1 text-black bg-white rounded-full p-1 px-3 border-2 border-gray-200'>
+                <span className='text-sm font-bold leading-none'>100</span>
+                <span className='text-[10px] font-medium leading-none text-[#9a7b29]'>
+                  pts
+                </span>
+              </div>
             </div>
-            <div className='flex items-end gap-1 text-black bg-white rounded-full p-1 px-3 border-2 border-gray-200'>
-              <span className='text-sm font-bold leading-none'>100</span>
-              <span className='text-[10px] font-medium leading-none text-[#9a7b29]'>
-                pts
-              </span>
+          ) : (
+            <div className='py-2 text-brand text-lg font-semibold'>
+              Guest
             </div>
-          </div>
-          <h2 className='text-lg font-bold text-black'>Bombom Ganteng</h2>
+          )}
+          <h2 className='text-lg font-bold text-black'>
+            {isLoggedIn && userName ? userName : 'Hey, there gorgeous'}
+          </h2>
         </div>
       </div>
 
@@ -204,15 +324,64 @@ export default function MobileMenu() {
 
       <RegisterSheet
         trigger={<button ref={registerTriggerRef} className='hidden' />}
+        onSubmit={handleRegisterSubmit}
+        isSubmitting={registerMutation.isPending}
+        errorMessage={registerError}
+        onSwitchToLogin={() => {
+          closeActiveSheet();
+          registerMutation.reset();
+          loginMutation.reset();
+          setRegisterError(null);
+          setLoginError(null);
+          setTimeout(() => handleOpenLogin(), 0);
+        }}
       />
 
       <ForgotPasswordSheet
         trigger={<button ref={forgotTriggerRef} className='hidden' />}
+        onSubmit={({ email }) => {
+          closeActiveSheet();
+          toast.message(`Instruksi pemulihan dikirim ke ${email}.`);
+        }}
+        onSwitchToLogin={() => {
+          closeActiveSheet();
+          loginMutation.reset();
+          setLoginError(null);
+          setTimeout(() => handleOpenLogin(), 0);
+        }}
+        onSwitchToRegister={() => {
+          closeActiveSheet();
+          registerMutation.reset();
+          setRegisterError(null);
+          setTimeout(() => handleOpenRegister(), 0);
+        }}
       />
+
+      <LoginSheet
+        trigger={<button ref={loginTriggerRef} className='hidden' />}
+        onSubmit={handleLoginSubmit}
+        isSubmitting={loginMutation.isPending}
+        errorMessage={loginError}
+        onForgotPassword={() => {
+          closeActiveSheet();
+          loginMutation.reset();
+          setLoginError(null);
+          setTimeout(() => openSheet(forgotTriggerRef), 0);
+        }}
+        onSwitchToRegister={() => {
+          closeActiveSheet();
+          loginMutation.reset();
+          setLoginError(null);
+          setRegisterError(null);
+          setTimeout(() => handleOpenRegister(), 0);
+        }}
+      />
+
       <div className='p-4 pt-2 space-y-7'>
         <Button
           variant='outline'
           className='w-full h-auto py-5 md:py-6 text-base gap-3'
+          onClick={handleLogout}
         >
           <LogOut
             className='w-7 h-7 text-black'
