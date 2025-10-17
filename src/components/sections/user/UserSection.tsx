@@ -26,6 +26,7 @@ interface MenuItem {
   icon: React.ReactNode;
   label: string;
   href: string;
+  newTab?: boolean;
 }
 
 const menuItems: MenuItem[] = [
@@ -43,6 +44,7 @@ const menuItems: MenuItem[] = [
     icon: <Phone className='w-5 h-5 text-brand' />,
     label: 'Pelayanan Whatsapp',
     href: 'https://wa.me/6283854560095',
+    newTab: true,
   },
   {
     icon: (
@@ -313,11 +315,19 @@ export default function MobileMenu() {
               className='flex items-center gap-4 p-4'
               role='button'
               tabIndex={0}
-              onClick={() => router.push(item.href)}
+              onClick={() =>
+                item.newTab
+                  ? window.open(item.href, '_blank', 'noopener,noreferrer')
+                  : router.push(item.href)
+              }
               onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  router.push(item.href);
+                  if (item.newTab) {
+                    window.open(item.href, '_blank', 'noopener,noreferrer');
+                  } else {
+                    router.push(item.href);
+                  }
                 }
               }}
             >
