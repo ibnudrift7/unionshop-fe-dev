@@ -31,6 +31,22 @@ export interface RegisterSheetProps {
   onSwitchToLogin?: () => void;
   isSubmitting?: boolean;
   errorMessage?: string | null;
+  fieldErrors?: Partial<
+    Record<
+      | 'name'
+      | 'email'
+      | 'password'
+      | 'phone'
+      | 'gender'
+      | 'dateOfBirth'
+      | 'province'
+      | 'city'
+      | 'district'
+      | 'postalCode'
+      | 'addressDetail',
+      string
+    >
+  >;
 }
 
 export function RegisterSheet({
@@ -39,10 +55,12 @@ export function RegisterSheet({
   onSwitchToLogin,
   isSubmitting = false,
   errorMessage = null,
+  fieldErrors = {},
 }: RegisterSheetProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
@@ -56,6 +74,14 @@ export function RegisterSheet({
   const [addressDetail, setAddressDetail] = useState('');
 
   const handleSubmit = () => {
+    // FE validations
+    const hasLowercase = /[a-z]/.test(password);
+    if (!hasLowercase) {
+      setPasswordError('Password harus mengandung minimal 1 huruf kecil');
+      return;
+    }
+    setPasswordError(null);
+
     onSubmit?.({
       name,
       email,
@@ -92,6 +118,9 @@ export function RegisterSheet({
               onChange={(e) => setName(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.name ? (
+              <p className='text-xs text-red-600'>{fieldErrors.name}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-email'>Email</Label>
@@ -103,6 +132,9 @@ export function RegisterSheet({
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.email ? (
+              <p className='text-xs text-red-600'>{fieldErrors.email}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-password'>Kata sandi</Label>
@@ -114,6 +146,12 @@ export function RegisterSheet({
               onChange={(e) => setPassword(e.target.value)}
               disabled={isSubmitting}
             />
+            {passwordError ? (
+              <p className='text-xs text-red-600'>{passwordError}</p>
+            ) : null}
+            {fieldErrors.password ? (
+              <p className='text-xs text-red-600'>{fieldErrors.password}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-password-confirm'>
@@ -190,6 +228,9 @@ export function RegisterSheet({
                 Pria
               </Button>
             </div>
+            {fieldErrors.gender ? (
+              <p className='text-xs text-red-600'>{fieldErrors.gender}</p>
+            ) : null}
           </div>
 
           <div className='space-y-2 pt-1'>
@@ -258,6 +299,9 @@ export function RegisterSheet({
                 </div>
               </SheetContent>
             </Sheet>
+            {fieldErrors.dateOfBirth ? (
+              <p className='text-xs text-red-600'>{fieldErrors.dateOfBirth}</p>
+            ) : null}
           </div>
 
           <div className='space-y-1 pt-1'>
@@ -270,6 +314,9 @@ export function RegisterSheet({
               onChange={(e) => setProvince(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.province ? (
+              <p className='text-xs text-red-600'>{fieldErrors.province}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-city'>Kota/Kabupaten</Label>
@@ -281,6 +328,9 @@ export function RegisterSheet({
               onChange={(e) => setCity(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.city ? (
+              <p className='text-xs text-red-600'>{fieldErrors.city}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-district'>Kecamatan</Label>
@@ -292,6 +342,9 @@ export function RegisterSheet({
               onChange={(e) => setDistrict(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.district ? (
+              <p className='text-xs text-red-600'>{fieldErrors.district}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-postal'>Kode pos</Label>
@@ -304,6 +357,9 @@ export function RegisterSheet({
               onChange={(e) => setPostalCode(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.postalCode ? (
+              <p className='text-xs text-red-600'>{fieldErrors.postalCode}</p>
+            ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-address'>Detail alamat</Label>
@@ -316,6 +372,11 @@ export function RegisterSheet({
               onChange={(e) => setAddressDetail(e.target.value)}
               disabled={isSubmitting}
             />
+            {fieldErrors.addressDetail ? (
+              <p className='text-xs text-red-600'>
+                {fieldErrors.addressDetail}
+              </p>
+            ) : null}
           </div>
           {errorMessage ? (
             <p className='text-sm text-red-600'>{errorMessage}</p>

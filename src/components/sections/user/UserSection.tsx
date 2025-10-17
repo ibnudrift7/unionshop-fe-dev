@@ -20,6 +20,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import { useLoginMutation, useRegisterMutation } from '@/hooks/use-auth';
+import { setAuthToken } from '@/hooks/use-auth-status';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
 
 interface MenuItem {
@@ -113,7 +114,7 @@ export default function MobileMenu() {
           setIsLoggedIn(true);
           try {
             const token = response?.data?.token as string | undefined;
-            if (token) localStorage.setItem('auth_token', token);
+            setAuthToken(token);
           } catch {}
           const nameFromResponse =
             response?.data?.user?.full_name ??
@@ -159,6 +160,28 @@ export default function MobileMenu() {
           const message =
             error.message || 'Gagal mendaftar. Silakan coba lagi.';
           setRegisterError(message);
+          const maybeData = (error as unknown as { data?: unknown })?.data;
+          let beErrors: Record<string, string> = {};
+          if (
+            maybeData &&
+            typeof maybeData === 'object' &&
+            'errors' in (maybeData as Record<string, unknown>)
+          ) {
+            const candidate = (maybeData as Record<string, unknown>).errors;
+            if (candidate && typeof candidate === 'object') {
+              beErrors = candidate as Record<string, string>;
+            }
+          }
+          const fieldErrors: Record<string, string> = {};
+          if (beErrors.full_name) fieldErrors.name = beErrors.full_name;
+          if (beErrors.password) fieldErrors.password = beErrors.password;
+          if (beErrors.gender) fieldErrors.gender = beErrors.gender;
+          if (beErrors.date_of_birth)
+            fieldErrors.dateOfBirth = beErrors.date_of_birth;
+          if (beErrors.email) fieldErrors.email = beErrors.email;
+          if (Object.keys(fieldErrors).length > 0) {
+            setRegisterFieldErrors(fieldErrors);
+          }
           toast.error(message);
         },
       });
@@ -175,6 +198,7 @@ export default function MobileMenu() {
   const handleOpenRegister = useCallback(() => {
     registerMutation.reset();
     setRegisterError(null);
+    setRegisterFieldErrors({});
     openSheet(registerTriggerRef);
   }, [openSheet, registerMutation]);
 
@@ -184,10 +208,14 @@ export default function MobileMenu() {
     setRegisterError(null);
     setUserName(null);
     try {
-      localStorage.removeItem('auth_token');
+      setAuthToken(null);
     } catch {}
     toast.message('Anda telah keluar dari akun.');
   }, []);
+
+  const [registerFieldErrors, setRegisterFieldErrors] = useState<
+    Record<string, string>
+  >({});
 
   return (
     <div className='w-full bg-white min-h-screen relative'>
@@ -345,11 +373,13 @@ export default function MobileMenu() {
         onSubmit={handleRegisterSubmit}
         isSubmitting={registerMutation.isPending}
         errorMessage={registerError}
+        fieldErrors={registerFieldErrors}
         onSwitchToLogin={() => {
           closeActiveSheet();
           registerMutation.reset();
           loginMutation.reset();
           setRegisterError(null);
+          setRegisterFieldErrors({});
           setLoginError(null);
           setTimeout(() => handleOpenLogin(), 0);
         }}
