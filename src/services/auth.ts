@@ -31,4 +31,16 @@ export const authService = {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   },
+  forgotPassword(email: string) {
+    const params = new URLSearchParams();
+    params.set('email', email);
+    return httpFetch<AuthResponse, URLSearchParams>(
+      API_ENDPOINTS.forgotPassword,
+      {
+        method: 'POST',
+        body: params,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
+  },
 };

@@ -7,7 +7,7 @@
         "npx",
         "-y",
         "apidog-mcp-server@latest",
-        "--site-id=759219"
+        "--site-id=759322"
       ]
     }
   }

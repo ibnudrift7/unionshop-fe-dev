@@ -4,4 +4,7 @@ export const API_BASE_URL =
 export const API_ENDPOINTS = {
   login: '/login',
   register: '/register',
+  forgotPassword: '/forgot-password',
+  profile: '/user/profile',
+  profilePassword: '/user/profile/password',
 } as const;

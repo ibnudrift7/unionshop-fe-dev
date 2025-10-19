@@ -30,7 +30,7 @@ import {
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const { isLoggedIn } = useAuthStatus();
+  const { isLoggedIn, isReady } = useAuthStatus();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,7 +50,8 @@ export default function Home() {
             points={locationData.points}
             name={locationData.name}
             address={locationData.address}
-            isGuest={!isLoggedIn}
+            // Ensure hydration-safe: initial client render matches SSR (guest)
+            isGuest={!isReady || !isLoggedIn}
           />
         </div>
       </div>

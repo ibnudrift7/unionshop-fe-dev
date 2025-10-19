@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Sheet,
   SheetContent,
@@ -14,26 +15,140 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { FooterNavigationSection } from '@/components/sections';
+import { useAuthStatus } from '@/hooks/use-auth-status';
+import {
+  useProfileQuery,
+  useUpdatePasswordMutation,
+  useUpdateProfileMutation,
+} from '@/hooks/use-profile';
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: profile, isLoading } = useProfileQuery(isReady && isLoggedIn);
+  const updateProfile = useUpdateProfileMutation();
+  const updatePassword = useUpdatePasswordMutation();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState<'wanita' | 'pria' | ''>('');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordSheetOpen, setPasswordSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isReady) return; // wait until auth status ready
+    if (!isLoggedIn) router.push('/user');
+  }, [isLoggedIn, isReady, router]);
+
+  useEffect(() => {
+    const p = profile?.data;
+    if (!p) return;
+    setName(p.full_name ?? '');
+    setEmail(p.email ?? '');
+    setPhone(p.phone ?? '');
+    if (p.date_of_birth) {
+      const iso = p.date_of_birth;
+      const yyyyMmDd = iso.includes('T') ? iso.split('T')[0] : iso;
+      setDateOfBirth(yyyyMmDd);
+    } else {
+      setDateOfBirth('');
+    }
+  }, [profile?.data]);
 
   const handleSaveProfile = () => {
-    // TODO: submit profile
+    if (!name || !email || !phone || !dateOfBirth) {
+      toast.error('Lengkapi semua data profil terlebih dahulu.');
+      return;
+    }
+    if (gender !== 'wanita' && gender !== 'pria') {
+      toast.error('Pilih jenis kelamin.');
+      return;
+    }
+    updateProfile.mutate(
+      {
+        name,
+        email,
+        phone,
+        gender,
+        dateOfBirth,
+      },
+      {
+        onSuccess: (res) => {
+          toast.success(res.message || 'Profil berhasil diperbarui.');
+        },
+        onError: (err) => {
+          const data = (err as unknown as { data?: unknown })?.data;
+          if (
+            data &&
+            typeof data === 'object' &&
+            'errors' in (data as Record<string, unknown>)
+          ) {
+            const beErrors = (data as Record<string, unknown>).errors as Record<
+              string,
+              unknown
+            >;
+            if (beErrors?.date_of_birth) {
+              toast.error(
+                String((beErrors as Record<string, unknown>).date_of_birth),
+              );
+              return;
+            }
+          }
+          toast.error(err.message || 'Gagal memperbarui profil.');
+        },
+      },
+    );
   };
 
   const handleSavePassword = () => {
-    // TODO: submit password change
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      toast.error('Lengkapi semua kolom password.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error('Password baru minimal 8 karakter.');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error('Konfirmasi password tidak cocok.');
+      return;
+    }
+    updatePassword.mutate(
+      {
+        currentPassword,
+        newPassword,
+        confirmPassword: confirmNewPassword,
+      },
+      {
+        onSuccess: (res) => {
+          toast.success(res.message || 'Password berhasil diperbarui.');
+          setPasswordSheetOpen(false);
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmNewPassword('');
+          setShowPassword(false);
+        },
+        onError: (err) => {
+          const data = (err as unknown as { data?: unknown })?.data;
+          if (
+            data &&
+            typeof data === 'object' &&
+            'message' in (data as Record<string, unknown>)
+          ) {
+            toast.error(String((data as Record<string, unknown>).message));
+          } else {
+            toast.error(err.message || 'Gagal memperbarui password.');
+          }
+        },
+      },
+    );
   };
 
   return (
@@ -59,6 +174,7 @@ export default function EditProfilePage() {
             type='text'
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={isLoading || updateProfile.isPending}
           />
         </div>
         <div className='space-y-1'>
@@ -68,6 +184,7 @@ export default function EditProfilePage() {
             type='email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading || updateProfile.isPending}
           />
         </div>
 
@@ -80,7 +197,10 @@ export default function EditProfilePage() {
               readOnly
               className='flex-1'
             />
-            <Sheet>
+            <Sheet
+              open={isPasswordSheetOpen}
+              onOpenChange={setPasswordSheetOpen}
+            >
               <SheetTrigger asChild>
                 <Button variant='outline'>Ganti</Button>
               </SheetTrigger>
@@ -101,6 +221,7 @@ export default function EditProfilePage() {
                       type={showPassword ? 'text' : 'password'}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
+                      disabled={updatePassword.isPending}
                     />
                   </div>
                   <div className='space-y-1'>
@@ -110,6 +231,7 @@ export default function EditProfilePage() {
                       type={showPassword ? 'text' : 'password'}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
+                      disabled={updatePassword.isPending}
                     />
                   </div>
                   <div className='space-y-1'>
@@ -119,6 +241,7 @@ export default function EditProfilePage() {
                       type={showPassword ? 'text' : 'password'}
                       value={confirmNewPassword}
                       onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      disabled={updatePassword.isPending}
                     />
                   </div>
                   <div className='flex items-center gap-2 pt-1'>
@@ -128,6 +251,7 @@ export default function EditProfilePage() {
                       className='h-4 w-4 rounded border-gray-300'
                       checked={showPassword}
                       onChange={(e) => setShowPassword(e.target.checked)}
+                      disabled={updatePassword.isPending}
                     />
                     <Label htmlFor='cp-show' className='text-sm'>
                       Perlihatkan password
@@ -140,8 +264,11 @@ export default function EditProfilePage() {
                     <Button
                       className='w-full bg-brand hover:bg-brand/90 text-white'
                       onClick={handleSavePassword}
+                      disabled={updatePassword.isPending}
                     >
-                      Simpan password
+                      {updatePassword.isPending
+                        ? 'Menyimpan...'
+                        : 'Simpan password'}
                     </Button>
                   </div>
                 </div>
@@ -158,6 +285,7 @@ export default function EditProfilePage() {
             inputMode='tel'
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            disabled={isLoading || updateProfile.isPending}
           />
         </div>
 
@@ -174,6 +302,7 @@ export default function EditProfilePage() {
                   : 'bg-white text-black border-gray-300')
               }
               onClick={() => setGender('wanita')}
+              disabled={isLoading || updateProfile.isPending}
             >
               Wanita
             </Button>
@@ -187,6 +316,7 @@ export default function EditProfilePage() {
                   : 'bg-white text-black border-gray-300')
               }
               onClick={() => setGender('pria')}
+              disabled={isLoading || updateProfile.isPending}
             >
               Pria
             </Button>
@@ -200,6 +330,7 @@ export default function EditProfilePage() {
             type='date'
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
+            disabled={isLoading || updateProfile.isPending}
           />
         </div>
 
@@ -207,8 +338,9 @@ export default function EditProfilePage() {
           <Button
             className='w-full bg-brand hover:bg-brand/90 text-white'
             onClick={handleSaveProfile}
+            disabled={isLoading || updateProfile.isPending}
           >
-            Simpan profil
+            {updateProfile.isPending ? 'Menyimpan...' : 'Simpan profil'}
           </Button>
         </div>
       </main>

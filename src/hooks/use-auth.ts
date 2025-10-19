@@ -23,3 +23,13 @@ export const useRegisterMutation = (
       authService.register(payload).then((res) => res.data),
     ...options,
   });
+
+export const useForgotPasswordMutation = (
+  options?: UseMutationOptions<AuthResponse, HttpError, { email: string }>,
+) =>
+  useMutation<AuthResponse, HttpError, { email: string }>({
+    mutationKey: ['auth', 'forgot-password'],
+    mutationFn: ({ email }) =>
+      authService.forgotPassword(email).then((res) => res.data),
+    ...options,
+  });

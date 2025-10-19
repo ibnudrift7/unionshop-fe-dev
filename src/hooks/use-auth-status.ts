@@ -1,11 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-const TOKEN_KEY = 'laksdjfhlaksjdfhlaksjdfh_token_123456789';
+import { TOKEN_KEY, setAuthToken } from '@/lib/auth-token';
 
 export function useAuthStatus() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      return Boolean(localStorage.getItem(TOKEN_KEY));
+    } catch {
+      return false;
+    }
+  });
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   useEffect(() => {
     const check = () => {
@@ -21,6 +28,7 @@ export function useAuthStatus() {
     };
 
     check();
+    setIsReady(true);
 
     const onStorage = (e: StorageEvent) => {
       if (e.key === TOKEN_KEY) {
@@ -36,14 +44,7 @@ export function useAuthStatus() {
     };
   }, []);
 
-  return { isLoggedIn };
+  return { isLoggedIn, isReady };
 }
 
-export function setAuthToken(token?: string | null) {
-  try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // ignore storage errors
-  }
-}
+export { setAuthToken };
