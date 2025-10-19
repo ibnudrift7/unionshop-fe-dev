@@ -7,4 +7,5 @@ export const API_ENDPOINTS = {
   forgotPassword: '/forgot-password',
   profile: '/user/profile',
   profilePassword: '/user/profile/password',
+  products: '/products',
 } as const;

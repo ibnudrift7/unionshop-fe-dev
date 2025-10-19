@@ -12,9 +12,10 @@ import {
   FooterNavigationSection,
   PromoSection,
 } from '@/components/sections';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
+import { useProductsQuery } from '@/hooks/use-products';
 import {
   heroImages,
   locationData,
@@ -31,6 +32,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: productsData, isLoading: isLoadingProducts } =
+    useProductsQuery();
+  const productsForHome = useMemo(() => {
+    return productsData && productsData.length > 0
+      ? productsData
+      : mockProducts;
+  }, [productsData]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -50,7 +58,6 @@ export default function Home() {
             points={locationData.points}
             name={locationData.name}
             address={locationData.address}
-            // Ensure hydration-safe: initial client render matches SSR (guest)
             isGuest={!isReady || !isLoggedIn}
           />
         </div>
@@ -78,9 +85,9 @@ export default function Home() {
       />
 
       <ProductSection
-        products={mockProducts}
-        isLoading={isLoading}
-        onProductClick={(p) => router.push(`/product/${p.id}`)}
+        products={productsForHome}
+        isLoading={isLoading || isLoadingProducts}
+        onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
       />
 
       <PromoSection images={promoImages} />

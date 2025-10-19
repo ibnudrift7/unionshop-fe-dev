@@ -13,15 +13,21 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import type { EmblaCarouselType } from 'embla-carousel';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BottomActionBar from './BottomActionBar';
-import { getProductById } from '../shop/data';
 import { useCartStore } from '@/store/cart';
+import type { Product } from '@/types';
 
-export default function ProductDetail() {
+interface ProductDetailProps {
+  product?: Product;
+  loading?: boolean;
+}
+
+export default function ProductDetail({
+  product,
+  loading = false,
+}: ProductDetailProps) {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
-  const productId = params?.id;
   const searchParams = useSearchParams();
   const noCart = searchParams.get('noCart') === '1';
   const [selectedColor, setSelectedColor] = useState('PURPLE');
@@ -32,14 +38,11 @@ export default function ProductDetail() {
     null,
   );
 
-  const product = useMemo(
-    () => (productId ? getProductById(productId) : undefined),
-    [productId],
-  );
-
-  const images = product?.image
-    ? [product.image, '/assets/SpecialProduct.png']
-    : ['/assets/Product.png'];
+  const images = useMemo(() => {
+    if (product?.images && product.images.length > 0) return product.images;
+    if (product?.image) return [product.image];
+    return ['/assets/Product.png'];
+  }, [product]);
 
   const colors = [
     { name: 'PURPLE', value: '#9333ea', code: 'PURPLE' },
@@ -123,13 +126,13 @@ export default function ProductDetail() {
         <div className='flex items-start justify-between gap-4 mb-4'>
           <div className='flex-1 min-w-0'>
             <h1 className='text-xl font-bold text-gray-900 mb-1 line-clamp-2'>
-              {product?.name || 'Produk Tidak Ditemukan'}
+              {loading ? 'Memuat…' : product?.name || 'Produk Tidak Ditemukan'}
             </h1>
             <button
               type='button'
-              onClick={() =>
-                productId && router.push(`/product/${productId}/reviews`)
-              }
+              onClick={() => {
+                /* reviews route could use slug or id later */
+              }}
               className='flex items-center w-full text-left bg-transparent p-0 hover:opacity-80 cursor-pointer'
             >
               <div className='flex items-center'>
@@ -165,9 +168,11 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <p className='text-sm text-gray-600 mb-6 leading-relaxed'>
-          {product
-            ? 'Deskripsi produk masih berupa mock. Nantinya akan diisi dari API produk detail.'
+        <p className='text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-line'>
+          {loading
+            ? 'Memuat deskripsi…'
+            : product
+            ? product.description || 'Deskripsi tidak tersedia.'
             : 'Produk tidak ditemukan atau belum tersedia.'}
         </p>
 
