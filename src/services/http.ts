@@ -56,16 +56,44 @@ export async function httpFetch<TResponse, TBody = unknown>(
   const { method = 'GET', body, headers, query, cache = 'no-store' } = options;
 
   const url = buildUrl(path, query);
-  const mergedHeaders: HeadersInit = {
-    ...defaultHeaders,
-    ...headers,
-  };
+  // Build headers considering body type
+  const hdr = new Headers(defaultHeaders);
+  if (headers) {
+    const entries = Array.isArray(headers)
+      ? headers
+      : headers instanceof Headers
+      ? Array.from(headers.entries())
+      : Object.entries(headers);
+    for (const [k, v] of entries) hdr.set(k, v as string);
+  }
+
+  const isStringBody = typeof body === 'string';
+  const isFormDataBody =
+    typeof FormData !== 'undefined' && body instanceof FormData;
+  const isSearchParamsBody =
+    typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams;
+  const isBlobBody = typeof Blob !== 'undefined' && body instanceof Blob;
+
+  // If body is FormData, let the browser set the Content-Type with boundary
+  if (isFormDataBody) {
+    hdr.delete('Content-Type');
+  }
+  // If body is URLSearchParams or string and no explicit content-type, default to x-www-form-urlencoded
+  if (isSearchParamsBody || isStringBody) {
+    if (!hdr.get('Content-Type')) {
+      hdr.set('Content-Type', 'application/x-www-form-urlencoded');
+    }
+  }
 
   const response = await fetch(url, {
     method,
     cache,
-    headers: mergedHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: hdr,
+    body: body
+      ? isStringBody || isFormDataBody || isSearchParamsBody || isBlobBody
+        ? (body as BodyInit)
+        : JSON.stringify(body)
+      : undefined,
   });
 
   const contentType = response.headers.get('content-type');
