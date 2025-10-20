@@ -8,4 +8,9 @@ export const API_ENDPOINTS = {
   profile: '/user/profile',
   profilePassword: '/user/profile/password',
   products: '/products',
+  // Address & Location
+  addressDefault: '/user/address/default',
+  locationProvinces: '/location/provinces',
+  locationCities: '/location/cities',
+  locationDistricts: '/location/districts',
 } as const;

@@ -16,6 +16,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery } from '@/hooks/use-products';
+import { useDefaultAddressQuery } from '@/hooks/use-address';
+import { useCitiesQuery, useDistrictsQuery } from '@/hooks/use-location';
 import {
   heroImages,
   locationData,
@@ -34,6 +36,18 @@ export default function Home() {
   const { isLoggedIn, isReady } = useAuthStatus();
   const { data: productsData, isLoading: isLoadingProducts } =
     useProductsQuery();
+  const { data: defaultAddressResp } = useDefaultAddressQuery(
+    isReady && isLoggedIn,
+  );
+  const defaultAddress = defaultAddressResp?.data ?? null;
+  const { data: citiesResp } = useCitiesQuery(defaultAddress?.province_id);
+  const cityName = citiesResp?.data.find(
+    (c) => c.id === defaultAddress?.city_id,
+  )?.name;
+  const { data: districtsResp } = useDistrictsQuery(defaultAddress?.city_id);
+  const districtName = districtsResp?.data.find(
+    (d) => d.id === defaultAddress?.subdistrict_id,
+  )?.name;
   const productsForHome = useMemo(() => {
     return productsData && productsData.length > 0
       ? productsData
@@ -56,8 +70,17 @@ export default function Home() {
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>
           <LocationSection
             points={locationData.points}
-            name={locationData.name}
-            address={locationData.address}
+            name={
+              !isReady || !isLoggedIn
+                ? locationData.name
+                : [districtName, cityName].filter(Boolean).join(', ') ||
+                  locationData.name
+            }
+            address={
+              !isReady || !isLoggedIn
+                ? locationData.address
+                : defaultAddress?.address_line || locationData.address
+            }
             isGuest={!isReady || !isLoggedIn}
           />
         </div>
