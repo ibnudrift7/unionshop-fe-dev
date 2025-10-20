@@ -1,5 +1,9 @@
-import { API_BASE_URL } from '@/constants/api';
-import { getAuthToken } from '@/lib/auth-token';
+import { API_BASE_URL, API_ENDPOINTS } from '@/constants/api';
+import {
+  getAuthToken,
+  getStoredCsrfToken,
+  setStoredCsrfToken,
+} from '@/lib/auth-token';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -91,9 +95,54 @@ export async function httpFetch<TResponse, TBody = unknown>(
     }
   }
 
+  const isMutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+  if (isMutating && !hdr.get('X-CSRF-Token')) {
+    let tokenToUse: string | null = null;
+    const { token, exp } = getStoredCsrfToken();
+    const now = Date.now();
+    if (token && exp && now < exp) {
+      tokenToUse = token;
+    } else {
+      // fetch new csrf token
+      try {
+        const csrfRes = await fetch(buildUrl(API_ENDPOINTS.csrfToken), {
+          method: 'GET',
+          cache: 'no-store',
+          credentials: 'include',
+          headers: new Headers({ Accept: 'application/json' }),
+        });
+        const ctype = csrfRes.headers.get('content-type');
+        const isJsonCsrf = ctype?.includes('application/json');
+        const csrfPayload = isJsonCsrf
+          ? await csrfRes.json()
+          : await csrfRes.text();
+        const extracted =
+          (isJsonCsrf &&
+            csrfPayload &&
+            (csrfPayload.csrfToken ||
+              csrfPayload.token ||
+              csrfPayload.csrf ||
+              csrfPayload.data?.csrfToken)) ||
+          null;
+        if (
+          csrfRes.ok &&
+          typeof extracted === 'string' &&
+          extracted.length > 0
+        ) {
+          tokenToUse = extracted;
+          setStoredCsrfToken(extracted);
+        }
+      } catch {}
+    }
+    if (tokenToUse) {
+      hdr.set('X-CSRF-Token', tokenToUse);
+    }
+  }
+
   const response = await fetch(url, {
     method,
     cache,
+    credentials: 'include',
     headers: hdr,
     body: body
       ? isStringBody || isFormDataBody || isSearchParamsBody || isBlobBody
