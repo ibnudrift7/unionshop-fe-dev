@@ -117,13 +117,7 @@ export async function httpFetch<TResponse, TBody = unknown>(
           ? await csrfRes.json()
           : await csrfRes.text();
         const extracted =
-          (isJsonCsrf &&
-            csrfPayload &&
-            (csrfPayload.csrfToken ||
-              csrfPayload.token ||
-              csrfPayload.csrf ||
-              csrfPayload.data?.csrfToken)) ||
-          null;
+          (isJsonCsrf && csrfPayload && csrfPayload.csrfToken) || null;
         if (
           csrfRes.ok &&
           typeof extracted === 'string' &&
