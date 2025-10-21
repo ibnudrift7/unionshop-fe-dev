@@ -5,7 +5,6 @@ export const API_ENDPOINTS = {
   login: '/login',
   register: '/register',
   forgotPassword: '/forgot-password',
-  csrfToken: '/csrf-token',
   profile: '/user/profile',
   profilePassword: '/user/profile/password',
   products: '/products',

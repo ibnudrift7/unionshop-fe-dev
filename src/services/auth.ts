@@ -1,13 +1,10 @@
 import { API_ENDPOINTS } from '@/constants/api';
-import { httpFetch } from '@/services/http';
 import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth';
+import { api } from '@/lib/api';
 
 export const authService = {
   login(payload: LoginPayload) {
-    return httpFetch<AuthResponse, LoginPayload>(API_ENDPOINTS.login, {
-      method: 'POST',
-      body: payload,
-    });
+    return api.post<AuthResponse>(API_ENDPOINTS.login, payload);
   },
   register(payload: RegisterPayload) {
     const params = new URLSearchParams();
@@ -25,22 +22,15 @@ export const authService = {
       if (g) params.set('gender', g);
     }
     if (payload.dateOfBirth) params.set('date_of_birth', payload.dateOfBirth);
-    return httpFetch<AuthResponse, URLSearchParams>(API_ENDPOINTS.register, {
-      method: 'POST',
-      body: params,
+    return api.post<AuthResponse>(API_ENDPOINTS.register, params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   },
   forgotPassword(email: string) {
     const params = new URLSearchParams();
     params.set('email', email);
-    return httpFetch<AuthResponse, URLSearchParams>(
-      API_ENDPOINTS.forgotPassword,
-      {
-        method: 'POST',
-        body: params,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      },
-    );
+    return api.post<AuthResponse>(API_ENDPOINTS.forgotPassword, params, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
   },
 };
