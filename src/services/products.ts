@@ -15,10 +15,18 @@ function parsePrice(str?: string): number | undefined {
 }
 
 function mapApiProductToUi(p: ApiProduct): Product {
+  const IMG_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || '';
+  const toAbsolute = (path?: string) => {
+    if (!path) return undefined;
+    if (/^https?:\/\//i.test(path)) return path;
+    return IMG_BASE
+      ? `${IMG_BASE.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`
+      : undefined;
+  };
   const sale = parsePrice(p.sale_price);
   const base = parsePrice(p.base_price) ?? 0;
   const hasSale = sale !== undefined && sale > 0;
-  const image = /^https?:\/\//i.test(p.cover_image) ? p.cover_image : undefined;
+  const image = toAbsolute(p.cover_image);
   return {
     id: String(p.id),
     name: p.name,
@@ -51,8 +59,6 @@ export const productsService = {
     return list.map(mapApiProductToUi);
   },
   async getProductDetail(slugOrId: string) {
-    // The OAS shows product detail at /products/{slug}. Our example file name indicates slug 'tanyaacevedo'.
-    // We'll construct the path by appending the identifier.
     const path = `${API_ENDPOINTS.products}/${encodeURIComponent(slugOrId)}`;
     return httpFetch<ProductDetailResponse>(path, { method: 'GET' });
   },
@@ -75,13 +81,16 @@ export const productsService = {
       .filter(
         (img): img is string => typeof img === 'string' && img.length > 0,
       );
-    const attributes = (p.attributes || []).map((a) => ({
-      id: a.id,
-      name: a.attribute_name,
-      valueId: a.attribute_value_id,
-      value: a.attribute_value,
-      price: a.attribute_price,
-      image: a.attribute_image ?? undefined,
+    const attributes = (p.attributes || []).map((group) => ({
+      id: group.id,
+      name: group.name,
+      type: (group.type as 'options' | 'images') ?? 'options',
+      values: (group.values || []).map((v) => ({
+        id: v.id,
+        value: v.value,
+        price: v.price,
+        image: v.image ? toAbsolute(v.image) ?? null : null,
+      })),
     }));
     return {
       id: String(p.id),

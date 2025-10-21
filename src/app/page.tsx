@@ -17,7 +17,9 @@ import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery } from '@/hooks/use-products';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
-import { useCitiesQuery, useDistrictsQuery } from '@/hooks/use-location';
+import { useCartStore } from '@/store/cart';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
 import {
   heroImages,
   locationData,
@@ -33,6 +35,7 @@ import {
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { items, getTotal } = useCartStore();
   const { isLoggedIn, isReady } = useAuthStatus();
   const { data: productsData, isLoading: isLoadingProducts } =
     useProductsQuery();
@@ -40,19 +43,28 @@ export default function Home() {
     isReady && isLoggedIn,
   );
   const defaultAddress = defaultAddressResp?.data ?? null;
-  const { data: citiesResp } = useCitiesQuery(defaultAddress?.province_id);
-  const cityName = citiesResp?.data.find(
-    (c) => c.id === defaultAddress?.city_id,
-  )?.name;
-  const { data: districtsResp } = useDistrictsQuery(defaultAddress?.city_id);
-  const districtName = districtsResp?.data.find(
-    (d) => d.id === defaultAddress?.subdistrict_id,
-  )?.name;
+  const cityName = defaultAddress?.city_name;
+  const districtName = defaultAddress?.subdistrict_name;
   const productsForHome = useMemo(() => {
     return productsData && productsData.length > 0
       ? productsData
       : mockProducts;
   }, [productsData]);
+
+  const itemsCount = useMemo(
+    () => items.reduce((sum, i) => sum + i.quantity, 0),
+    [items],
+  );
+  const totalAmount = getTotal();
+  const totalFormatted = useMemo(
+    () =>
+      new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+      }).format(totalAmount),
+    [totalAmount],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -116,6 +128,25 @@ export default function Home() {
       <PromoSection images={promoImages} />
 
       <ChatAdminSection />
+
+      <div className='h-36 sm:h-40' aria-hidden />
+
+      <div className='fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-24 w-full max-w-[550px] px-4 z-50'>
+        <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
+          <div className='flex flex-col leading-tight'>
+            <span className='text-xs opacity-90'>{itemsCount} produk</span>
+            <span className='text-lg font-semibold'>{totalFormatted}</span>
+          </div>
+          <Button
+            size='icon'
+            className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90'
+            onClick={() => router.push('/order-confirmation')}
+            aria-label='Lanjut ke order confirmation'
+          >
+            <ArrowRight className='h-5 w-5' />
+          </Button>
+        </div>
+      </div>
 
       <FooterNavigationSection activeTab='home' />
     </div>

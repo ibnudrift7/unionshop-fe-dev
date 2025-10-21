@@ -8,7 +8,9 @@ export const API_ENDPOINTS = {
   profile: '/user/profile',
   profilePassword: '/user/profile/password',
   products: '/products',
-  // Address & Location
+  cart: '/cart',
+  cartItems: '/cart/items',
+  cartClear: '/cart/clear',
   addressDefault: '/user/address/default',
   locationProvinces: '/location/provinces',
   locationCities: '/location/cities',

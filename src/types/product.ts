@@ -5,8 +5,8 @@ export interface ApiProduct {
   description: string;
   category_id: number;
   brand_id: number;
-  base_price: string; // e.g. "100.00"
-  sale_price: string; // e.g. "0.00"
+  base_price: string; 
+  sale_price: string; 
   stock_quantity: number;
   stock_alert_threshold: number;
   is_active: number;

@@ -5,15 +5,18 @@ export interface ProductPhoto {
   sorts: number;
 }
 
-export interface ProductAttribute {
+export interface ProductAttributeValue {
   id: number;
-  product_id: number;
-  attributes_id: number;
-  attribute_name: string;
-  attribute_value_id: number;
-  attribute_value: string;
-  attribute_image: null | string;
-  attribute_price: number;
+  value: string;
+  image: string | null; // filename or absolute URL depending on backend
+  price: number;
+}
+
+export interface ProductAttributeGroup {
+  id: number;
+  name: string;
+  type: string; // e.g., 'options' | 'images'
+  values: ProductAttributeValue[];
 }
 
 export interface ApiProductDetail {
@@ -36,7 +39,7 @@ export interface ApiProductDetail {
   sku_code: string;
   category_name: string;
   photos: ProductPhoto[];
-  attributes: ProductAttribute[];
+  attributes: ProductAttributeGroup[];
 }
 
 export interface ProductDetailResponse {

@@ -29,10 +29,13 @@ export interface Product {
   attributes?: Array<{
     id: number;
     name: string;
-    valueId: number;
-    value: string;
-    price: number;
-    image?: string | null;
+    type: 'options' | 'images' | string;
+    values: Array<{
+      id: number;
+      value: string;
+      image: string | null;
+      price: number;
+    }>;
   }>;
   isNew?: boolean;
   discountPrice?: number;

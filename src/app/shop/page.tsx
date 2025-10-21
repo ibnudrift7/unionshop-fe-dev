@@ -1,7 +1,6 @@
 'use client';
 
 import { ShopSection, FooterNavigationSection } from '@/components/sections';
-import { toast } from 'sonner';
 import { Suspense, useMemo } from 'react';
 import { useCartStore } from '@/store/cart';
 import { Button } from '@/components/ui/button';
@@ -33,11 +32,7 @@ export default function ShopPage() {
           <div className='p-4 text-sm text-gray-500'>Memuat data shop...</div>
         }
       >
-        <ShopSection
-          cartCount={3}
-          onSearch={(v) => console.log('search:', v)}
-          onCartClick={() => toast('Cart opened')}
-        />
+        <ShopSection onSearch={() => {}} />
       </Suspense>
       <div className='h-36 sm:h-40' aria-hidden />
 
