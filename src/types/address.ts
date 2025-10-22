@@ -21,3 +21,36 @@ export interface DefaultAddressResponse {
   success: boolean;
   data: DefaultAddressData | null;
 }
+
+export interface CreateAddressPayload {
+  recipient_name: string;
+  phone: string;
+  province_id: number | string;
+  city_id: number | string;
+  subdistrict_id: number | string;
+  address_line: string;
+  postal_code: string;
+  is_default: 'true' | 'false' | string; // API expects string boolean in form
+  subdistrict_name: string;
+}
+
+export interface CreateAddressData {
+  id: number;
+  user_id: number;
+  recipient_name: string;
+  phone: string;
+  address_line: string;
+  province_id: number;
+  city_id: number;
+  subdistrict_id: number;
+  postal_code: string;
+  is_default: number;
+  created_at: string;
+}
+
+export interface CreateAddressResponse {
+  statusCode: number;
+  message: string;
+  success: boolean;
+  data: CreateAddressData;
+}

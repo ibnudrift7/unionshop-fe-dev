@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   forgotPassword: '/forgot-password',
   profile: '/user/profile',
   profilePassword: '/user/profile/password',
+  addressCreate: '/user/address',
   products: '/products',
   cart: '/cart',
   cartItems: '/cart/items',

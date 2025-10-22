@@ -25,6 +25,9 @@ import {
 import { useProfileQuery } from '@/hooks/use-profile';
 import { setAuthToken, useAuthStatus } from '@/hooks/use-auth-status';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
+import { locationService } from '@/services/location';
+import { addressService } from '@/services/address';
+import type { CreateAddressPayload } from '@/types/address';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -153,7 +156,155 @@ export default function MobileMenu() {
     (payload: RegisterPayload) => {
       setRegisterError(null);
       registerMutation.mutate(payload, {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
+          // Attempt to create default address right after successful register
+          // without persisting auth state. If backend returns a token, use it for this one call.
+          const tokenFromRegister =
+            (response?.data?.token as string | undefined) ||
+            ((response?.data?.tokens as { accessToken?: string } | undefined)
+              ?.accessToken ??
+              undefined);
+
+          const headers = tokenFromRegister
+            ? { Authorization: `Bearer ${tokenFromRegister}` }
+            : undefined;
+
+          const tryCreateAddress = async () => {
+            // Only proceed if we have minimum address fields
+            const {
+              name,
+              phone,
+              province,
+              city,
+              district,
+              postalCode,
+              addressDetail,
+            } = payload;
+
+            if (
+              !name ||
+              !phone ||
+              !addressDetail ||
+              !postalCode ||
+              !province ||
+              !city ||
+              !district
+            ) {
+              return; // Incomplete address details, skip quietly
+            }
+
+            // Resolve IDs: support numeric input or name lookup via location APIs
+            const parseMaybeNumber = (v: string | undefined) => {
+              if (!v) return undefined;
+              const n = Number(v);
+              return Number.isFinite(n) && String(n) === v.trim()
+                ? n
+                : undefined;
+            };
+
+            let provinceId = parseMaybeNumber(province);
+            if (!provinceId) {
+              const provRes = await locationService.getProvinces();
+              const prov = provRes.data.data.find(
+                (p) => p.name.toLowerCase() === province.toLowerCase(),
+              );
+              provinceId = prov?.id;
+            }
+
+            if (!provinceId) return; // can't proceed without province id
+
+            let cityId = parseMaybeNumber(city);
+            if (!cityId) {
+              const cityRes = await locationService.getCities(provinceId);
+              const ct = cityRes.data.data.find(
+                (c) => c.name.toLowerCase() === city.toLowerCase(),
+              );
+              cityId = ct?.id;
+            }
+
+            if (!cityId) return; // can't proceed without city id
+
+            let subdistrictId = parseMaybeNumber(district);
+            let subdistrictName = district;
+            if (!subdistrictId) {
+              const distRes = await locationService.getDistricts(cityId);
+              const d = distRes.data.data.find(
+                (x) => x.name.toLowerCase() === district.toLowerCase(),
+              );
+              if (d) {
+                subdistrictId = d.id;
+                subdistrictName = d.name;
+              }
+            }
+
+            if (!subdistrictId) return; // can't proceed without subdistrict id
+
+            const addressPayload: CreateAddressPayload = {
+              recipient_name: name,
+              phone,
+              province_id: provinceId,
+              city_id: cityId,
+              subdistrict_id: subdistrictId,
+              address_line: addressDetail,
+              postal_code: postalCode,
+              is_default: 'true',
+              subdistrict_name: subdistrictName,
+            };
+
+            try {
+              const res = await addressService.createAddress(addressPayload, {
+                headers,
+              });
+              if (res.ok) {
+                toast.success('Alamat default berhasil dibuat.');
+              }
+            } catch (err) {
+              // Try to surface field errors if any
+              const httpErr = err as unknown as {
+                message?: string;
+                status?: number;
+                data?: unknown;
+              };
+              const maybeData = httpErr?.data;
+              if (
+                maybeData &&
+                typeof maybeData === 'object' &&
+                'errors' in (maybeData as Record<string, unknown>)
+              ) {
+                const errors = (maybeData as Record<string, unknown>)
+                  .errors as Record<string, unknown>;
+                const fieldErrors: Record<string, string> = {};
+                const toStr = (v: unknown) =>
+                  Array.isArray(v) ? String(v[0]) : String(v ?? '');
+                if (errors?.province_id)
+                  fieldErrors.province = toStr(errors.province_id);
+                if (errors?.city_id) fieldErrors.city = toStr(errors.city_id);
+                if (errors?.subdistrict_id)
+                  fieldErrors.district = toStr(errors.subdistrict_id);
+                if (errors?.postal_code)
+                  fieldErrors.postalCode = toStr(errors.postal_code);
+                if (errors?.address_line)
+                  fieldErrors.addressDetail = toStr(errors.address_line);
+                if (Object.keys(fieldErrors).length > 0) {
+                  setRegisterFieldErrors((prev) => ({
+                    ...prev,
+                    ...fieldErrors,
+                  }));
+                }
+              }
+              // Notify but don't block registration flow
+              toast.error(
+                httpErr?.message ||
+                  'Alamat tidak dapat dibuat otomatis. Anda bisa menambahkannya nanti.',
+              );
+            }
+          };
+
+          if (tokenFromRegister) {
+            await tryCreateAddress();
+          }
+
+          // Continue original success flow
           toast.success(
             response?.message ?? 'Registrasi berhasil. Silakan masuk.',
           );

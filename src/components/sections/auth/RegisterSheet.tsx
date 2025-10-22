@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import {
+  useProvincesQuery,
+  useCitiesQuery,
+  useDistrictsQuery,
+} from '@/hooks/use-location';
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -73,11 +78,38 @@ export function RegisterSheet({
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
 
+  // Location queries (IDs will be used for value)
+  const provincesQuery = useProvincesQuery(true);
+  const citiesQuery = useCitiesQuery(province || undefined);
+  const districtsQuery = useDistrictsQuery(city || undefined);
+
+  const provinces = provincesQuery.data?.data ?? [];
+  const cities = citiesQuery.data?.data ?? [];
+  const districts = districtsQuery.data?.data ?? [];
+
+  const handleProvinceChange = (id: string) => {
+    setProvince(id);
+    setCity('');
+    setDistrict('');
+  };
+
+  const handleCityChange = (id: string) => {
+    setCity(id);
+    setDistrict('');
+  };
+
   const handleSubmit = () => {
-    // FE validations
-    const hasLowercase = /[a-z]/.test(password);
-    if (!hasLowercase) {
+    // Basic password validations
+    if (!/[a-z]/.test(password)) {
       setPasswordError('Password harus mengandung minimal 1 huruf kecil');
+      return;
+    }
+    if (password.length < 8) {
+      setPasswordError('Password minimal 8 karakter');
+      return;
+    }
+    if (confirmPassword !== password) {
+      setPasswordError('Konfirmasi kata sandi tidak cocok');
       return;
     }
     setPasswordError(null);
@@ -306,42 +338,78 @@ export function RegisterSheet({
 
           <div className='space-y-1 pt-1'>
             <Label htmlFor='register-province'>Provinsi</Label>
-            <Input
+            <select
               id='register-province'
-              type='text'
-              placeholder='Provinsi'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={province}
-              onChange={(e) => setProvince(e.target.value)}
-              disabled={isSubmitting}
-            />
+              onChange={(e) => handleProvinceChange(e.target.value)}
+              disabled={isSubmitting || provincesQuery.isLoading}
+            >
+              <option value='' disabled>
+                {provincesQuery.isLoading ? 'Memuat...' : 'Pilih provinsi'}
+              </option>
+              {provinces.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.province ? (
               <p className='text-xs text-red-600'>{fieldErrors.province}</p>
             ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-city'>Kota/Kabupaten</Label>
-            <Input
+            <select
               id='register-city'
-              type='text'
-              placeholder='Kota atau Kabupaten'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={city}
-              onChange={(e) => setCity(e.target.value)}
-              disabled={isSubmitting}
-            />
+              onChange={(e) => handleCityChange(e.target.value)}
+              disabled={isSubmitting || !province || citiesQuery.isLoading}
+            >
+              <option value='' disabled>
+                {!province
+                  ? 'Pilih provinsi dulu'
+                  : citiesQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Pilih kota/kabupaten'}
+              </option>
+              {cities.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.city ? (
               <p className='text-xs text-red-600'>{fieldErrors.city}</p>
             ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-district'>Kecamatan</Label>
-            <Input
+            <select
               id='register-district'
-              type='text'
-              placeholder='Kecamatan'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
-              disabled={isSubmitting}
-            />
+              disabled={
+                isSubmitting || !province || !city || districtsQuery.isLoading
+              }
+            >
+              <option value='' disabled>
+                {!province
+                  ? 'Pilih provinsi dulu'
+                  : !city
+                  ? 'Pilih kota/kabupaten dulu'
+                  : districtsQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Pilih kecamatan'}
+              </option>
+              {districts.map((d) => (
+                <option key={d.id} value={String(d.id)}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.district ? (
               <p className='text-xs text-red-600'>{fieldErrors.district}</p>
             ) : null}
