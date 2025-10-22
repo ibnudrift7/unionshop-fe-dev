@@ -5,14 +5,20 @@ import { X, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useCallback } from 'react';
 import ProductSection from '@/components/sections/product/ProductSection';
-import { shopAllProducts } from '@/components/sections/shop/data';
+import { useProductsQuery } from '@/hooks/use-products';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cart';
+import { useAuthStatus } from '@/hooks/use-auth-status';
+import { useAddCartItemsMutation } from '@/hooks/use-cart';
 
 export default function AddOrderPage() {
   const router = useRouter();
+  const { isLoggedIn } = useAuthStatus();
+  const { mutate: addMemberCart, isPending: isAddingMember } =
+    useAddCartItemsMutation();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { data: products, isLoading, isError, error } = useProductsQuery();
   const { addItem } = useCartStore();
 
   const toggleSelect = useCallback((p: Product) => {
@@ -21,10 +27,10 @@ export default function AddOrderPage() {
     );
   }, []);
 
-  const selectedProducts = useMemo(
-    () => shopAllProducts.filter((p) => selectedIds.includes(p.id)),
-    [selectedIds],
-  );
+  const selectedProducts = useMemo(() => {
+    const list = products ?? [];
+    return list.filter((p) => selectedIds.includes(p.id));
+  }, [products, selectedIds]);
 
   const selectedCount = selectedProducts.length;
   const totalAmount = selectedProducts.reduce((sum, p) => sum + p.price, 0);
@@ -56,9 +62,15 @@ export default function AddOrderPage() {
       </div>
 
       <div className='mt-2'>
+        {isError && (
+          <div className='px-4 text-sm text-red-600'>
+            Gagal memuat produk{error?.message ? `: ${error.message}` : ''}
+          </div>
+        )}
         <ProductSection
           title='Pilih Produk'
-          products={shopAllProducts}
+          products={products ?? []}
+          isLoading={isLoading}
           onProductClick={toggleSelect}
           showChevron={false}
           selectionMode
@@ -74,9 +86,44 @@ export default function AddOrderPage() {
           </div>
           <Button
             size='icon'
-            disabled={selectedCount === 0}
+            disabled={selectedCount === 0 || isAddingMember}
             className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90 disabled:opacity-50'
             onClick={() => {
+              if (isLoggedIn) {
+                const inputs = selectedProducts
+                  .map((p) => {
+                    const idNum = Number(p.id);
+                    if (!Number.isFinite(idNum)) return null;
+                    return { product_id: idNum, qty: 1, attributes: [] };
+                  })
+                  .filter(
+                    (
+                      x,
+                    ): x is {
+                      product_id: number;
+                      qty: number;
+                      attributes: [];
+                    } => Boolean(x),
+                  );
+
+                if (inputs.length === 0) {
+                  selectedProducts.forEach((p) => addItem(p, 1));
+                  router.push('/order-confirmation');
+                  return;
+                }
+
+                addMemberCart(inputs, {
+                  onSuccess: () => {
+                    router.push('/order-confirmation');
+                  },
+                  onError: () => {
+                    selectedProducts.forEach((p) => addItem(p, 1));
+                    router.push('/order-confirmation');
+                  },
+                });
+                return;
+              }
+
               selectedProducts.forEach((p) => addItem(p, 1));
               router.push('/order-confirmation');
             }}

@@ -20,10 +20,7 @@ export default function OrderConfirmation() {
   const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
 
-  // Guest cart (local store)
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
-
-  // Member cart (API)
   const { data: memberCart } = useCartQuery(isReady && isLoggedIn);
   const { mutate: updateMemberQty } = useUpdateCartItemQtyMutation();
   const { mutate: deleteMemberItem } = useDeleteCartItemMutation();
@@ -66,7 +63,6 @@ export default function OrderConfirmation() {
     }
   };
 
-  // Address
   const { data: defaultAddress } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
