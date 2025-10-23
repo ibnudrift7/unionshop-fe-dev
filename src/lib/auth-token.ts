@@ -1,4 +1,5 @@
 export const TOKEN_KEY = 'laksdjfhlaksjdfhlaksjdfh_token_123456789';
+export const AUTH_TOKEN_CHANGED_EVENT = 'auth:token-changed';
 
 export function getAuthToken(): string | null {
   try {
@@ -14,6 +15,13 @@ export function setAuthToken(token?: string | null) {
     if (typeof window === 'undefined') return;
     if (token) localStorage.setItem(TOKEN_KEY, token);
     else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-  }
+
+    try {
+      window.dispatchEvent(
+        new CustomEvent(AUTH_TOKEN_CHANGED_EVENT, {
+          detail: { token: token ?? null },
+        }),
+      );
+    } catch {}
+  } catch {}
 }

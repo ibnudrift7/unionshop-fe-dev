@@ -100,7 +100,6 @@ export default function MobileMenu() {
     },
   ];
 
-  // Keep userName in sync from profile when available
   useEffect(() => {
     const fullName = profileData?.data?.full_name;
     if (isLoggedIn && fullName) {
@@ -140,6 +139,9 @@ export default function MobileMenu() {
           toast.success(
             response?.message ?? 'Berhasil masuk. Selamat berbelanja!',
           );
+          try {
+            router.refresh();
+          } catch {}
           closeActiveSheet();
         },
         onError: (error) => {
@@ -149,7 +151,7 @@ export default function MobileMenu() {
         },
       });
     },
-    [closeActiveSheet, loginMutation],
+    [closeActiveSheet, loginMutation, router],
   );
 
   const handleRegisterSubmit = useCallback(
@@ -157,8 +159,6 @@ export default function MobileMenu() {
       setRegisterError(null);
       registerMutation.mutate(payload, {
         onSuccess: async (response) => {
-          // Attempt to create default address right after successful register
-          // without persisting auth state. If backend returns a token, use it for this one call.
           const tokenFromRegister =
             (response?.data?.token as string | undefined) ||
             ((response?.data?.tokens as { accessToken?: string } | undefined)
@@ -170,7 +170,6 @@ export default function MobileMenu() {
             : undefined;
 
           const tryCreateAddress = async () => {
-            // Only proceed if we have minimum address fields
             const {
               name,
               phone,
@@ -190,10 +189,9 @@ export default function MobileMenu() {
               !city ||
               !district
             ) {
-              return; // Incomplete address details, skip quietly
+              return;
             }
 
-            // Resolve IDs: support numeric input or name lookup via location APIs
             const parseMaybeNumber = (v: string | undefined) => {
               if (!v) return undefined;
               const n = Number(v);
@@ -211,7 +209,7 @@ export default function MobileMenu() {
               provinceId = prov?.id;
             }
 
-            if (!provinceId) return; // can't proceed without province id
+            if (!provinceId) return;
 
             let cityId = parseMaybeNumber(city);
             if (!cityId) {
@@ -222,7 +220,7 @@ export default function MobileMenu() {
               cityId = ct?.id;
             }
 
-            if (!cityId) return; // can't proceed without city id
+            if (!cityId) return;
 
             let subdistrictId = parseMaybeNumber(district);
             let subdistrictName = district;
@@ -237,7 +235,7 @@ export default function MobileMenu() {
               }
             }
 
-            if (!subdistrictId) return; // can't proceed without subdistrict id
+            if (!subdistrictId) return;
 
             const addressPayload: CreateAddressPayload = {
               recipient_name: name,
@@ -259,7 +257,6 @@ export default function MobileMenu() {
                 toast.success('Alamat default berhasil dibuat.');
               }
             } catch (err) {
-              // Try to surface field errors if any
               const httpErr = err as unknown as {
                 message?: string;
                 status?: number;
@@ -292,7 +289,6 @@ export default function MobileMenu() {
                   }));
                 }
               }
-              // Notify but don't block registration flow
               toast.error(
                 httpErr?.message ||
                   'Alamat tidak dapat dibuat otomatis. Anda bisa menambahkannya nanti.',
@@ -304,7 +300,6 @@ export default function MobileMenu() {
             await tryCreateAddress();
           }
 
-          // Continue original success flow
           toast.success(
             response?.message ?? 'Registrasi berhasil. Silakan masuk.',
           );
@@ -372,8 +367,11 @@ export default function MobileMenu() {
     try {
       setAuthToken(null);
     } catch {}
+    try {
+      router.refresh();
+    } catch {}
     toast.message('Anda telah keluar dari akun.');
-  }, []);
+  }, [router]);
 
   const [registerFieldErrors, setRegisterFieldErrors] = useState<
     Record<string, string>
