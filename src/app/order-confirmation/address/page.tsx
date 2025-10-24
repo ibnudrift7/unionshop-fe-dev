@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,26 +8,95 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { setGuestAddress } from '@/hooks/use-guest-address';
+import {
+  useProvincesQuery,
+  useCitiesQuery,
+  useDistrictsQuery,
+} from '@/hooks/use-location';
 
 export default function GuestAddressPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [province, setProvince] = useState('');
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
+  const [provinceId, setProvinceId] = useState('');
+  const [provinceName, setProvinceName] = useState('');
+  const [cityId, setCityId] = useState('');
+  const [cityName, setCityName] = useState('');
+  const [districtId, setDistrictId] = useState('');
+  const [districtName, setDistrictName] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let v = String(e.target.value || '')?.replace(/\D/g, '');
+    if (v.length > 15) v = v.slice(0, 15);
+    setPhone(v);
+    if (!v || /^(08|62)\d*$/.test(v)) setPhoneError(null);
+    else setPhoneError('Nomor harus diawali dengan 08 atau 62');
+  };
+
+  const provincesQuery = useProvincesQuery(true);
+  const citiesQuery = useCitiesQuery(provinceId || undefined);
+  const districtsQuery = useDistrictsQuery(cityId || undefined);
+  const provinces = provincesQuery.data?.data ?? [];
+  const cities = citiesQuery.data?.data ?? [];
+  const districts = districtsQuery.data?.data ?? [];
+
+  const onProvinceChange = (id: string) => {
+    setProvinceId(id);
+    const selected = provinces.find((p) => String(p.id) === String(id));
+    setProvinceName(selected?.name ?? '');
+    setCityId('');
+    setCityName('');
+    setDistrictId('');
+    setDistrictName('');
+  };
+
+  const onCityChange = (id: string) => {
+    setCityId(id);
+    const selected = cities.find((c) => String(c.id) === String(id));
+    setCityName(selected?.name ?? '');
+    setDistrictId('');
+    setDistrictName('');
+  };
+
+  const onDistrictChange = (id: string) => {
+    setDistrictId(id);
+    const selected = districts.find((d) => String(d.id) === String(id));
+    setDistrictName(selected?.name ?? '');
+  };
 
   const handleSubmit = () => {
+    if (phone) {
+      const digits = phone.replace(/\D/g, '');
+      if (!/^(08|62)/.test(digits)) {
+        setPhoneError('Nomor harus diawali dengan 08 atau 62');
+        return;
+      }
+      if (!/^\d+$/.test(digits)) {
+        setPhoneError('Nomor hanya boleh berisi angka');
+        return;
+      }
+      if (digits.length > 15 || digits.length < 10) {
+        setPhoneError('Nomor harus antara 10 hingga 15 digit');
+        return;
+      }
+    }
+    setPhoneError(null);
     setGuestAddress({
       name,
       email,
       phone,
-      province,
-      city,
-      district,
+      province: provinceName,
+      city: cityName,
+      district: districtName,
+      provinceId,
+      provinceName,
+      cityId,
+      cityName,
+      districtId,
+      districtName,
       postalCode,
       addressDetail,
     });
@@ -85,39 +154,80 @@ export default function GuestAddressPage() {
             inputMode='tel'
             placeholder='0812xxxxxxx'
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={handlePhoneChange}
+            maxLength={15}
           />
+          {phoneError ? (
+            <p className='text-xs text-red-600'>{phoneError}</p>
+          ) : null}
         </div>
 
         <div className='space-y-1'>
           <Label htmlFor='addr-province'>Provinsi</Label>
-          <Input
+          <select
             id='addr-province'
-            type='text'
-            placeholder='Provinsi'
-            value={province}
-            onChange={(e) => setProvince(e.target.value)}
-          />
+            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+            value={provinceId}
+            onChange={(e) => onProvinceChange(e.target.value)}
+            disabled={provincesQuery.isLoading}
+          >
+            <option value=''>
+              {provincesQuery.isLoading ? 'Memuat...' : 'Pilih provinsi'}
+            </option>
+            {provinces.map((p) => (
+              <option key={p.id} value={String(p.id)}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-city'>Kota/Kabupaten</Label>
-          <Input
+          <select
             id='addr-city'
-            type='text'
-            placeholder='Kota atau Kabupaten'
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
+            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+            value={cityId}
+            onChange={(e) => onCityChange(e.target.value)}
+            disabled={!provinceId || citiesQuery.isLoading}
+          >
+            <option value=''>
+              {!provinceId
+                ? 'Pilih provinsi dulu'
+                : citiesQuery.isLoading
+                ? 'Memuat...'
+                : 'Pilih kota/kabupaten'}
+            </option>
+            {cities.map((c) => (
+              <option key={c.id} value={String(c.id)}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-district'>Kecamatan</Label>
-          <Input
+          <select
             id='addr-district'
-            type='text'
-            placeholder='Kecamatan'
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-          />
+            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+            value={districtId}
+            onChange={(e) => onDistrictChange(e.target.value)}
+            disabled={!provinceId || !cityId || districtsQuery.isLoading}
+          >
+            <option value=''>
+              {!provinceId
+                ? 'Pilih provinsi dulu'
+                : !cityId
+                ? 'Pilih kota/kabupaten dulu'
+                : districtsQuery.isLoading
+                ? 'Memuat...'
+                : 'Pilih kecamatan'}
+            </option>
+            {districts.map((d) => (
+              <option key={d.id} value={String(d.id)}>
+                {d.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-postal'>Kode pos</Label>
