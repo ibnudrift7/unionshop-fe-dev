@@ -16,8 +16,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery } from '@/hooks/use-products';
+import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { useCartStore } from '@/store/cart';
+import type { CartItem } from '@/store/cart';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import {
@@ -31,17 +33,20 @@ import {
   products as mockProducts,
   promoImages,
 } from '@/components/sections/shop/data';
+import { useProfileQuery } from '@/hooks/use-profile';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { items, getTotal } = useCartStore();
   const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: memberCart } = useCartQuery(Boolean(isReady && isLoggedIn));
   const { data: productsData, isLoading: isLoadingProducts } =
     useProductsQuery();
   const { data: defaultAddressResp } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
+  const { data: profileResp } = useProfileQuery(Boolean(isReady && isLoggedIn));
   const defaultAddress = defaultAddressResp?.data ?? null;
   const cityName = defaultAddress?.city_name;
   const districtName = defaultAddress?.subdistrict_name;
@@ -51,11 +56,23 @@ export default function Home() {
       : mockProducts;
   }, [productsData]);
 
-  const itemsCount = useMemo(
-    () => items.reduce((sum, i) => sum + i.quantity, 0),
-    [items],
-  );
-  const totalAmount = getTotal();
+  const itemsCount = useMemo(() => {
+    if (isLoggedIn) {
+      const list = memberCart?.data?.items ?? [];
+      return list.reduce((sum, i) => sum + (i.qty ?? 0), 0);
+    }
+    return items.reduce((sum, i) => sum + i.quantity, 0);
+  }, [isLoggedIn, items, memberCart]);
+
+  const totalAmount = useMemo(() => {
+    if (isLoggedIn) {
+      const raw = memberCart?.data?.summary?.subtotal;
+      const n = Number(raw ?? 0);
+      return Number.isFinite(n) ? n : 0;
+    }
+    return getTotal();
+  }, [isLoggedIn, memberCart, getTotal]);
+
   const totalFormatted = useMemo(
     () =>
       new Intl.NumberFormat('id-ID', {
@@ -66,6 +83,11 @@ export default function Home() {
     [totalAmount],
   );
 
+  const pointsBalance: number = useMemo(() => {
+    if (!isReady || !isLoggedIn) return locationData.points;
+    const n = Number(profileResp?.data?.points_balance ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  }, [isReady, isLoggedIn, profileResp]);
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -74,6 +96,19 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isLoggedIn) return;
+    try {
+      const raw = localStorage.getItem('guest_cart');
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as CartItem[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        useCartStore.setState({ items: parsed });
+      }
+    } catch {}
+  }, [isLoggedIn]);
+
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='relative'>
@@ -81,7 +116,7 @@ export default function Home() {
 
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>
           <LocationSection
-            points={locationData.points}
+            points={pointsBalance}
             name={
               !isReady || !isLoggedIn
                 ? locationData.name
