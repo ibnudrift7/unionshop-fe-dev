@@ -115,7 +115,7 @@ export default function RiwayatPesanan() {
                     key={idx}
                     className='flex items-center justify-start gap-2'
                   >
-                    <p className='text-xl font-extralight text-black'>
+                    <p className='text-md font-extralight text-black'>
                       {it.name} x{it.quantity}
                     </p>
                   </div>
