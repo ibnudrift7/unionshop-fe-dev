@@ -60,7 +60,6 @@ export default function ProductDetail({
   const sizes = sizeAttr?.values ?? [];
 
   useEffect(() => {
-    // Initialize selections when product or options change
     setSelectedColorId(colors.length > 0 ? colors[0].id : null);
     setSelectedSizeId(sizes.length > 0 ? sizes[0].id : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,27 +68,24 @@ export default function ProductDetail({
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, quantity + change));
   };
-
   const addToCart = () => {
     if (!product) return;
+    const attrs: Array<{ name: string; value: string }> = [];
+    if (colorAttr && selectedColorId != null) {
+      const v = colorAttr.values.find((vv) => vv.id === selectedColorId);
+      if (v) attrs.push({ name: colorAttr.name, value: v.value || 'null' });
+    }
+    if (sizeAttr && selectedSizeId != null) {
+      const v = sizeAttr.values.find((vv) => vv.id === selectedSizeId);
+      if (v) attrs.push({ name: sizeAttr.name, value: v.value || 'null' });
+    }
 
     if (isLoggedIn) {
       const productIdNum = Number(product.id);
       if (!Number.isFinite(productIdNum)) {
-        // fallback ke lokal jika id tidak valid number
         useCartStore.getState().addItem(product, quantity);
         router.push('/order-confirmation');
         return;
-      }
-
-      const attrs: Array<{ name: string; value: string }> = [];
-      if (colorAttr && selectedColorId != null) {
-        const v = colorAttr.values.find((vv) => vv.id === selectedColorId);
-        if (v) attrs.push({ name: colorAttr.name, value: v.value || 'null' });
-      }
-      if (sizeAttr && selectedSizeId != null) {
-        const v = sizeAttr.values.find((vv) => vv.id === selectedSizeId);
-        if (v) attrs.push({ name: sizeAttr.name, value: v.value || 'null' });
       }
 
       addMemberCart(
@@ -105,8 +101,11 @@ export default function ProductDetail({
             router.push('/order-confirmation');
           },
           onError: () => {
-            // fallback local jika error
-            useCartStore.getState().addItem(product, quantity);
+            const productForCart = {
+              ...product,
+              selectedAttributes: attrs,
+            } as unknown as Product;
+            useCartStore.getState().addItem(productForCart, quantity);
             router.push('/order-confirmation');
           },
         },
@@ -115,7 +114,11 @@ export default function ProductDetail({
     }
 
     // Guest mode: keranjang lokal
-    useCartStore.getState().addItem(product, quantity);
+    const productForCart = {
+      ...product,
+      selectedAttributes: attrs,
+    } as unknown as Product;
+    useCartStore.getState().addItem(productForCart, quantity);
     router.push('/order-confirmation');
   };
 
