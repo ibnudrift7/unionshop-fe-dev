@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import {
   useProvincesQuery,
   useCitiesQuery,
@@ -29,8 +29,8 @@ export interface RegisterSheetProps {
     dateOfBirth?: string; // ISO yyyy-mm-dd
     province?: string;
     city?: string;
-    district?: string; // kecamatan
-    postalCode?: string; // kode pos
+    district?: string;
+    postalCode?: string;
     addressDetail?: string;
   }) => void;
   onSwitchToLogin?: () => void;
@@ -69,6 +69,14 @@ export function RegisterSheet({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let v = String(e.target.value || '')?.replace(/\D/g, '');
+    if (v.length > 15) v = v.slice(0, 15);
+    setPhone(v);
+    if (!v || /^(08|62)\d*$/.test(v)) setPhoneError(null);
+    else setPhoneError('Nomor harus diawali dengan 08 atau 62');
+  };
   const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
   const [dateOfBirth, setDateOfBirth] = useState(''); // ISO yyyy-mm-dd
   const [dobDraft, setDobDraft] = useState('');
@@ -78,7 +86,6 @@ export function RegisterSheet({
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
 
-  // Location queries (IDs will be used for value)
   const provincesQuery = useProvincesQuery(true);
   const citiesQuery = useCitiesQuery(province || undefined);
   const districtsQuery = useDistrictsQuery(city || undefined);
@@ -99,7 +106,6 @@ export function RegisterSheet({
   };
 
   const handleSubmit = () => {
-    // Basic password validations
     if (!/[a-z]/.test(password)) {
       setPasswordError('Password harus mengandung minimal 1 huruf kecil');
       return;
@@ -113,6 +119,23 @@ export function RegisterSheet({
       return;
     }
     setPasswordError(null);
+
+    if (phone) {
+      const digits = phone.replace(/\D/g, '');
+      if (!/^(08|62)/.test(digits)) {
+        setPhoneError('Nomor harus diawali dengan 08 atau 62');
+        return;
+      }
+      if (!/^\d+$/.test(digits)) {
+        setPhoneError('Nomor hanya boleh berisi angka');
+        return;
+      }
+      if (digits.length < 10 || digits.length > 15) {
+        setPhoneError('Nomor harus antara 10 hingga 15 digit');
+        return;
+      }
+    }
+    setPhoneError(null);
 
     onSubmit?.({
       name,
@@ -223,9 +246,15 @@ export function RegisterSheet({
               inputMode='tel'
               placeholder='08xxxxxxxxxx'
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
+              maxLength={15}
               disabled={isSubmitting}
             />
+            {phoneError ? (
+              <p className='text-xs text-red-600'>{phoneError}</p>
+            ) : fieldErrors.phone ? (
+              <p className='text-xs text-red-600'>{fieldErrors.phone}</p>
+            ) : null}
           </div>
 
           <div className='space-y-2 pt-1'>
