@@ -3,10 +3,14 @@
 import { ArrowLeft, Minus, Plus, Coins, CircleArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { useMemo } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useMemo, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { useCartStore } from '@/store/cart';
+import type { CartItem } from '@/store/cart';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import {
@@ -14,7 +18,7 @@ import {
   useUpdateCartItemQtyMutation,
   useDeleteCartItemMutation,
 } from '@/hooks/use-cart';
-import { getGuestAddress } from '@/hooks/use-guest-address';
+import { useGuestAddress } from '@/hooks/use-guest-address';
 
 export default function OrderConfirmation() {
   const router = useRouter();
@@ -66,7 +70,44 @@ export default function OrderConfirmation() {
   const { data: defaultAddress } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
-  const guestAddress = useMemo(() => getGuestAddress(), []);
+  const { data: guestAddress } = useGuestAddress();
+
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string } | null>(
+    null,
+  );
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  const applyPromo = () => {
+    setPromoError(null);
+    const code = promoCode.trim();
+    if (!code) {
+      const err = 'Masukkan kode promo';
+      setPromoError(err);
+      toast.error(err);
+      return;
+    }
+    // NOTE: stub implementation — accept any non-empty code for now.
+    setAppliedPromo({ code });
+    setPromoCode('');
+    toast.success(`Kode "${code}" berhasil diterapkan`);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isLoggedIn) return;
+    try {
+      const raw = localStorage.getItem('guest_cart');
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Array<{
+        product: unknown;
+        quantity: number;
+      }>;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        useCartStore.setState({ items: parsed as unknown as CartItem[] });
+      }
+    } catch {}
+  }, [isLoggedIn]);
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
@@ -86,8 +127,8 @@ export default function OrderConfirmation() {
       </div>
 
       <div className='bg-white'>
-        {/* alamat pengiriman member mode */}
-        {isLoggedIn && (
+        {/* alamat pengiriman: tampilkan untuk member, atau guest yang sudah isi alamat */}
+        {(isLoggedIn || !!guestAddress) && (
           <div className='px-4'>
             <Card className='py-2 px-4 border-3 border-brand rounded-xl'>
               <div className='flex items-center justify-between gap-2'>
@@ -96,14 +137,28 @@ export default function OrderConfirmation() {
                     Alamat Utama
                   </p>
                   <p className='text-xs text-gray-600 mt-1'>
-                    {defaultAddress?.data
-                      ? `${defaultAddress.data.recipient_name} - ${defaultAddress.data.phone} | ${defaultAddress.data.address_line}, ${defaultAddress.data.postal_code}`
-                      : 'Memuat alamat…'}
+                    {isLoggedIn
+                      ? defaultAddress?.data
+                        ? `${defaultAddress.data.recipient_name} - ${defaultAddress.data.phone} | ${defaultAddress.data.address_line}, ${defaultAddress.data.postal_code}`
+                        : 'Memuat alamat…'
+                      : guestAddress
+                      ? `${guestAddress.name} - ${guestAddress.phone} | ${
+                          guestAddress.addressDetail
+                        }, ${
+                          guestAddress.districtName || guestAddress.district
+                        }, ${guestAddress.cityName || guestAddress.city}, ${
+                          guestAddress.provinceName || guestAddress.province
+                        }, ${guestAddress.postalCode}`
+                      : ''}
                   </p>
                 </div>
                 <button
                   type='button'
-                  onClick={() => router.push('/shipping')}
+                  onClick={() =>
+                    isLoggedIn
+                      ? router.push('/shipping')
+                      : router.push('/order-confirmation/address')
+                  }
                   className='text-sm font-bold text-brand hover:underline'
                 >
                   Ubah
@@ -149,6 +204,37 @@ export default function OrderConfirmation() {
                               minimumFractionDigits: 0,
                             }).format(product.price)}
                           </p>
+                          {(
+                            product as unknown as {
+                              selectedAttributes?: Array<{
+                                name: string;
+                                value: string;
+                              }>;
+                            }
+                          ).selectedAttributes &&
+                            (
+                              product as unknown as {
+                                selectedAttributes?: Array<{
+                                  name: string;
+                                  value: string;
+                                }>;
+                              }
+                            ).selectedAttributes!.length > 0 && (
+                              <div className='text-xs text-gray-500 mt-1'>
+                                {(
+                                  (
+                                    product as unknown as {
+                                      selectedAttributes?: Array<{
+                                        name: string;
+                                        value: string;
+                                      }>;
+                                    }
+                                  ).selectedAttributes ?? []
+                                )
+                                  .map((a) => `${a.name}: ${a.value}`)
+                                  .join(' • ')}
+                              </div>
+                            )}
                         </div>
                         <div className='relative w-25 h-25 rounded-lg overflow-hidden flex-shrink-0'>
                           <Image
@@ -275,10 +361,31 @@ export default function OrderConfirmation() {
                   </Card>
                 ))}
           </div>
-
+          {isLoggedIn && (
+            <div className='mt-4'>
+              <div className='flex flex-col gap-2'>
+                <Label>Masukkan Kode Promo</Label>
+                <div className='flex items-center gap-2'>
+                  <Input
+                    value={promoCode}
+                    onChange={(e) =>
+                      setPromoCode((e.target as HTMLInputElement).value)
+                    }
+                    placeholder='Kode promo'
+                  />
+                  <Button
+                    className='bg-brand hover:bg-brand/80'
+                    onClick={applyPromo}
+                  >
+                    Terapkan
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className='mt-6'>
             {/* alamat pengiriman guest mode */}
-            {!isLoggedIn && (
+            {!isLoggedIn && !guestAddress && (
               <button
                 type='button'
                 onClick={() => router.push('/order-confirmation/address')}
@@ -289,15 +396,8 @@ export default function OrderConfirmation() {
                     <div className='flex items-center gap-3'>
                       <div>
                         <p className='text-lg font-bold text-black'>
-                          {guestAddress?.name
-                            ? `${guestAddress.name} - ${guestAddress.phone}`
-                            : 'Isi Data Pengiriman'}
+                          Isi Data Pengiriman
                         </p>
-                        {guestAddress && (
-                          <p className='text-xs text-gray-600 mt-1'>
-                            {`${guestAddress.addressDetail}, ${guestAddress.district}, ${guestAddress.city}, ${guestAddress.province}, ${guestAddress.postalCode}`}
-                          </p>
-                        )}
                       </div>
                     </div>
                     <CircleArrowRight className='h-7 w-7 text-black' />
