@@ -52,3 +52,12 @@ export const useCartStore = create<CartState>((set, get) => ({
     return items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   },
 }));
+
+if (typeof window !== 'undefined') {
+  useCartStore.subscribe((state: CartState) => {
+    try {
+      const payload = JSON.stringify(state.items);
+      localStorage.setItem('guest_cart', payload);
+    } catch {}
+  });
+}

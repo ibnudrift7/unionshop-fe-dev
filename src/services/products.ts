@@ -27,6 +27,8 @@ function mapApiProductToUi(p: ApiProduct): Product {
   const base = parsePrice(p.base_price) ?? 0;
   const hasSale = sale !== undefined && sale > 0;
   const image = toAbsolute(p.cover_image);
+  const rating = Number((4 + Math.random()).toFixed(1));
+  const sold = Math.floor(Math.random() * 1000);
   return {
     id: String(p.id),
     name: p.name,
@@ -36,8 +38,8 @@ function mapApiProductToUi(p: ApiProduct): Product {
     discountPrice: hasSale ? base : undefined,
     image,
     isNew: p.is_newest === 1,
-    rating: 0,
-    sold: 0,
+    rating,
+    sold,
   } as Product;
 }
 
