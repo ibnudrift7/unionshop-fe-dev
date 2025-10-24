@@ -9,6 +9,12 @@ export interface GuestAddressData {
   province: string;
   city: string;
   district: string;
+  provinceId?: string;
+  provinceName?: string;
+  cityId?: string;
+  cityName?: string;
+  districtId?: string;
+  districtName?: string;
   postalCode: string;
   addressDetail: string;
 }
@@ -30,8 +36,7 @@ export function setGuestAddress(data: GuestAddressData | null) {
     if (typeof window === 'undefined') return;
     if (data) localStorage.setItem(KEY, JSON.stringify(data));
     else localStorage.removeItem(KEY);
-  } catch {
-  }
+  } catch {}
 }
 
 export function useGuestAddress() {
