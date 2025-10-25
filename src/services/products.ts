@@ -14,14 +14,15 @@ function parsePrice(str?: string): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function mapApiProductToUi(p: ApiProduct): Product {
-  const IMG_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || '';
-  const toAbsolute = (path?: string) => {
-    if (!path) return undefined;
+function mapApiProductToUi(
+  p: ApiProduct,
+  defaultImage: string = '/assets/SpecialProduct.png',
+): Product {
+  const DEFAULT_IMG = defaultImage;
+  const toAbsolute = (path?: string | null): string => {
+    if (!path) return DEFAULT_IMG;
     if (/^https?:\/\//i.test(path)) return path;
-    return IMG_BASE
-      ? `${IMG_BASE.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`
-      : undefined;
+    return DEFAULT_IMG;
   };
   const sale = parsePrice(p.sale_price);
   const base = parsePrice(p.base_price) ?? 0;
@@ -55,10 +56,28 @@ export const productsService = {
     });
     return res;
   },
+  async getBundles(params: ProductsQuery = {}) {
+    const { search, categoryId } = params;
+    const path = `${API_ENDPOINTS.products}/bundles`;
+    const res = await httpFetch<{ data: ApiProduct[] }>(path, {
+      method: 'GET',
+      query: {
+        ...(search ? { search } : {}),
+        ...(categoryId ? { category_id: categoryId } : {}),
+      },
+    });
+    return res;
+  },
+  async getBundlesUi(params: ProductsQuery = {}): Promise<Product[]> {
+    const res = await this.getBundles(params as ProductsQuery);
+    const payload = res.data as unknown as { data?: ApiProduct[] };
+    const list = payload?.data ?? [];
+    return list.map((p) => mapApiProductToUi(p, '/assets/promo-item.png'));
+  },
   async getProductsUi(params: ProductsQuery = {}): Promise<Product[]> {
     const res = await this.getProducts(params);
     const list = res.data.data ?? [];
-    return list.map(mapApiProductToUi);
+    return list.map((p) => mapApiProductToUi(p));
   },
   async getProductDetail(slugOrId: string) {
     const path = `${API_ENDPOINTS.products}/${encodeURIComponent(slugOrId)}`;
@@ -70,13 +89,11 @@ export const productsService = {
     const sale = parsePrice(p.sale_price);
     const base = parsePrice(p.base_price) ?? 0;
     const hasSale = sale !== undefined && sale > 0;
-    const IMG_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || '';
-    const toAbsolute = (path?: string) => {
-      if (!path) return undefined;
+    const DEFAULT_IMG = '/assets/SpecialProduct.png';
+    const toAbsolute = (path?: string | null): string => {
+      if (!path) return DEFAULT_IMG;
       if (/^https?:\/\//i.test(path)) return path;
-      return IMG_BASE
-        ? `${IMG_BASE.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
-        : undefined;
+      return DEFAULT_IMG;
     };
     const images: string[] = (p.photos || [])
       .map((ph) => toAbsolute(ph.image))
