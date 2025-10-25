@@ -238,7 +238,7 @@ export default function OrderConfirmation() {
                         </div>
                         <div className='relative w-25 h-25 rounded-lg overflow-hidden flex-shrink-0'>
                           <Image
-                            src={product.image || '/assets/Product.png'}
+                            src={product.image || '/assets/SpecialProduct.png'}
                             alt={product.name}
                             fill
                             sizes='100px'
@@ -297,16 +297,11 @@ export default function OrderConfirmation() {
                           <Image
                             src={(() => {
                               const raw = it.cover_image;
-                              if (!raw) return '/assets/Product.png';
+                              const DEFAULT_IMG = '/assets/SpecialProduct.png';
+                              if (!raw) return DEFAULT_IMG;
                               if (/^https?:\/\//i.test(raw)) return raw;
-                              const base =
-                                process.env.NEXT_PUBLIC_IMAGE_BASE_URL || '';
-                              return base
-                                ? `${base.replace(/\/$/, '')}/${raw.replace(
-                                    /^\//,
-                                    '',
-                                  )}`
-                                : '/assets/Product.png';
+                              // Do not use external IMG base; fallback to local asset for non-absolute paths
+                              return DEFAULT_IMG;
                             })()}
                             alt={it.product_name}
                             fill
