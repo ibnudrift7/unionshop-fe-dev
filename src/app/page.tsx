@@ -136,7 +136,7 @@ export default function Home() {
       <div className='pt-36'>
         <CategoryGridSection
           categories={mockCategories}
-          isLoading={isLoading}
+          // isLoading={isLoading}
         />
       </div>
 
@@ -144,7 +144,7 @@ export default function Home() {
 
       <SpecialTodaySection
         products={specialTodayProducts}
-        isLoading={isLoading}
+        // isLoading={isLoading}
       />
 
       <OfficialMerchandiseSection
@@ -156,7 +156,7 @@ export default function Home() {
 
       <ProductSection
         products={productsForHome}
-        isLoading={isLoading || isLoadingProducts}
+        isLoading={isLoadingProducts}
         onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
       />
 
