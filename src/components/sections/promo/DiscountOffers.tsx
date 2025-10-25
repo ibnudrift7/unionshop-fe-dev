@@ -5,8 +5,10 @@ import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import useBundlesQuery from '@/hooks/use-bundles';
+import type { Product as UiProduct } from '@/types';
 
-interface Product {
+interface PromoProduct {
   id: string;
   name: string;
   image: string;
@@ -19,43 +21,68 @@ interface Product {
   percentDiscount?: string;
 }
 
-const products: Product[] = [
-  {
-    id: '1',
-    name: 'Makna Trio Deal 7MG',
-    image: '/assets/promo-item.png',
-    price: 200000,
-    originalPrice: 360000,
-    rating: 5.0,
-    soldCount: 500,
-    expiryDate: '20 September 2025',
-    shippingDiscount: 'Diskon Ongkir 40rb',
-    percentDiscount: 'Diskon 50%',
-  },
-  {
-    id: '2',
-    name: 'Wasp Nano X2 + Makna ...',
-    image: '/assets/promo-item.png',
-    price: 200000,
-    rating: 5.0,
-    soldCount: 500,
-    expiryDate: '20 September 2025',
-    shippingDiscount: 'Diskon Ongkir 40rb',
-  },
-  {
-    id: '3',
-    name: 'Oxva + Makna',
-    image: '/assets/promo-item.png',
-    price: 200000,
-    rating: 5.0,
-    soldCount: 500,
-    expiryDate: '20 September 2025',
-    shippingDiscount: 'Diskon Ongkir 40rb',
-  },
-];
-
 export function DiscountOffers() {
   const router = useRouter();
+  const { data: bundles } = useBundlesQuery();
+
+  const DEFAULT_IMG = '/assets/promo-item.png';
+
+  const products: PromoProduct[] = React.useMemo(() => {
+    if (!bundles || bundles.length === 0) {
+      return [
+        {
+          id: '1',
+          name: 'Makna Trio Deal 7MG',
+          image: '/assets/promo-item.png',
+          price: 200000,
+          originalPrice: 360000,
+          rating: 5.0,
+          soldCount: 500,
+          expiryDate: '20 September 2025',
+          shippingDiscount: 'Diskon Ongkir 40rb',
+          percentDiscount: 'Diskon 50%',
+        },
+        {
+          id: '2',
+          name: 'Wasp Nano X2 + Makna ...',
+          image: '/assets/promo-item.png',
+          price: 200000,
+          rating: 5.0,
+          soldCount: 500,
+          expiryDate: '20 September 2025',
+          shippingDiscount: 'Diskon Ongkir 40rb',
+        },
+        {
+          id: '3',
+          name: 'Oxva + Makna',
+          image: '/assets/promo-item.png',
+          price: 200000,
+          rating: 5.0,
+          soldCount: 500,
+          expiryDate: '20 September 2025',
+          shippingDiscount: 'Diskon Ongkir 40rb',
+        },
+      ];
+    }
+
+    return bundles.map((b: UiProduct) => ({
+      id: b.id,
+      name: b.name,
+      image: (b.image as string) ?? DEFAULT_IMG,
+      price: (b.price as number) ?? 0,
+      originalPrice: (b.discountPrice as number) ?? undefined,
+      rating: (b.rating as number) ?? 4.5,
+      soldCount: Math.floor(Math.random() * 1000),
+      expiryDate: 'Segera berakhir',
+      shippingDiscount: 'Diskon Ongkir 40rb',
+      percentDiscount: (b.discountPrice as number)
+        ? `${Math.round(
+            ((b.discountPrice as number) / ((b.price as number) || 1)) * 100,
+          )}%`
+        : undefined,
+    }));
+  }, [bundles]);
+
   return (
     <div className='mx-auto max-w-2xl px-4'>
       <div className='mb-6'>
@@ -86,7 +113,7 @@ export function DiscountOffers() {
               <div className='relative h-[135px] w-28 flex-shrink-0 rounded-3xl overflow-hidden border border-gray-300'>
                 <div className='h-24 w-28 absolute'>
                   <Image
-                    src={product.image || '/placeholder.svg'}
+                    src={product.image || DEFAULT_IMG}
                     alt={product.name}
                     fill
                     className='object-cover rounded-3xl'
