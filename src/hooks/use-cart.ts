@@ -10,12 +10,11 @@ export function useCartQuery(enabled: boolean) {
     queryKey: ['member-cart'],
     queryFn: () => cartService.getCart().then((r) => r.data),
     select: (res) => {
-      const IMG_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || '';
-      const toAbs = (p?: string | null): string | null => {
-        if (!p) return null;
+      const DEFAULT_IMG = '/assets/SpecialProduct.png';
+      const toAbs = (p?: string | null): string => {
+        if (!p) return DEFAULT_IMG;
         if (/^https?:\/\//i.test(p)) return p;
-        if (!IMG_BASE) return null;
-        return `${IMG_BASE.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
+        return DEFAULT_IMG;
       };
       return {
         ...res,
