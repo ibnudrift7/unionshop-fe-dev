@@ -19,6 +19,8 @@ import {
   useDeleteCartItemMutation,
 } from '@/hooks/use-cart';
 import { useGuestAddress } from '@/hooks/use-guest-address';
+import { useApplyPromoMutation } from '@/hooks/use-checkout';
+import type { ApplyPromoData } from '@/types/promo';
 
 export default function OrderConfirmation() {
   const router = useRouter();
@@ -73,10 +75,10 @@ export default function OrderConfirmation() {
   const { data: guestAddress } = useGuestAddress();
 
   const [promoCode, setPromoCode] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<{ code: string } | null>(
-    null,
-  );
+  const [appliedPromo, setAppliedPromo] = useState<ApplyPromoData | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
+  const { mutate: applyPromoMutate, isPending: isApplying } =
+    useApplyPromoMutation();
 
   const applyPromo = () => {
     setPromoError(null);
@@ -87,10 +89,39 @@ export default function OrderConfirmation() {
       toast.error(err);
       return;
     }
-    // NOTE: stub implementation — accept any non-empty code for now.
-    setAppliedPromo({ code });
-    setPromoCode('');
-    toast.success(`Kode "${code}" berhasil diterapkan`);
+    if (!isLoggedIn) {
+      const err = 'Harus login untuk menggunakan kode promo';
+      setPromoError(err);
+      toast.error(err);
+      return;
+    }
+    applyPromoMutate(
+      { promoCode: code },
+      {
+        onSuccess: (res) => {
+          setAppliedPromo(res.data);
+          setPromoCode('');
+          toast.success(res.message || `Kode "${code}" berhasil diterapkan`);
+        },
+        onError: (err) => {
+          const raw = err?.data as unknown;
+          const obj =
+            (raw && typeof raw === 'object'
+              ? (raw as Record<string, unknown>)
+              : {}) || {};
+          const msg =
+            (typeof obj.message === 'string' && obj.message) ||
+            'Gagal menerapkan kode promo';
+          const errors = obj.errors as Record<string, unknown> | undefined;
+          const fieldErr =
+            errors && typeof errors.promo_code === 'string'
+              ? (errors.promo_code as string)
+              : undefined;
+          if (fieldErr) setPromoError(fieldErr);
+          toast.error(msg);
+        },
+      },
+    );
   };
 
   useEffect(() => {
@@ -371,10 +402,20 @@ export default function OrderConfirmation() {
                   <Button
                     className='bg-brand hover:bg-brand/80'
                     onClick={applyPromo}
+                    disabled={isApplying}
                   >
-                    Terapkan
+                    {isApplying ? 'Menerapkan…' : 'Terapkan'}
                   </Button>
                 </div>
+                {promoError && (
+                  <p className='text-xs text-red-500'>{promoError}</p>
+                )}
+                {appliedPromo && (
+                  <div className='text-xs text-green-700 mt-1'>
+                    Promo {appliedPromo.promo_code} • Diskon{' '}
+                    {appliedPromo.discount_amount}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -430,7 +471,11 @@ export default function OrderConfirmation() {
                   style: 'currency',
                   currency: 'IDR',
                   minimumFractionDigits: 0,
-                }).format(total)}
+                }).format(
+                  appliedPromo && isLoggedIn
+                    ? Number(appliedPromo.total_after_discount || 0)
+                    : total,
+                )}
               </span>
             </div>
             <Button
