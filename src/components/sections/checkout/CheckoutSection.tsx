@@ -7,29 +7,145 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cart';
+import { useAuthStatus } from '@/hooks/use-auth-status';
+import { useCartQuery } from '@/hooks/use-cart';
+import { useDefaultAddressQuery } from '@/hooks/use-address';
+import type { ShippingServiceItem } from '@/types/shipping';
+import {
+  useCouriersQuery,
+  useShippingCalculateQuery,
+} from '@/hooks/use-shipping';
 
 interface CheckoutSectionProps {
   onTotalChange?: (total: number) => void;
+  onSelectionChange?: (sel: {
+    courierId: number | null;
+    serviceCode: string | null;
+    shippingFee: number;
+    estimatedDay: string | null;
+  }) => void;
 }
 
-export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
-  const { items } = useCartStore();
+export function CheckoutSection({
+  onTotalChange,
+  onSelectionChange,
+}: CheckoutSectionProps) {
+  const { isLoggedIn, isReady } = useAuthStatus();
+  const { items: guestItems } = useCartStore();
+  const { data: memberCart } = useCartQuery(isReady && isLoggedIn);
+  const { data: defaultAddress } = useDefaultAddressQuery(
+    isReady && isLoggedIn,
+  );
   const [usePoints, setUsePoints] = useState(false);
 
-  const subtotalProduct = useMemo(
-    () => items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
-    [items],
+  const { data: couriersRes, isLoading: loadingCouriers } = useCouriersQuery(
+    isReady && isLoggedIn,
   );
-  const subtotalShipping = items.length > 0 ? 10000 : 0;
-  const pointsDiscount = usePoints ? 5000 : 0; 
+  const couriers = useMemo(() => couriersRes?.data ?? [], [couriersRes]);
+  const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (couriers.length > 0 && selectedCourierId == null) {
+      setSelectedCourierId(couriers[0].id);
+    }
+  }, [couriers, selectedCourierId]);
+
+  const selectedCourier = useMemo(() => {
+    return couriers.find((c) => c.id === selectedCourierId) || null;
+  }, [couriers, selectedCourierId]);
+
+  const cartId = memberCart?.data?.cart_id;
+  const addressId = defaultAddress?.data?.id;
+
+  const { data: shippingCalcRes, isLoading: loadingShipping } =
+    useShippingCalculateQuery(
+      isLoggedIn &&
+        Boolean(selectedCourier?.code) &&
+        Boolean(cartId) &&
+        Boolean(addressId),
+      {
+        courier: selectedCourier?.code || '',
+        cart_id: cartId || 0,
+        address_id: addressId || 0,
+      },
+    );
+
+  const availableServices: ShippingServiceItem[] = useMemo(() => {
+    if (!shippingCalcRes?.data || !selectedCourier?.code) return [];
+    const key =
+      selectedCourier.code as keyof typeof shippingCalcRes.data.shipping_options;
+    const courierOpt = shippingCalcRes.data.shipping_options[key];
+    return courierOpt?.services ?? [];
+  }, [shippingCalcRes, selectedCourier]);
+
+  const [selectedServiceCode, setSelectedServiceCode] = useState<string | null>(
+    null,
+  );
+  useEffect(() => {
+    if (availableServices.length > 0 && !selectedServiceCode) {
+      setSelectedServiceCode(availableServices[0].code);
+    }
+  }, [availableServices, selectedServiceCode]);
+
+  const selectedService = useMemo(() => {
+    return (
+      availableServices.find((s) => s.code === selectedServiceCode) || null
+    );
+  }, [availableServices, selectedServiceCode]);
+
+  const displayItems = useMemo(() => {
+    if (isLoggedIn) {
+      return (memberCart?.data?.items ?? []).map((i) => ({
+        key: String(i.id),
+        name: i.product_name,
+        quantity: i.qty,
+        total: i.subtotal,
+      }));
+    }
+    return guestItems.map((i) => ({
+      key: i.product.id,
+      name: i.product.name,
+      quantity: i.quantity,
+      total: i.product.price * i.quantity,
+    }));
+  }, [isLoggedIn, memberCart, guestItems]);
+
+  const subtotalProduct = useMemo(
+    () => displayItems.reduce((sum, i) => sum + i.total, 0),
+    [displayItems],
+  );
+  const subtotalShipping = useMemo(() => {
+    if (!isLoggedIn) return 0;
+    if (!selectedService) return 0;
+    return selectedService.cost || 0;
+  }, [isLoggedIn, selectedService]);
+  const pointsDiscount = usePoints ? 5000 : 0;
   const totalOrder = useMemo(
     () => Math.max(0, subtotalProduct + subtotalShipping - pointsDiscount),
     [subtotalProduct, subtotalShipping, pointsDiscount],
   );
 
+  const estimatedDeliveryDate = useMemo(() => {
+    const dayStr = selectedService?.estimated_day || '';
+    const match = dayStr.match(/\d+/);
+    const days = match ? parseInt(match[0], 10) : 3;
+    return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  }, [selectedService]);
+
   useEffect(() => {
     onTotalChange?.(totalOrder);
   }, [totalOrder, onTotalChange]);
+
+  useEffect(() => {
+    onSelectionChange?.({
+      courierId: selectedCourier?.id ?? null,
+      serviceCode: selectedService?.code ?? null,
+      shippingFee: subtotalShipping,
+      estimatedDay: selectedService?.estimated_day ?? null,
+    });
+  }, [onSelectionChange, selectedCourier, selectedService, subtotalShipping]);
 
   const format = (n: number) => new Intl.NumberFormat('id-ID').format(n);
 
@@ -47,10 +163,27 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
             />
             <div className='flex-1'>
               <p className='text-xs text-gray-600 mb-0.5'>Dikirim ke</p>
-              <h3 className='text-sm font-semibold text-gray-900'>Kantor</h3>
-              <p className='text-sm text-gray-600'>
-                Jl. Suretejo Utara Baru No.174, RT. 003/RW.04, Dukuh
-              </p>
+              {isLoggedIn ? (
+                <>
+                  <h3 className='text-sm font-semibold text-gray-900'>
+                    {defaultAddress?.data?.recipient_name || 'Alamat Utama'}
+                  </h3>
+                  <p className='text-sm text-gray-600'>
+                    {defaultAddress?.data
+                      ? `${defaultAddress.data.address_line}, ${defaultAddress.data.postal_code}`
+                      : 'Memuat alamat…'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className='text-sm font-semibold text-gray-900'>
+                    Alamat Tamu
+                  </h3>
+                  <p className='text-sm text-gray-600'>
+                    Diisi pada langkah sebelumnya
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </CardContent>
@@ -64,17 +197,17 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
             </div>
             <h3 className='text-sm font-semibold text-gray-900'>Pesanan</h3>
             <span className='text-xs text-gray-500 ml-auto'>
-              Total {items.reduce((acc, i) => acc + i.quantity, 0)} Item
+              Total {displayItems.reduce((acc, i) => acc + i.quantity, 0)} Item
             </span>
           </div>
 
           <div className='space-y-4'>
-            {items.length === 0 && (
+            {displayItems.length === 0 && (
               <p className='text-xs text-gray-500'>Keranjang kosong.</p>
             )}
-            {items.map((i, idx) => (
+            {displayItems.map((i, idx) => (
               <div
-                key={i.product.id}
+                key={i.key}
                 className='flex justify-between items-center relative'
               >
                 <div className='flex-1 pr-2'>
@@ -82,13 +215,13 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
                     {i.quantity} x
                   </span>
                   <p className='text-sm font-semibold text-gray-900 mt-1 line-clamp-2'>
-                    {i.product.name}
+                    {i.name}
                   </p>
                 </div>
                 <p className='text-sm font-semibold text-gray-900 ml-4 whitespace-nowrap'>
-                  Rp {format(i.product.price * i.quantity)}
+                  Rp {format(i.total)}
                 </p>
-                {idx !== items.length - 1 && (
+                {idx !== displayItems.length - 1 && (
                   <hr className='border-dashed border-gray-300 absolute -bottom-2 left-0 right-0' />
                 )}
               </div>
@@ -109,9 +242,76 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
         </AlertDescription>
       </Alert>
 
+      <Card className='border-0 shadow-sm'>
+        <CardContent className='p-4'>
+          <div className='flex items-center justify-between gap-3'>
+            <label
+              htmlFor='courier'
+              className='text-sm font-semibold text-gray-900'
+            >
+              Pilih kurir
+            </label>
+            {isLoggedIn ? (
+              <select
+                id='courier'
+                value={selectedCourierId ?? ''}
+                onChange={(e) => {
+                  const id = Number(e.target.value);
+                  setSelectedCourierId(isNaN(id) ? null : id);
+                  setSelectedServiceCode(null);
+                }}
+                disabled={displayItems.length === 0 || loadingCouriers}
+                className='w-1/2 md:w-2/5 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
+                aria-disabled={displayItems.length === 0}
+              >
+                {couriers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className='text-xs text-gray-600'>
+                Login untuk memilih kurir resmi.
+              </p>
+            )}
+          </div>
+          {isLoggedIn && selectedCourier && (
+            <>
+              <div className='flex items-center justify-between gap-3 mt-3'>
+                <label
+                  htmlFor='service'
+                  className='text-sm font-semibold text-gray-900'
+                >
+                  Paket layanan
+                </label>
+                <select
+                  id='service'
+                  value={selectedServiceCode ?? ''}
+                  onChange={(e) => setSelectedServiceCode(e.target.value)}
+                  disabled={availableServices.length === 0 || loadingShipping}
+                  className='w-1/2 md:w-2/5 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
+                >
+                  {availableServices.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name} — Rp {format(s.cost)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <p className='text-xs text-gray-600 mt-2'>
+                Ongkir: Rp {format(subtotalShipping)} • Estimasi:{' '}
+                {selectedService?.estimated_day || '-'}
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       <div className='space-y-3'>
         <h3 className='text-sm font-semibold text-gray-900'>
-          Estimasi Pengiriman 2 - 4 hari
+          Estimasi Pengiriman {selectedService?.estimated_day || '-'}
         </h3>
 
         <div className='flex items-center justify-between'>
@@ -150,9 +350,7 @@ export function CheckoutSection({ onTotalChange }: CheckoutSectionProps) {
                 Estimasi terkirim :
               </p>
               <p className='text-base font-semibold text-black'>
-                {new Date(
-                  Date.now() + 3 * 24 * 60 * 60 * 1000,
-                ).toLocaleDateString('id-ID', {
+                {estimatedDeliveryDate.toLocaleDateString('id-ID', {
                   day: '2-digit',
                   month: 'long',
                   year: 'numeric',
