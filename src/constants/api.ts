@@ -16,4 +16,8 @@ export const API_ENDPOINTS = {
   locationProvinces: '/location/provinces',
   locationCities: '/location/cities',
   locationDistricts: '/location/districts',
+  shippingCouriers: '/shipping/couriers',
+  shippingCalculate: '/shipping/calculate',
+  checkout: '/checkout',
+  checkoutApplyPromo: '/checkout/apply-promo',
 } as const;
