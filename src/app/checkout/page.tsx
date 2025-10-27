@@ -9,6 +9,44 @@ import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { checkoutService } from '@/services/checkout';
 import { useCheckoutStore } from '@/store/checkout';
+import { toast } from 'sonner';
+
+async function loadMidtransSnap(paymentUrl?: string) {
+  if (typeof window === 'undefined') return;
+  if (window.snap?.pay) return;
+
+  const isSandbox = paymentUrl?.includes('sandbox');
+  const src = isSandbox
+    ? 'https://app.sandbox.midtrans.com/snap/snap.js'
+    : 'https://app.midtrans.com/snap/snap.js';
+
+  await new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Gagal memuat Midtrans Snap'));
+    document.body.appendChild(s);
+  });
+}
+
+function extractSnapToken(paymentUrl?: string): string | undefined {
+  if (!paymentUrl) return undefined;
+  try {
+    const u = new URL(paymentUrl);
+    const parts = u.pathname.split('/');
+    return parts[parts.length - 1] || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function isCheckoutSuccess(
+  x: unknown,
+): x is { success: true; data?: { payment_url?: string } } {
+  if (!x || typeof x !== 'object') return false;
+  const obj = x as Record<string, unknown>;
+  return obj.success === true;
+}
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -70,13 +108,54 @@ export default function CheckoutPage() {
         shipping_day: day,
         shipping_fee: fee,
       });
-      // You can redirect based on response if backend returns payment link
-      console.log('Checkout response:', res.data);
-      // For now, go to order confirmation page after checkout
-      router.push('/order-confirmation');
-      clearCheckout();
+      const payload = res.data as unknown;
+      if (isCheckoutSuccess(payload) && payload.data) {
+        const paymentUrl: string | undefined = payload.data.payment_url as
+          | string
+          | undefined;
+
+        const token = extractSnapToken(paymentUrl);
+        try {
+          await loadMidtransSnap(paymentUrl);
+          if (window.snap?.pay && token) {
+            window.snap.pay(token, {
+              onSuccess: () => {
+                toast.success('Pembayaran berhasil');
+                clearCheckout();
+                router.push('/order-confirmation');
+              },
+              onPending: () => {
+                toast.info('Menunggu pembayaran');
+              },
+              onError: () => {
+                toast.error('Terjadi kesalahan pembayaran');
+              },
+              onClose: () => {
+                // user closed modal
+              },
+            });
+            return;
+          }
+        } catch (err) {
+          console.warn('Snap modal tidak tersedia, fallback ke redirect:', err);
+        }
+
+        if (paymentUrl) {
+          // Fallback redirect
+          window.location.href = paymentUrl;
+          return;
+        }
+
+        // Final fallback: go to confirmation if no payment url
+        router.push('/order-confirmation');
+        clearCheckout();
+        return;
+      }
+
+      toast.error('Checkout gagal: respons tidak valid');
     } catch (e) {
       console.error('Checkout failed:', e);
+      toast.error((e as Error)?.message || 'Checkout gagal');
     } finally {
       setIsPaying(false);
     }
