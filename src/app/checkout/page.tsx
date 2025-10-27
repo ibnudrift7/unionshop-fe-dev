@@ -8,6 +8,7 @@ import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { checkoutService } from '@/services/checkout';
+import { useCheckoutStore } from '@/store/checkout';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function CheckoutPage() {
     estimatedDay: null,
   });
   const [isPaying, setIsPaying] = useState(false);
+  const promo = useCheckoutStore((s) => s.promo);
+  const clearCheckout = useCheckoutStore((s) => s.clear);
 
   const totalFormatted = useMemo(
     () =>
@@ -59,7 +62,7 @@ export default function CheckoutPage() {
     try {
       const res = await checkoutService.create({
         shipping_address_id: addressId,
-        promo_code: '',
+        promo_code: promo?.promo_code || '',
         points_to_use: '0',
         order_notes: '',
         courier_id: courierId,
@@ -71,6 +74,7 @@ export default function CheckoutPage() {
       console.log('Checkout response:', res.data);
       // For now, go to order confirmation page after checkout
       router.push('/order-confirmation');
+      clearCheckout();
     } catch (e) {
       console.error('Checkout failed:', e);
     } finally {
@@ -98,6 +102,11 @@ export default function CheckoutPage() {
       />
 
       <div className='px-4 py-6 sm:py-8'>
+        {promo?.promo_code && (
+          <div className='text-xs text-green-700 mb-2'>
+            Promo {promo.promo_code} diterapkan
+          </div>
+        )}
         <Button
           className='w-full bg-brand hover:bg-brand/80 text-white font-bold text-lg py-7 rounded-xl justify-center'
           onClick={handlePay}
