@@ -27,6 +27,9 @@ export default function GuestAddressPage() {
   const [districtName, setDistrictName] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
+  const [addressDetailError, setAddressDetailError] = useState<string | null>(
+    null,
+  );
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     let v = String(e.target.value || '')?.replace(/\D/g, '');
@@ -68,6 +71,10 @@ export default function GuestAddressPage() {
   };
 
   const handleSubmit = () => {
+    if (addressDetail.trim().length < 10) {
+      setAddressDetailError('Detail alamat minimal 10 karakter');
+      return;
+    }
     if (phone) {
       const digits = phone.replace(/\D/g, '');
       if (!/^(08|62)/.test(digits)) {
@@ -248,8 +255,16 @@ export default function GuestAddressPage() {
             className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm'
             placeholder='Nama jalan, no rumah, RT/RW, patokan, dsb.'
             value={addressDetail}
-            onChange={(e) => setAddressDetail(e.target.value)}
+            onChange={(e) => {
+              const v = (e.target as HTMLTextAreaElement).value;
+              setAddressDetail(v);
+              if (v.trim().length >= 10) setAddressDetailError(null);
+              else setAddressDetailError('Detail alamat minimal 10 karakter');
+            }}
           />
+          {addressDetailError ? (
+            <p className='text-xs text-red-600'>{addressDetailError}</p>
+          ) : null}
         </div>
 
         <div className='pt-2'>
