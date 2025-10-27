@@ -22,6 +22,15 @@ export interface DefaultAddressResponse {
   data: DefaultAddressData | null;
 }
 
+export type AddressItem = DefaultAddressData;
+
+export interface AddressListResponse {
+  statusCode: number;
+  message: string;
+  success: boolean;
+  data: AddressItem[];
+}
+
 export interface CreateAddressPayload {
   recipient_name: string;
   phone: string;
@@ -53,4 +62,29 @@ export interface CreateAddressResponse {
   message: string;
   success: boolean;
   data: CreateAddressData;
+}
+
+export interface UpdateAddressPayload {
+  recipient_name: string;
+  phone: string;
+  province_id: number | string;
+  city_id: number | string;
+  subdistrict_id: number | string;
+  address_line: string;
+  postal_code: string;
+  is_default: 'true' | 'false' | string;
+  subdistrict_name: string;
+}
+
+export interface UpdateAddressResponse {
+  statusCode: number;
+  message: string;
+  success: boolean;
+  data: number; // affected rows
+}
+
+export interface DeleteAddressResponse {
+  statusCode: number;
+  message: string;
+  success: boolean;
 }

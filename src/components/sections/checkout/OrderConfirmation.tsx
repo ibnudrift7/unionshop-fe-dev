@@ -21,6 +21,7 @@ import {
 import { useGuestAddress } from '@/hooks/use-guest-address';
 import { useApplyPromoMutation } from '@/hooks/use-checkout';
 import type { ApplyPromoData } from '@/types/promo';
+import { useCheckoutStore } from '@/store/checkout';
 
 export default function OrderConfirmation() {
   const router = useRouter();
@@ -79,6 +80,7 @@ export default function OrderConfirmation() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const { mutate: applyPromoMutate, isPending: isApplying } =
     useApplyPromoMutation();
+  const setCheckoutPromo = useCheckoutStore((s) => s.setPromo);
 
   const applyPromo = () => {
     setPromoError(null);
@@ -100,6 +102,7 @@ export default function OrderConfirmation() {
       {
         onSuccess: (res) => {
           setAppliedPromo(res.data);
+          setCheckoutPromo(res.data);
           setPromoCode('');
           toast.success(res.message || `Kode "${code}" berhasil diterapkan`);
         },
