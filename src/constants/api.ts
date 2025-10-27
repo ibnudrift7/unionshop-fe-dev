@@ -20,4 +20,10 @@ export const API_ENDPOINTS = {
   shippingCalculate: '/shipping/calculate',
   checkout: '/checkout',
   checkoutApplyPromo: '/checkout/apply-promo',
+  orders: '/user/order',
+  orderDetail: '/user/order',
+  orderShipmentHistory: '/user/order',
+  orderCreateReview: '/user/order',
+  orderReviews: '/user/order',
+  webhookOrderStatus: '/webhooks/order-status',
 } as const;
