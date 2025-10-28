@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useMemo, useEffect, useState } from 'react';
+import { getGuestToken } from '@/lib/auth-token';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -28,7 +29,10 @@ export default function OrderConfirmation() {
   const { isLoggedIn, isReady } = useAuthStatus();
 
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
-  const { data: memberCart } = useCartQuery(isReady && isLoggedIn);
+  const guestToken = typeof window !== 'undefined' ? getGuestToken() : null;
+  const { data: memberCart } = useCartQuery(
+    isReady && (isLoggedIn || Boolean(guestToken)),
+  );
   const { mutate: updateMemberQty } = useUpdateCartItemQtyMutation();
   const { mutate: deleteMemberItem } = useDeleteCartItemMutation();
 

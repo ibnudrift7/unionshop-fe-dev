@@ -10,6 +10,7 @@ import { useCartStore } from '@/store/cart';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
+import { useGuestAddress } from '@/hooks/use-guest-address';
 import type { ShippingServiceItem } from '@/types/shipping';
 import {
   useCouriersQuery,
@@ -32,14 +33,49 @@ export function CheckoutSection({
 }: CheckoutSectionProps) {
   const { isLoggedIn, isReady } = useAuthStatus();
   const { items: guestItems } = useCartStore();
-  const { data: memberCart } = useCartQuery(isReady && isLoggedIn);
+  const [guestToken, setGuestToken] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('guest_token') : null,
+  );
+  const [guestCartInfo, setGuestCartInfo] = useState<{
+    cart_id?: number;
+    address_id?: number;
+  } | null>(() => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const raw = localStorage.getItem('guest_cart_info');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'guest_token')
+        setGuestToken(localStorage.getItem('guest_token'));
+      if (e.key === 'guest_cart_info') {
+        try {
+          const raw = localStorage.getItem('guest_cart_info');
+          setGuestCartInfo(raw ? JSON.parse(raw) : null);
+        } catch {
+          setGuestCartInfo(null);
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const { data: defaultAddress } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
-  const [usePoints, setUsePoints] = useState(false);
+  const { data: guestAddress } = useGuestAddress();
 
+  const isGuest = Boolean(guestToken);
+  const { data: memberCart } = useCartQuery(isReady && (isLoggedIn || isGuest));
+  const [usePoints, setUsePoints] = useState(false);
   const { data: couriersRes, isLoading: loadingCouriers } = useCouriersQuery(
-    isReady && isLoggedIn,
+    isReady && (isLoggedIn || isGuest),
   );
   const couriers = useMemo(() => couriersRes?.data ?? [], [couriersRes]);
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
@@ -56,12 +92,12 @@ export function CheckoutSection({
     return couriers.find((c) => c.id === selectedCourierId) || null;
   }, [couriers, selectedCourierId]);
 
-  const cartId = memberCart?.data?.cart_id;
-  const addressId = defaultAddress?.data?.id;
+  const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
+  const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;
 
   const { data: shippingCalcRes, isLoading: loadingShipping } =
     useShippingCalculateQuery(
-      isLoggedIn &&
+      (isLoggedIn || isGuest) &&
         Boolean(selectedCourier?.code) &&
         Boolean(cartId) &&
         Boolean(addressId),
@@ -97,17 +133,24 @@ export function CheckoutSection({
 
   const displayItems = useMemo(() => {
     if (isLoggedIn) {
-      return (memberCart?.data?.items ?? []).map((i) => ({
-        key: String(i.id),
-        name: i.product_name,
-        quantity: i.qty,
-        total: i.subtotal,
-      }));
+      return (memberCart?.data?.items ?? []).map((i) => {
+        const price = Number(i.prices ?? i.sale_price ?? i.base_price ?? 0);
+        const qty = Number(i.qty ?? 0);
+        const total = Number(i.subtotal ?? price * qty);
+        return {
+          key: String(i.id),
+          name: i.product_name,
+          quantity: qty,
+          price,
+          total,
+        };
+      });
     }
     return guestItems.map((i) => ({
       key: i.product.id,
       name: i.product.name,
       quantity: i.quantity,
+      price: i.product.price,
       total: i.product.price * i.quantity,
     }));
   }, [isLoggedIn, memberCart, guestItems]);
@@ -117,10 +160,9 @@ export function CheckoutSection({
     [displayItems],
   );
   const subtotalShipping = useMemo(() => {
-    if (!isLoggedIn) return 0;
     if (!selectedService) return 0;
     return selectedService.cost || 0;
-  }, [isLoggedIn, selectedService]);
+  }, [selectedService]);
   const pointsDiscount = usePoints ? 5000 : 0;
   const totalOrder = useMemo(
     () => Math.max(0, subtotalProduct + subtotalShipping - pointsDiscount),
@@ -177,10 +219,16 @@ export function CheckoutSection({
               ) : (
                 <>
                   <h3 className='text-sm font-semibold text-gray-900'>
-                    Alamat Tamu
+                    {guestAddress?.name || 'Alamat Tamu'}
                   </h3>
                   <p className='text-sm text-gray-600'>
-                    Diisi pada langkah sebelumnya
+                    {guestAddress
+                      ? `${guestAddress.addressDetail}, ${
+                          guestAddress.districtName || guestAddress.district
+                        }, ${guestAddress.cityName || guestAddress.city}, ${
+                          guestAddress.provinceName || guestAddress.province
+                        } ${guestAddress.postalCode}`
+                      : 'Diisi pada langkah sebelumnya'}
                   </p>
                 </>
               )}
@@ -217,6 +265,11 @@ export function CheckoutSection({
                   <p className='text-sm font-semibold text-gray-900 mt-1 line-clamp-2'>
                     {i.name}
                   </p>
+                  {typeof i.price !== 'undefined' && (
+                    <p className='text-xs text-gray-500 mt-1'>
+                      Rp {format(i.price)} / pcs
+                    </p>
+                  )}
                 </div>
                 <p className='text-sm font-semibold text-gray-900 ml-4 whitespace-nowrap'>
                   Rp {format(i.total)}
@@ -251,7 +304,7 @@ export function CheckoutSection({
             >
               Pilih kurir
             </label>
-            {isLoggedIn ? (
+            {isLoggedIn || isGuest ? (
               <select
                 id='courier'
                 value={selectedCourierId ?? ''}
@@ -272,11 +325,11 @@ export function CheckoutSection({
               </select>
             ) : (
               <p className='text-xs text-gray-600'>
-                Login untuk memilih kurir resmi.
+                Masukkan alamat / daftar tamu untuk memilih kurir.
               </p>
             )}
           </div>
-          {isLoggedIn && selectedCourier && (
+          {(isLoggedIn || isGuest) && selectedCourier && (
             <>
               <div className='flex items-center justify-between gap-3 mt-3'>
                 <label

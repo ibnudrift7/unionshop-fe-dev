@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { setGuestAddress } from '@/hooks/use-guest-address';
+import { useRegisterGuestMutation } from '@/hooks/use-auth';
+import { useCartStore } from '@/store/cart';
 import {
   useProvincesQuery,
   useCitiesQuery,
@@ -16,13 +18,13 @@ import {
 
 export default function GuestAddressPage() {
   const router = useRouter();
+  const { items: guestItems } = useCartStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [provinceId, setProvinceId] = useState('');
-  const [provinceName, setProvinceName] = useState('');
+  // provinceName and cityName no longer needed once we send IDs directly
   const [cityId, setCityId] = useState('');
-  const [cityName, setCityName] = useState('');
   const [districtId, setDistrictId] = useState('');
   const [districtName, setDistrictName] = useState('');
   const [postalCode, setPostalCode] = useState('');
@@ -45,21 +47,19 @@ export default function GuestAddressPage() {
   const provinces = provincesQuery.data?.data ?? [];
   const cities = citiesQuery.data?.data ?? [];
   const districts = districtsQuery.data?.data ?? [];
+  const { mutate: registerGuest, isPending } = useRegisterGuestMutation();
 
   const onProvinceChange = (id: string) => {
     setProvinceId(id);
-    const selected = provinces.find((p) => String(p.id) === String(id));
-    setProvinceName(selected?.name ?? '');
+    // Name not needed for payload; sending IDs
     setCityId('');
-    setCityName('');
     setDistrictId('');
     setDistrictName('');
   };
 
   const onCityChange = (id: string) => {
     setCityId(id);
-    const selected = cities.find((c) => String(c.id) === String(id));
-    setCityName(selected?.name ?? '');
+    // Name not needed for payload; sending IDs
     setDistrictId('');
     setDistrictName('');
   };
@@ -91,24 +91,122 @@ export default function GuestAddressPage() {
       }
     }
     setPhoneError(null);
-    setGuestAddress({
-      name,
-      email,
-      phone,
-      province: provinceName,
-      city: cityName,
-      district: districtName,
-      provinceId,
-      provinceName,
-      cityId,
-      cityName,
-      districtId,
-      districtName,
-      postalCode,
-      addressDetail,
+
+    // Build cart items from local guest cart
+    const cartItems = guestItems.map((i) => {
+      const pid = Number(i.product.id);
+      const qty = i.quantity;
+      const productMaybe = i.product as unknown as {
+        selectedAttributes?: Array<{ name: string; value: string }>;
+      };
+      const attrs: Array<{ name: string; value: string }> = Array.isArray(
+        productMaybe?.selectedAttributes,
+      )
+        ? productMaybe.selectedAttributes!
+        : [];
+      return {
+        product_id: Number.isFinite(pid)
+          ? pid
+          : parseInt(String(i.product.id), 10) || 0,
+        qty,
+        attributes: attrs,
+      };
     });
-    toast.success('Alamat pengiriman disimpan');
-    router.push('/order-confirmation');
+
+    if (cartItems.length === 0) {
+      toast.error('Keranjang masih kosong');
+      return;
+    }
+
+    const payload = {
+      email,
+      full_name: name,
+      phone,
+      shipping_address: {
+        province_id: parseInt(provinceId || '0', 10),
+        city_id: parseInt(cityId || '0', 10),
+        subdistrict_id: parseInt(districtId || '0', 10),
+        subdistrict_name: districtName,
+        address_line: addressDetail,
+        postal_code: postalCode,
+      },
+      cart_items: cartItems,
+    };
+
+    registerGuest(payload, {
+      onSuccess: (res) => {
+        try {
+          // Store guest token under a separate key so app doesn't treat guest as full auth
+          if (res.data?.token) {
+            localStorage.setItem('guest_token', res.data.token);
+          }
+
+          // Persist minimal user and cart info for reference
+          localStorage.setItem('guest_user', JSON.stringify(res.data.user));
+          localStorage.setItem(
+            'guest_cart_info',
+            JSON.stringify({
+              cart_id: res.data.cart_id,
+              address_id: res.data.address_id,
+            }),
+          );
+
+          // Save the address locally so OrderConfirmation reads it from local storage
+          const provinceName =
+            provinces.find((p) => String(p.id) === String(provinceId))?.name ??
+            '';
+          const cityName =
+            cities.find((c) => String(c.id) === String(cityId))?.name ?? '';
+          const guestAddr = {
+            name,
+            email,
+            phone,
+            province: provinceName,
+            city: cityName,
+            district: districtName,
+            provinceId,
+            provinceName,
+            cityId,
+            cityName,
+            districtId,
+            districtName,
+            postalCode,
+            addressDetail,
+          };
+          setGuestAddress(guestAddr);
+          // Note: do NOT clear local guest cart so that OrderConfirmation continues to show guest items
+        } catch {}
+
+        toast.success(
+          res.message || 'Akun tamu berhasil dibuat. Lanjutkan ke konfirmasi.',
+        );
+        router.push('/order-confirmation');
+      },
+      onError: (err) => {
+        const raw = err?.data as unknown;
+        const obj =
+          (raw && typeof raw === 'object'
+            ? (raw as Record<string, unknown>)
+            : {}) || {};
+        const msg =
+          (typeof obj.message === 'string' && obj.message) ||
+          'Gagal mendaftarkan tamu';
+        const errors = obj.errors as Record<string, unknown> | undefined;
+        if (errors) {
+          if (typeof errors.email === 'string')
+            toast.error(String(errors.email));
+          if (typeof errors.full_name === 'string')
+            toast.error(String(errors.full_name));
+          if (typeof errors.phone === 'string')
+            toast.error(String(errors.phone));
+          if (typeof errors.shipping_address === 'string')
+            toast.error(String(errors.shipping_address));
+          if (typeof errors.cart_items === 'string')
+            toast.error(String(errors.cart_items));
+        }
+        toast.error(msg);
+      },
+    });
   };
 
   return (
@@ -271,8 +369,9 @@ export default function GuestAddressPage() {
           <Button
             className='w-full bg-brand hover:bg-brand/90 text-white'
             onClick={handleSubmit}
+            disabled={isPending}
           >
-            Simpan Data Pengiriman
+            {isPending ? 'Menyimpan…' : 'Simpan Data Pengiriman'}
           </Button>
         </div>
       </div>

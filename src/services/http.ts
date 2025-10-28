@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/constants/api';
-import { getAuthToken } from '@/lib/auth-token';
+import { getAuthToken, getGuestToken } from '@/lib/auth-token';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -69,7 +69,7 @@ export async function httpFetch<TResponse, TBody = unknown>(
 
   const existingAuth = hdr.get('Authorization');
   if (!existingAuth) {
-    const token = getAuthToken();
+    const token = getAuthToken() || getGuestToken();
     if (token) {
       hdr.set('Authorization', `Bearer ${token}`);
     }

@@ -3,12 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { getGuestToken } from '@/lib/auth-token';
 import { useRouter } from 'next/navigation';
 import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { checkoutService } from '@/services/checkout';
 import { useCheckoutStore } from '@/store/checkout';
+import { useCartStore as useLocalCartStore } from '@/store/cart';
 import { toast } from 'sonner';
 
 async function loadMidtransSnap(paymentUrl?: string) {
@@ -81,11 +83,27 @@ export default function CheckoutPage() {
   );
 
   const handlePay = async () => {
-    if (!isLoggedIn) {
-      console.warn('User must login to proceed checkout');
+    const guestToken = typeof window !== 'undefined' ? getGuestToken() : null;
+    if (!isLoggedIn && !guestToken) {
+      console.warn(
+        'User must login or be a registered guest to proceed checkout',
+      );
       return;
     }
-    const addressId = defaultAddress?.data?.id;
+
+    const addressId = isLoggedIn
+      ? defaultAddress?.data?.id
+      : ((): number | undefined => {
+          try {
+            if (typeof window === 'undefined') return undefined;
+            const raw = localStorage.getItem('guest_cart_info');
+            if (!raw) return undefined;
+            const parsed = JSON.parse(raw) as { address_id?: number };
+            return parsed.address_id;
+          } catch {
+            return undefined;
+          }
+        })();
     const courierId = selection.courierId;
     const serviceCode = selection.serviceCode;
     const fee = selection.shippingFee;
@@ -114,6 +132,18 @@ export default function CheckoutPage() {
           | string
           | undefined;
 
+        const clearGuestLocal = () => {
+          try {
+            if (typeof window === 'undefined') return;
+            localStorage.removeItem('guest_cart');
+            localStorage.removeItem('guest_cart_info');
+            localStorage.removeItem('guest_token');
+          } catch {}
+          try {
+            useLocalCartStore.setState({ items: [] });
+          } catch {}
+        };
+
         const token = extractSnapToken(paymentUrl);
         try {
           await loadMidtransSnap(paymentUrl);
@@ -121,8 +151,9 @@ export default function CheckoutPage() {
             window.snap.pay(token, {
               onSuccess: () => {
                 toast.success('Pembayaran berhasil');
+                clearGuestLocal();
                 clearCheckout();
-                router.push('/order-confirmation');
+                router.push('/user?thankyou=1');
               },
               onPending: () => {
                 toast.info('Menunggu pembayaran');
@@ -130,9 +161,7 @@ export default function CheckoutPage() {
               onError: () => {
                 toast.error('Terjadi kesalahan pembayaran');
               },
-              onClose: () => {
-                // user closed modal
-              },
+              onClose: () => {},
             });
             return;
           }
@@ -141,14 +170,22 @@ export default function CheckoutPage() {
         }
 
         if (paymentUrl) {
-          // Fallback redirect
           window.location.href = paymentUrl;
           return;
         }
 
-        // Final fallback: go to confirmation if no payment url
-        router.push('/order-confirmation');
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('guest_cart');
+            localStorage.removeItem('guest_cart_info');
+          }
+        } catch {}
+        try {
+          useLocalCartStore.setState({ items: [] });
+        } catch {}
         clearCheckout();
+        // If no snap and no paymentUrl, go to user page and show thank you dialog
+        router.push('/user?thankyou=1');
         return;
       }
 
