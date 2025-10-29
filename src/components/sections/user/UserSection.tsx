@@ -24,6 +24,7 @@ import {
 } from '@/hooks/use-auth';
 import { useProfileQuery } from '@/hooks/use-profile';
 import { setAuthToken, useAuthStatus } from '@/hooks/use-auth-status';
+import { clearUserLocalStorage } from '@/lib/auth-token';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
 import { locationService } from '@/services/location';
 import { addressService } from '@/services/address';
@@ -39,7 +40,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     icon: <Menu className='w-5 h-5 text-brand' />,
-    label: 'Riwayat Pesanan',
+    label: 'Pesanan',
     href: '/orders',
   },
   {
@@ -365,7 +366,7 @@ export default function MobileMenu() {
     setRegisterError(null);
     setUserName(null);
     try {
-      setAuthToken(null);
+      clearUserLocalStorage();
     } catch {}
     try {
       router.refresh();
@@ -376,6 +377,11 @@ export default function MobileMenu() {
   const [registerFieldErrors, setRegisterFieldErrors] = useState<
     Record<string, string>
   >({});
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (isLoggedIn) return true;
+    return item.href !== '/orders' && item.href !== '/shipping';
+  });
 
   return (
     <div className='w-full bg-white min-h-screen relative'>
@@ -446,57 +452,59 @@ export default function MobileMenu() {
         </div>
       </div>
 
-      <div className='px-4 pt-4'>
-        <Carousel
-          plugins={[plugin.current]}
-          className='w-full'
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
-          opts={{ align: 'start', loop: vouchers.length > 1 }}
-        >
-          <CarouselContent className='pr-4'>
-            {vouchers.map((item, idx) => (
-              <CarouselItem key={idx} className='basis-full'>
-                <div className='rounded-xl sm:rounded-2xl overflow-hidden border-3 border-gray-300 bg-white'>
-                  <div className='p-4 px-6 md:p-6 md:px-8'>
-                    <div className='flex items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
-                      <div className='flex-1'>
-                        <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-0 sm:mb-0 leading-tight'>
-                          {item.title1}
-                        </h3>
-                        <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-1 sm:mb-2'>
-                          {item.title2}
-                        </h3>
-                        <p className='text-[9px] md:text-sm font-semibold text-[#7c7c7c]'>
-                          {item.description}
-                        </p>
-                      </div>
-                      <div className='flex justify-end'>
-                        <div className='relative'>
-                          <Image
-                            src={item.image}
-                            alt='Voucher'
-                            width={150}
-                            height={150}
-                            className='w-auto h-20 md:w-auto md:h-28 object-contain'
-                          />
+      {isLoggedIn && (
+        <div className='px-4 pt-4'>
+          <Carousel
+            plugins={[plugin.current]}
+            className='w-full'
+            onMouseEnter={plugin.current.stop}
+            onMouseLeave={plugin.current.reset}
+            opts={{ align: 'start', loop: vouchers.length > 1 }}
+          >
+            <CarouselContent className='pr-4'>
+              {vouchers.map((item, idx) => (
+                <CarouselItem key={idx} className='basis-full'>
+                  <div className='rounded-xl sm:rounded-2xl overflow-hidden border-3 border-gray-300 bg-white'>
+                    <div className='p-4 px-6 md:p-6 md:px-8'>
+                      <div className='flex items-center justify-between mb-3 sm:mb-4 gap-2 sm:gap-3 md:gap-4'>
+                        <div className='flex-1'>
+                          <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-0 sm:mb-0 leading-tight'>
+                            {item.title1}
+                          </h3>
+                          <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-1 sm:mb-2'>
+                            {item.title2}
+                          </h3>
+                          <p className='text-[9px] md:text-sm font-semibold text-[#7c7c7c]'>
+                            {item.description}
+                          </p>
+                        </div>
+                        <div className='flex justify-end'>
+                          <div className='relative'>
+                            <Image
+                              src={item.image}
+                              alt='Voucher'
+                              width={150}
+                              height={150}
+                              className='w-auto h-20 md:w-auto md:h-28 object-contain'
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <Button className='w-full bg-brand hover:bg-brand/90 text-white font-base py-6 md:py-8 rounded-4xl text-sm md:text-base'>
-                      {item.buttonText}
-                    </Button>
+                      <Button className='w-full bg-brand hover:bg-brand/90 text-white font-base py-6 md:py-8 rounded-4xl text-sm md:text-base'>
+                        {item.buttonText}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+        </div>
+      )}
 
       <div className='p-4 space-y-2'>
-        {menuItems.map((item, index) => (
+        {visibleMenuItems.map((item, index) => (
           <Card
             key={index}
             className='border-0 shadow-none hover:bg-gray-50 transition-colors cursor-pointer'
@@ -614,23 +622,25 @@ export default function MobileMenu() {
         }}
       />
 
-      <div className='p-4 pt-2 space-y-7'>
-        <Button
-          variant='outline'
-          className='w-full h-auto py-5 md:py-6 text-base gap-3'
-          onClick={handleLogout}
-        >
-          <LogOut
-            className='w-7 h-7 text-black'
-            strokeWidth={2.5}
-            aria-hidden='true'
-          />
-          <span className='text-brand font-normal'>Logout</span>
-        </Button>
-        <p className='text-sm text-black text-center mb-10'>
-          Versi Website 0 01.00.00
-        </p>
-      </div>
+      {isLoggedIn && (
+        <div className='p-4 pt-2 space-y-7'>
+          <Button
+            variant='outline'
+            className='w-full h-auto py-5 md:py-6 text-base gap-3'
+            onClick={handleLogout}
+          >
+            <LogOut
+              className='w-7 h-7 text-black'
+              strokeWidth={2.5}
+              aria-hidden='true'
+            />
+            <span className='text-brand font-normal'>Logout</span>
+          </Button>
+          <p className='text-sm text-black text-center mb-10'>
+            Versi Website 0 01.00.00
+          </p>
+        </div>
+      )}
     </div>
   );
 }

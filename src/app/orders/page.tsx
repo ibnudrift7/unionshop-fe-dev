@@ -93,7 +93,7 @@ export default function RiwayatPesanan() {
 
         {isError && (
           <div className='p-4 text-sm text-red-600 bg-red-50 rounded-md'>
-            Gagal memuat pesanan: {error?.message ?? 'Terjadi kesalahan'}
+            {error?.message || 'Gagal memuat riwayat pesanan.'}
           </div>
         )}
 

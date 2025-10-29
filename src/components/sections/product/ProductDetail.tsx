@@ -193,7 +193,8 @@ export default function ProductDetail({
             <button
               type='button'
               onClick={() => {
-                /* reviews route */
+                if (product)
+                  router.push(`/product/${product.slug ?? product.id}/reviews`);
               }}
               className='flex items-center w-full text-left bg-transparent p-0 hover:opacity-80 cursor-pointer'
             >

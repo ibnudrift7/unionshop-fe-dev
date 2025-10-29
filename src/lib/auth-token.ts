@@ -52,3 +52,31 @@ export function setGuestToken(token?: string | null) {
     } catch {}
   } catch {}
 }
+
+export function clearUserLocalStorage() {
+  try {
+    if (typeof window === 'undefined') return;
+    const keysToRemove = [
+      'checkout_state',
+      'guest_address',
+      'guest_cart',
+      TOKEN_KEY,
+      GUEST_TOKEN_KEY,
+      'guest_user',
+      'TanstackQueryDevtools.open',
+    ];
+
+    keysToRemove.forEach((k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+    });
+
+    try {
+      setAuthToken(null);
+    } catch {}
+    try {
+      setGuestToken(null);
+    } catch {}
+  } catch {}
+}
