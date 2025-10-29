@@ -238,9 +238,11 @@ export default function ProductDetail({
             : 'Produk tidak ditemukan atau belum tersedia.'}
         </p>
 
+        {/* Color attribute ("type": "images") */}
         <div className='mb-6'>
           <h3 className='text-sm font-medium text-gray-900 mb-3'>
-            Color <span className='text-brand'>Pilih 1</span>
+            {colorAttr?.name ?? 'Color'}{' '}
+            <span className='text-brand'>Pilih 1</span>
           </h3>
           <div className='grid grid-cols-2 gap-4'>
             {colors.length > 0 ? (
@@ -265,11 +267,13 @@ export default function ProductDetail({
                           className='object-cover w-full h-full'
                         />
                       ) : (
-                        <span className='text-xs text-gray-500'>null</span>
+                        <span className='text-xs text-gray-700 text-center px-1'>
+                          {color.value || '—'}
+                        </span>
                       )}
                     </div>
                     <span className='text-xs font-medium'>
-                      {color.value || 'null'}
+                      {color.value || '—'}
                     </span>
                   </div>
                 </Card>
@@ -278,18 +282,20 @@ export default function ProductDetail({
               <Card className='w-full md:h-32 p-4 border-gray-200'>
                 <div className='flex flex-col items-center justify-center h-full space-y-2'>
                   <div className='w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center bg-gray-100'>
-                    <span className='text-xs text-gray-500'>null</span>
+                    <span className='text-xs text-gray-400'>—</span>
                   </div>
-                  <span className='text-xs font-medium'>null</span>
+                  <span className='text-xs font-medium text-gray-400'>—</span>
                 </div>
               </Card>
             )}
           </div>
         </div>
 
+        {/* attribute size ("type": "options") */}
         <div className='mb-6'>
           <h3 className='text-sm font-medium text-gray-900 mb-3'>
-            Size <span className='text-brand'>Pilih 1</span>
+            {sizeAttr?.name ?? 'Size'}{' '}
+            <span className='text-brand'>Pilih 1</span>
           </h3>
           <div className='flex w-full gap-2'>
             {sizes.length > 0 ? (
@@ -304,7 +310,7 @@ export default function ProductDetail({
                   }`}
                   onClick={() => setSelectedSizeId(size.id)}
                 >
-                  {size.value || 'null'}
+                  {size.value || '—'}
                 </Button>
               ))
             ) : (
@@ -312,7 +318,7 @@ export default function ProductDetail({
                 variant='outline'
                 className='flex-1 py-2 border-gray-300 text-gray-400 cursor-default'
               >
-                null
+                —
               </Button>
             )}
           </div>

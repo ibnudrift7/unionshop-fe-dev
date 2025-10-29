@@ -28,6 +28,9 @@ export interface ApiProductDetail {
   brand_id: number;
   base_price: string;
   sale_price: string;
+  average_rating?: string;
+  total_reviews?: number;
+  formatted_sales?: string;
   stock_quantity: number;
   stock_alert_threshold: number;
   is_active: number;
