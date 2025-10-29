@@ -193,7 +193,7 @@ export default function ProductDetail({
             <button
               type='button'
               onClick={() => {
-                /* reviews route could use slug or id later */
+                /* reviews route */
               }}
               className='flex items-center w-full text-left bg-transparent p-0 hover:opacity-80 cursor-pointer'
             >

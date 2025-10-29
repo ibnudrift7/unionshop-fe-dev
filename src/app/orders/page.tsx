@@ -12,7 +12,7 @@ import {
   useOrderReviewsQuery,
   useOrdersQuery,
 } from '@/hooks/use-orders';
-import type { OrderListItem, OrderHistoryItem } from '@/types/order';
+import type { OrderListItem } from '@/types/order';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { HttpError } from '@/services/http';
@@ -39,24 +39,13 @@ function resolveOrderImage(image?: string | null): string {
 }
 
 function deliveredByName(statusName?: string | null): boolean {
-  const name = (statusName ?? '').toLowerCase();
-  return /diterima|delivered|selesai|completed/.test(name);
+  if (!statusName) return false;
+  const name = statusName.toLowerCase().trim();
+  return name === 'complete' || name === 'completed';
 }
 
-function isOrderDelivered(history?: OrderHistoryItem[]): boolean {
-  if (!history || history.length === 0) return false;
-  const sorted = [...history].sort((a, b) => a.sort_order - b.sort_order);
-  const last = sorted[sorted.length - 1];
-  const name = (last?.status_name ?? '').toLowerCase();
-  return /diterima|delivered|selesai|completed/.test(name);
-}
-
-function isOrderDeliveredFrom(
-  orderStatusName?: string,
-  history?: OrderHistoryItem[],
-): boolean {
-  if (deliveredByName(orderStatusName)) return true;
-  return isOrderDelivered(history);
+function isOrderDeliveredFrom(orderStatusName?: string): boolean {
+  return deliveredByName(orderStatusName);
 }
 
 export default function RiwayatPesanan() {
@@ -127,13 +116,11 @@ function OrderCard({ order }: { order: OrderListItem }) {
   const [openRatings, setOpenRatings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  // Fetch shipment history immediately for this order card
   const { data: historyData, isLoading: historyLoading } = useOrderHistoryQuery(
     order.id,
     showHistory,
   );
 
-  // Reviews are fetched when the rating section is opened
   const { data: reviewsData, isLoading: reviewsLoading } = useOrderReviewsQuery(
     order.id,
     openRatings,
@@ -217,7 +204,6 @@ function OrderCard({ order }: { order: OrderListItem }) {
         </p>
 
         <div className='border-t border-gray-200 mb-4' />
-        {/* order shipment history - lazy loaded */}
         {showHistory && (
           <div className='inline-flex rounded-3xl items-center bg-white px-2 py-2 border border-gray-100 [box-shadow:0_0_5px_rgba(0,0,0,0.15)] relative'>
             {historyLoading && (
@@ -275,7 +261,7 @@ function OrderCard({ order }: { order: OrderListItem }) {
         <div className='border-t border-gray-200 mt-4' />
 
         {/* rating section - only show when order delivered */}
-        {isOrderDeliveredFrom(order.status_name, historyData?.data.history) && (
+        {isOrderDeliveredFrom(order.status_name) && (
           <div className='mt-4'>
             <div className='bg-[#F5F5F5] rounded-2xl p-3 sm:p-4'>
               <div className='flex items-center justify-between'>
