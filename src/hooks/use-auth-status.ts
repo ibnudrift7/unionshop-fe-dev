@@ -1,11 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-const TOKEN_KEY = 'laksdjfhlaksjdfhlaksjdfh_token_123456789';
+import {
+  TOKEN_KEY,
+  setAuthToken,
+  AUTH_TOKEN_CHANGED_EVENT,
+} from '@/lib/auth-token';
 
 export function useAuthStatus() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      if (typeof window === 'undefined') return false;
+      return Boolean(localStorage.getItem(TOKEN_KEY));
+    } catch {
+      return false;
+    }
+  });
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   useEffect(() => {
     const check = () => {
@@ -21,6 +32,7 @@ export function useAuthStatus() {
     };
 
     check();
+    setIsReady(true);
 
     const onStorage = (e: StorageEvent) => {
       if (e.key === TOKEN_KEY) {
@@ -28,22 +40,27 @@ export function useAuthStatus() {
       }
     };
 
+    const onAuthTokenChanged = () => {
+      check();
+    };
+
     window.addEventListener('storage', onStorage);
+    window.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      onAuthTokenChanged as EventListener,
+    );
     document.addEventListener('visibilitychange', check);
     return () => {
       window.removeEventListener('storage', onStorage);
+      window.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        onAuthTokenChanged as EventListener,
+      );
       document.removeEventListener('visibilitychange', check);
     };
   }, []);
 
-  return { isLoggedIn };
+  return { isLoggedIn, isReady };
 }
 
-export function setAuthToken(token?: string | null) {
-  try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // ignore storage errors
-  }
-}
+export { setAuthToken };

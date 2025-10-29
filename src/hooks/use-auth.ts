@@ -2,7 +2,12 @@
 
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
+import { guestService } from '@/services/guest';
 import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth';
+import type {
+  RegisterGuestPayload,
+  RegisterGuestResponse,
+} from '@/types/guest';
 import { HttpError } from '@/services/http';
 
 export const useLoginMutation = (
@@ -21,5 +26,29 @@ export const useRegisterMutation = (
     mutationKey: ['auth', 'register'],
     mutationFn: (payload) =>
       authService.register(payload).then((res) => res.data),
+    ...options,
+  });
+
+export const useForgotPasswordMutation = (
+  options?: UseMutationOptions<AuthResponse, HttpError, { email: string }>,
+) =>
+  useMutation<AuthResponse, HttpError, { email: string }>({
+    mutationKey: ['auth', 'forgot-password'],
+    mutationFn: ({ email }) =>
+      authService.forgotPassword(email).then((res) => res.data),
+    ...options,
+  });
+
+export const useRegisterGuestMutation = (
+  options?: UseMutationOptions<
+    RegisterGuestResponse,
+    HttpError,
+    RegisterGuestPayload
+  >,
+) =>
+  useMutation<RegisterGuestResponse, HttpError, RegisterGuestPayload>({
+    mutationKey: ['auth', 'register-guest'],
+    mutationFn: (payload) =>
+      guestService.registerGuest(payload).then((res) => res.data),
     ...options,
   });

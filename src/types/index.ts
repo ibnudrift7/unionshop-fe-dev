@@ -19,10 +19,24 @@ export interface SpecialProduct {
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   price: number;
   rating: number;
   sold: number;
   image?: string;
+  slug?: string;
+  images?: string[];
+  attributes?: Array<{
+    id: number;
+    name: string;
+    type: 'options' | 'images' | string;
+    values: Array<{
+      id: number;
+      value: string;
+      image: string | null;
+      price: number;
+    }>;
+  }>;
   isNew?: boolean;
   discountPrice?: number;
 }

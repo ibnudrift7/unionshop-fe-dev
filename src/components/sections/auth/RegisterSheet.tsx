@@ -1,6 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
+import {
+  useProvincesQuery,
+  useCitiesQuery,
+  useDistrictsQuery,
+} from '@/hooks/use-location';
 import {
   Sheet,
   SheetContent,
@@ -24,8 +29,8 @@ export interface RegisterSheetProps {
     dateOfBirth?: string; // ISO yyyy-mm-dd
     province?: string;
     city?: string;
-    district?: string; // kecamatan
-    postalCode?: string; // kode pos
+    district?: string;
+    postalCode?: string;
     addressDetail?: string;
   }) => void;
   onSwitchToLogin?: () => void;
@@ -64,6 +69,14 @@ export function RegisterSheet({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let v = String(e.target.value || '')?.replace(/\D/g, '');
+    if (v.length > 15) v = v.slice(0, 15);
+    setPhone(v);
+    if (!v || /^(08|62)\d*$/.test(v)) setPhoneError(null);
+    else setPhoneError('Nomor harus diawali dengan 08 atau 62');
+  };
   const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
   const [dateOfBirth, setDateOfBirth] = useState(''); // ISO yyyy-mm-dd
   const [dobDraft, setDobDraft] = useState('');
@@ -73,14 +86,56 @@ export function RegisterSheet({
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
 
+  const provincesQuery = useProvincesQuery(true);
+  const citiesQuery = useCitiesQuery(province || undefined);
+  const districtsQuery = useDistrictsQuery(city || undefined);
+
+  const provinces = provincesQuery.data?.data ?? [];
+  const cities = citiesQuery.data?.data ?? [];
+  const districts = districtsQuery.data?.data ?? [];
+
+  const handleProvinceChange = (id: string) => {
+    setProvince(id);
+    setCity('');
+    setDistrict('');
+  };
+
+  const handleCityChange = (id: string) => {
+    setCity(id);
+    setDistrict('');
+  };
+
   const handleSubmit = () => {
-    // FE validations
-    const hasLowercase = /[a-z]/.test(password);
-    if (!hasLowercase) {
+    if (!/[a-z]/.test(password)) {
       setPasswordError('Password harus mengandung minimal 1 huruf kecil');
       return;
     }
+    if (password.length < 8) {
+      setPasswordError('Password minimal 8 karakter');
+      return;
+    }
+    if (confirmPassword !== password) {
+      setPasswordError('Konfirmasi kata sandi tidak cocok');
+      return;
+    }
     setPasswordError(null);
+
+    if (phone) {
+      const digits = phone.replace(/\D/g, '');
+      if (!/^(08|62)/.test(digits)) {
+        setPhoneError('Nomor harus diawali dengan 08 atau 62');
+        return;
+      }
+      if (!/^\d+$/.test(digits)) {
+        setPhoneError('Nomor hanya boleh berisi angka');
+        return;
+      }
+      if (digits.length < 10 || digits.length > 15) {
+        setPhoneError('Nomor harus antara 10 hingga 15 digit');
+        return;
+      }
+    }
+    setPhoneError(null);
 
     onSubmit?.({
       name,
@@ -191,9 +246,15 @@ export function RegisterSheet({
               inputMode='tel'
               placeholder='08xxxxxxxxxx'
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
+              maxLength={15}
               disabled={isSubmitting}
             />
+            {phoneError ? (
+              <p className='text-xs text-red-600'>{phoneError}</p>
+            ) : fieldErrors.phone ? (
+              <p className='text-xs text-red-600'>{fieldErrors.phone}</p>
+            ) : null}
           </div>
 
           <div className='space-y-2 pt-1'>
@@ -306,42 +367,78 @@ export function RegisterSheet({
 
           <div className='space-y-1 pt-1'>
             <Label htmlFor='register-province'>Provinsi</Label>
-            <Input
+            <select
               id='register-province'
-              type='text'
-              placeholder='Provinsi'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={province}
-              onChange={(e) => setProvince(e.target.value)}
-              disabled={isSubmitting}
-            />
+              onChange={(e) => handleProvinceChange(e.target.value)}
+              disabled={isSubmitting || provincesQuery.isLoading}
+            >
+              <option value='' disabled>
+                {provincesQuery.isLoading ? 'Memuat...' : 'Pilih provinsi'}
+              </option>
+              {provinces.map((p) => (
+                <option key={p.id} value={String(p.id)}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.province ? (
               <p className='text-xs text-red-600'>{fieldErrors.province}</p>
             ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-city'>Kota/Kabupaten</Label>
-            <Input
+            <select
               id='register-city'
-              type='text'
-              placeholder='Kota atau Kabupaten'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={city}
-              onChange={(e) => setCity(e.target.value)}
-              disabled={isSubmitting}
-            />
+              onChange={(e) => handleCityChange(e.target.value)}
+              disabled={isSubmitting || !province || citiesQuery.isLoading}
+            >
+              <option value='' disabled>
+                {!province
+                  ? 'Pilih provinsi dulu'
+                  : citiesQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Pilih kota/kabupaten'}
+              </option>
+              {cities.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.city ? (
               <p className='text-xs text-red-600'>{fieldErrors.city}</p>
             ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-district'>Kecamatan</Label>
-            <Input
+            <select
               id='register-district'
-              type='text'
-              placeholder='Kecamatan'
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
-              disabled={isSubmitting}
-            />
+              disabled={
+                isSubmitting || !province || !city || districtsQuery.isLoading
+              }
+            >
+              <option value='' disabled>
+                {!province
+                  ? 'Pilih provinsi dulu'
+                  : !city
+                  ? 'Pilih kota/kabupaten dulu'
+                  : districtsQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Pilih kecamatan'}
+              </option>
+              {districts.map((d) => (
+                <option key={d.id} value={String(d.id)}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
             {fieldErrors.district ? (
               <p className='text-xs text-red-600'>{fieldErrors.district}</p>
             ) : null}

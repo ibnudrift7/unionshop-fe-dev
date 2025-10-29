@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,47 +13,112 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import type { EmblaCarouselType } from 'embla-carousel';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import BottomActionBar from './BottomActionBar';
-import { getProductById } from '../shop/data';
 import { useCartStore } from '@/store/cart';
+import type { Product } from '@/types';
+import { useAuthStatus } from '@/hooks/use-auth-status';
+import { useAddCartItemsMutation } from '@/hooks/use-cart';
 
-export default function ProductDetail() {
+interface ProductDetailProps {
+  product?: Product;
+  loading?: boolean;
+}
+
+export default function ProductDetail({
+  product,
+  loading = false,
+}: ProductDetailProps) {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
-  const productId = params?.id;
   const searchParams = useSearchParams();
   const noCart = searchParams.get('noCart') === '1';
-  const [selectedColor, setSelectedColor] = useState('PURPLE');
-  const [selectedSize, setSelectedSize] = useState('M');
+  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
+  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType | null>(
     null,
   );
+  const { isLoggedIn } = useAuthStatus();
+  const { mutate: addMemberCart } = useAddCartItemsMutation();
 
-  const product = useMemo(
-    () => (productId ? getProductById(productId) : undefined),
-    [productId],
+  const images = useMemo(() => {
+    if (product?.images && product.images.length > 0) return product.images;
+    if (product?.image) return [product.image];
+    return ['/assets/Product.png'];
+  }, [product]);
+
+  const colorAttr = useMemo(
+    () => product?.attributes?.find((a) => a.type === 'images'),
+    [product],
   );
+  const sizeAttr = useMemo(
+    () => product?.attributes?.find((a) => a.type === 'options'),
+    [product],
+  );
+  const colors = colorAttr?.values ?? [];
+  const sizes = sizeAttr?.values ?? [];
 
-  const images = product?.image
-    ? [product.image, '/assets/SpecialProduct.png']
-    : ['/assets/Product.png'];
-
-  const colors = [
-    { name: 'PURPLE', value: '#9333ea', code: 'PURPLE' },
-    { name: 'BW', value: '#374151', code: 'BW' },
-  ];
-  const sizes = ['M', 'L', 'XL', 'XXL'];
+  useEffect(() => {
+    setSelectedColorId(colors.length > 0 ? colors[0].id : null);
+    setSelectedSizeId(sizes.length > 0 ? sizes[0].id : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product]);
 
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, quantity + change));
   };
-
   const addToCart = () => {
     if (!product) return;
-    useCartStore.getState().addItem(product, quantity);
+    const attrs: Array<{ name: string; value: string }> = [];
+    if (colorAttr && selectedColorId != null) {
+      const v = colorAttr.values.find((vv) => vv.id === selectedColorId);
+      if (v) attrs.push({ name: colorAttr.name, value: v.value || 'null' });
+    }
+    if (sizeAttr && selectedSizeId != null) {
+      const v = sizeAttr.values.find((vv) => vv.id === selectedSizeId);
+      if (v) attrs.push({ name: sizeAttr.name, value: v.value || 'null' });
+    }
+
+    if (isLoggedIn) {
+      const productIdNum = Number(product.id);
+      if (!Number.isFinite(productIdNum)) {
+        useCartStore.getState().addItem(product, quantity);
+        router.push('/order-confirmation');
+        return;
+      }
+
+      addMemberCart(
+        [
+          {
+            product_id: productIdNum,
+            qty: quantity,
+            attributes: attrs,
+          },
+        ],
+        {
+          onSuccess: () => {
+            router.push('/order-confirmation');
+          },
+          onError: () => {
+            const productForCart = {
+              ...product,
+              selectedAttributes: attrs,
+            } as unknown as Product;
+            useCartStore.getState().addItem(productForCart, quantity);
+            router.push('/order-confirmation');
+          },
+        },
+      );
+      return;
+    }
+
+    // Guest mode: keranjang lokal
+    const productForCart = {
+      ...product,
+      selectedAttributes: attrs,
+    } as unknown as Product;
+    useCartStore.getState().addItem(productForCart, quantity);
     router.push('/order-confirmation');
   };
 
@@ -123,13 +188,13 @@ export default function ProductDetail() {
         <div className='flex items-start justify-between gap-4 mb-4'>
           <div className='flex-1 min-w-0'>
             <h1 className='text-xl font-bold text-gray-900 mb-1 line-clamp-2'>
-              {product?.name || 'Produk Tidak Ditemukan'}
+              {loading ? 'Memuat…' : product?.name || 'Produk Tidak Ditemukan'}
             </h1>
             <button
               type='button'
-              onClick={() =>
-                productId && router.push(`/product/${productId}/reviews`)
-              }
+              onClick={() => {
+                /* reviews route */
+              }}
               className='flex items-center w-full text-left bg-transparent p-0 hover:opacity-80 cursor-pointer'
             >
               <div className='flex items-center'>
@@ -165,9 +230,11 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        <p className='text-sm text-gray-600 mb-6 leading-relaxed'>
-          {product
-            ? 'Deskripsi produk masih berupa mock. Nantinya akan diisi dari API produk detail.'
+        <p className='text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-line'>
+          {loading
+            ? 'Memuat deskripsi…'
+            : product
+            ? product.description || 'Deskripsi tidak tersedia.'
             : 'Produk tidak ditemukan atau belum tersedia.'}
         </p>
 
@@ -176,25 +243,47 @@ export default function ProductDetail() {
             Color <span className='text-brand'>Pilih 1</span>
           </h3>
           <div className='grid grid-cols-2 gap-4'>
-            {colors.map((color) => (
-              <Card
-                key={color.code}
-                className={`w-full md:h-32 p-4 cursor-pointer transition-colors ${
-                  selectedColor === color.code
-                    ? 'border-brand border-2'
-                    : 'border-gray-200'
-                }`}
-                onClick={() => setSelectedColor(color.code)}
-              >
+            {colors.length > 0 ? (
+              colors.map((color) => (
+                <Card
+                  key={color.id}
+                  className={`w-full md:h-32 p-4 cursor-pointer transition-colors ${
+                    selectedColorId === color.id
+                      ? 'border-brand border-2'
+                      : 'border-gray-200'
+                  }`}
+                  onClick={() => setSelectedColorId(color.id)}
+                >
+                  <div className='flex flex-col items-center justify-center h-full space-y-2'>
+                    <div className='w-12 h-12 rounded-full border-2 border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100'>
+                      {color.image ? (
+                        <Image
+                          src={color.image}
+                          alt={color.value || 'Color'}
+                          width={48}
+                          height={48}
+                          className='object-cover w-full h-full'
+                        />
+                      ) : (
+                        <span className='text-xs text-gray-500'>null</span>
+                      )}
+                    </div>
+                    <span className='text-xs font-medium'>
+                      {color.value || 'null'}
+                    </span>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <Card className='w-full md:h-32 p-4 border-gray-200'>
                 <div className='flex flex-col items-center justify-center h-full space-y-2'>
-                  <div
-                    className='w-8 h-8 rounded-full border-2 border-gray-300'
-                    style={{ backgroundColor: color.value }}
-                  />
-                  <span className='text-xs font-medium'>{color.name}</span>
+                  <div className='w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center bg-gray-100'>
+                    <span className='text-xs text-gray-500'>null</span>
+                  </div>
+                  <span className='text-xs font-medium'>null</span>
                 </div>
               </Card>
-            ))}
+            )}
           </div>
         </div>
 
@@ -203,20 +292,29 @@ export default function ProductDetail() {
             Size <span className='text-brand'>Pilih 1</span>
           </h3>
           <div className='flex w-full gap-2'>
-            {sizes.map((size) => (
+            {sizes.length > 0 ? (
+              sizes.map((size) => (
+                <Button
+                  key={size.id}
+                  variant={selectedSizeId === size.id ? 'default' : 'outline'}
+                  className={`flex-1 py-2 ${
+                    selectedSizeId === size.id
+                      ? 'bg-brand text-white border-brand'
+                      : 'border-gray-300 text-gray-700 hover:border-brand'
+                  }`}
+                  onClick={() => setSelectedSizeId(size.id)}
+                >
+                  {size.value || 'null'}
+                </Button>
+              ))
+            ) : (
               <Button
-                key={size}
-                variant={selectedSize === size ? 'default' : 'outline'}
-                className={`flex-1 py-2 ${
-                  selectedSize === size
-                    ? 'bg-brand text-white border-brand'
-                    : 'border-gray-300 text-gray-700 hover:border-brand'
-                }`}
-                onClick={() => setSelectedSize(size)}
+                variant='outline'
+                className='flex-1 py-2 border-gray-300 text-gray-400 cursor-default'
               >
-                {size}
+                null
               </Button>
-            ))}
+            )}
           </div>
         </div>
       </div>

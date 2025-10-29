@@ -1,8 +1,6 @@
 'use client';
 
-import type React from 'react';
-
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Edit2, LogOut, MapPin, Menu, Phone } from 'lucide-react';
@@ -19,9 +17,17 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { useLoginMutation, useRegisterMutation } from '@/hooks/use-auth';
-import { setAuthToken } from '@/hooks/use-auth-status';
+import {
+  useLoginMutation,
+  useRegisterMutation,
+  useForgotPasswordMutation,
+} from '@/hooks/use-auth';
+import { useProfileQuery } from '@/hooks/use-profile';
+import { setAuthToken, useAuthStatus } from '@/hooks/use-auth-status';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
+import { locationService } from '@/services/location';
+import { addressService } from '@/services/address';
+import type { CreateAddressPayload } from '@/types/address';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -67,13 +73,15 @@ export default function MobileMenu() {
   const forgotTriggerRef = useRef<HTMLButtonElement | null>(null);
   const loginTriggerRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuthStatus();
+  const { data: profileData } = useProfileQuery(isLoggedIn);
   const [userName, setUserName] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
+  const forgotMutation = useForgotPasswordMutation();
 
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const voucherBase = {
@@ -91,6 +99,13 @@ export default function MobileMenu() {
       image: '/assets/Voucher2.png',
     },
   ];
+
+  useEffect(() => {
+    const fullName = profileData?.data?.full_name;
+    if (isLoggedIn && fullName) {
+      setUserName(fullName);
+    }
+  }, [isLoggedIn, profileData?.data?.full_name]);
 
   const closeActiveSheet = useCallback(() => {
     const activeSheet = document.querySelector<HTMLElement>(
@@ -111,7 +126,6 @@ export default function MobileMenu() {
       setLoginError(null);
       loginMutation.mutate(payload, {
         onSuccess: (response) => {
-          setIsLoggedIn(true);
           try {
             const token = response?.data?.token as string | undefined;
             setAuthToken(token);
@@ -125,6 +139,9 @@ export default function MobileMenu() {
           toast.success(
             response?.message ?? 'Berhasil masuk. Selamat berbelanja!',
           );
+          try {
+            router.refresh();
+          } catch {}
           closeActiveSheet();
         },
         onError: (error) => {
@@ -134,14 +151,155 @@ export default function MobileMenu() {
         },
       });
     },
-    [closeActiveSheet, loginMutation],
+    [closeActiveSheet, loginMutation, router],
   );
 
   const handleRegisterSubmit = useCallback(
     (payload: RegisterPayload) => {
       setRegisterError(null);
       registerMutation.mutate(payload, {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
+          const tokenFromRegister =
+            (response?.data?.token as string | undefined) ||
+            ((response?.data?.tokens as { accessToken?: string } | undefined)
+              ?.accessToken ??
+              undefined);
+
+          const headers = tokenFromRegister
+            ? { Authorization: `Bearer ${tokenFromRegister}` }
+            : undefined;
+
+          const tryCreateAddress = async () => {
+            const {
+              name,
+              phone,
+              province,
+              city,
+              district,
+              postalCode,
+              addressDetail,
+            } = payload;
+
+            if (
+              !name ||
+              !phone ||
+              !addressDetail ||
+              !postalCode ||
+              !province ||
+              !city ||
+              !district
+            ) {
+              return;
+            }
+
+            const parseMaybeNumber = (v: string | undefined) => {
+              if (!v) return undefined;
+              const n = Number(v);
+              return Number.isFinite(n) && String(n) === v.trim()
+                ? n
+                : undefined;
+            };
+
+            let provinceId = parseMaybeNumber(province);
+            if (!provinceId) {
+              const provRes = await locationService.getProvinces();
+              const prov = provRes.data.data.find(
+                (p) => p.name.toLowerCase() === province.toLowerCase(),
+              );
+              provinceId = prov?.id;
+            }
+
+            if (!provinceId) return;
+
+            let cityId = parseMaybeNumber(city);
+            if (!cityId) {
+              const cityRes = await locationService.getCities(provinceId);
+              const ct = cityRes.data.data.find(
+                (c) => c.name.toLowerCase() === city.toLowerCase(),
+              );
+              cityId = ct?.id;
+            }
+
+            if (!cityId) return;
+
+            let subdistrictId = parseMaybeNumber(district);
+            let subdistrictName = district;
+            if (!subdistrictId) {
+              const distRes = await locationService.getDistricts(cityId);
+              const d = distRes.data.data.find(
+                (x) => x.name.toLowerCase() === district.toLowerCase(),
+              );
+              if (d) {
+                subdistrictId = d.id;
+                subdistrictName = d.name;
+              }
+            }
+
+            if (!subdistrictId) return;
+
+            const addressPayload: CreateAddressPayload = {
+              recipient_name: name,
+              phone,
+              province_id: provinceId,
+              city_id: cityId,
+              subdistrict_id: subdistrictId,
+              address_line: addressDetail,
+              postal_code: postalCode,
+              is_default: 'true',
+              subdistrict_name: subdistrictName,
+            };
+
+            try {
+              const res = await addressService.createAddress(addressPayload, {
+                headers,
+              });
+              if (res.ok) {
+                toast.success('Alamat default berhasil dibuat.');
+              }
+            } catch (err) {
+              const httpErr = err as unknown as {
+                message?: string;
+                status?: number;
+                data?: unknown;
+              };
+              const maybeData = httpErr?.data;
+              if (
+                maybeData &&
+                typeof maybeData === 'object' &&
+                'errors' in (maybeData as Record<string, unknown>)
+              ) {
+                const errors = (maybeData as Record<string, unknown>)
+                  .errors as Record<string, unknown>;
+                const fieldErrors: Record<string, string> = {};
+                const toStr = (v: unknown) =>
+                  Array.isArray(v) ? String(v[0]) : String(v ?? '');
+                if (errors?.province_id)
+                  fieldErrors.province = toStr(errors.province_id);
+                if (errors?.city_id) fieldErrors.city = toStr(errors.city_id);
+                if (errors?.subdistrict_id)
+                  fieldErrors.district = toStr(errors.subdistrict_id);
+                if (errors?.postal_code)
+                  fieldErrors.postalCode = toStr(errors.postal_code);
+                if (errors?.address_line)
+                  fieldErrors.addressDetail = toStr(errors.address_line);
+                if (Object.keys(fieldErrors).length > 0) {
+                  setRegisterFieldErrors((prev) => ({
+                    ...prev,
+                    ...fieldErrors,
+                  }));
+                }
+              }
+              toast.error(
+                httpErr?.message ||
+                  'Alamat tidak dapat dibuat otomatis. Anda bisa menambahkannya nanti.',
+              );
+            }
+          };
+
+          if (tokenFromRegister) {
+            await tryCreateAddress();
+          }
+
           toast.success(
             response?.message ?? 'Registrasi berhasil. Silakan masuk.',
           );
@@ -203,15 +361,17 @@ export default function MobileMenu() {
   }, [openSheet, registerMutation]);
 
   const handleLogout = useCallback(() => {
-    setIsLoggedIn(false);
     setLoginError(null);
     setRegisterError(null);
     setUserName(null);
     try {
       setAuthToken(null);
     } catch {}
+    try {
+      router.refresh();
+    } catch {}
     toast.message('Anda telah keluar dari akun.');
-  }, []);
+  }, [router]);
 
   const [registerFieldErrors, setRegisterFieldErrors] = useState<
     Record<string, string>
@@ -279,7 +439,9 @@ export default function MobileMenu() {
             <div className='py-2 text-brand text-lg font-semibold'>Guest</div>
           )}
           <h2 className='text-lg font-bold text-black'>
-            {isLoggedIn && userName ? userName : 'Hey, there gorgeous'}
+            {isLoggedIn
+              ? userName || profileData?.data?.full_name || 'Pengguna'
+              : 'Hey, there gorgeous'}
           </h2>
         </div>
       </div>
@@ -388,8 +550,35 @@ export default function MobileMenu() {
       <ForgotPasswordSheet
         trigger={<button ref={forgotTriggerRef} className='hidden' />}
         onSubmit={({ email }) => {
-          closeActiveSheet();
-          toast.message(`Instruksi pemulihan dikirim ke ${email}.`);
+          forgotMutation.mutate(
+            { email },
+            {
+              onSuccess: (res) => {
+                toast.success(
+                  res?.message ||
+                    'Jika email terdaftar, tautan reset telah dikirim.',
+                );
+                closeActiveSheet();
+              },
+              onError: (err) => {
+                const msg = err.message || 'Gagal mengirim tautan reset.';
+                // Try backend error mapping
+                const data = (err as unknown as { data?: unknown })?.data;
+                if (
+                  data &&
+                  typeof data === 'object' &&
+                  'message' in (data as Record<string, unknown>)
+                ) {
+                  const beMsg = String(
+                    (data as Record<string, unknown>).message,
+                  );
+                  toast.error(beMsg);
+                } else {
+                  toast.error(msg);
+                }
+              },
+            },
+          );
         }}
         onSwitchToLogin={() => {
           closeActiveSheet();

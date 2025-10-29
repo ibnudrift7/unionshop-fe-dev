@@ -28,7 +28,6 @@ export function LoginSheet({
   onForgotPassword,
   onSwitchToRegister,
   isSubmitting = false,
-  errorMessage = null,
 }: LoginSheetProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,9 +83,6 @@ export function LoginSheet({
               Perlihatkan password
             </Label>
           </div>
-          {errorMessage ? (
-            <p className='text-sm text-red-600'>{errorMessage}</p>
-          ) : null}
           <div className='pt-2'>
             <Button
               className='w-full bg-brand hover:bg-brand/90 text-white'

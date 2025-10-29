@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import useBundlesQuery from '@/hooks/use-bundles';
 
 type PromoItem = {
   id: string;
@@ -17,6 +18,7 @@ type PromoItem = {
   rating: number;
   sold: string;
   imageAlt?: string;
+  image?: string;
 };
 
 const ITEMS: PromoItem[] = [
@@ -60,6 +62,23 @@ function formatIDR(n: number) {
 export function PromoCarouselSection() {
   const scrollerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { data: bundles } = useBundlesQuery();
+
+  const items: PromoItem[] = React.useMemo(() => {
+    if (bundles && bundles.length > 0) {
+      return bundles.map((p) => ({
+        id: p.id,
+        title: p.name,
+        price: p.price,
+        priceBefore: p.discountPrice,
+        rating: p.rating ?? Number((4 + Math.random()).toFixed(1)),
+        sold: `${Math.floor(Math.random() * 1000)}`,
+        imageAlt: p.name,
+        image: p.image ?? '/assets/promo-item.png',
+      }));
+    }
+    return ITEMS;
+  }, [bundles]);
 
   return (
     <section aria-labelledby='promo-title'>
@@ -88,7 +107,7 @@ export function PromoCarouselSection() {
           role='list'
           aria-label='Promo pilihan'
         >
-          {ITEMS.map((item) => (
+          {items.map((item) => (
             <article
               key={item.id}
               role='listitem'

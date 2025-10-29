@@ -7,12 +7,8 @@ import { Search } from 'lucide-react';
 import ProductSection from '../product/ProductSection';
 import { Product } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  shopFilters as FILTERS,
-  shopProductsByFilter,
-  ShopFilter,
-  shopAllProducts,
-} from './data';
+import { shopFilters as FILTERS, ShopFilter } from './data';
+import { useProductsQuery } from '@/hooks/use-products';
 
 interface ShopSectionProps {
   cartCount?: number;
@@ -27,8 +23,9 @@ export default function ShopSection({
 }: ShopSectionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(''); // input text only
   const [active, setActive] = useState<ShopFilter | null>(null);
+  const [committedQuery, setCommittedQuery] = useState(''); // applied when clicking search
 
   useEffect(() => {
     const f = searchParams.get('filter');
@@ -41,50 +38,96 @@ export default function ShopSection({
 
   const handleSearchChange = (value: string) => {
     setQuery(value);
-    onSearch?.(value);
   };
+
+  const handleSearchSubmit = () => {
+    const val = query.trim();
+    setCommittedQuery(val);
+    onSearch?.(val);
+  };
+
+  const {
+    data: apiProducts,
+    isLoading,
+    isError,
+    error,
+  } = useProductsQuery({
+    search: committedQuery || undefined,
+    // Note: category filter remains dummy for now; don't pass categoryId
+  });
 
   const filterProducts = useCallback(
     (products: Product[]) => {
-      if (!query) return products;
-      const q = query.toLowerCase();
+      if (!committedQuery) return products;
+      const q = committedQuery.toLowerCase();
       return products.filter((p) => p.name.toLowerCase().includes(q));
     },
-    [query],
+    [committedQuery],
   );
 
   const content = useMemo(() => {
+    // Loading state
+    if (isLoading) {
+      return <div className='px-4 text-sm text-gray-500'>Memuat produk…</div>;
+    }
+    // Error state
+    if (isError) {
+      return (
+        <div className='px-4 text-sm text-red-600'>
+          Gagal memuat produk{error?.message ? `: ${error.message}` : ''}
+        </div>
+      );
+    }
+
+    const products = apiProducts ?? [];
+    const filtered = filterProducts(products);
+
     if (active) {
+      // Category filter is dummy: only affects title; list remains from API
       return (
         <div className='space-y-6'>
           <ProductSection
             title={FILTERS.find((f) => f.id === active)?.label}
-            products={filterProducts(shopProductsByFilter[active])}
+            products={filtered}
             onProductClick={(p) => {
               onProductClick?.(p);
-              router.push(`/product/${p.id}`);
+              router.push(`/product/${p.slug}`);
             }}
             showChevron={false}
           />
-          {filterProducts(shopProductsByFilter[active]).length === 0 && (
+          {filtered.length === 0 && (
             <div className='px-4 text-sm text-gray-500'>Tidak ada produk.</div>
           )}
         </div>
       );
     }
-    const allProducts = shopAllProducts;
+
     return (
-      <ProductSection
-        title='Semua Produk'
-        products={filterProducts(allProducts)}
-        onProductClick={(p) => {
-          onProductClick?.(p);
-          router.push(`/product/${p.id}`);
-        }}
-        showChevron={false}
-      />
+      <>
+        <ProductSection
+          title='Semua Produk'
+          products={filtered}
+          onProductClick={(p) => {
+            onProductClick?.(p);
+            router.push(`/product/${p.slug}`);
+          }}
+          showChevron={false}
+        />
+        {filtered.length === 0 && (
+          <div className='px-4 text-sm text-gray-500'>Tidak ada produk.</div>
+        )}
+      </>
     );
-  }, [active, onProductClick, filterProducts, router]);
+  }, [
+    active,
+    onProductClick,
+    filterProducts,
+    router,
+    apiProducts,
+    isLoading,
+    isError,
+    error,
+  ]);
 
   return (
     <section className='pb-6'>
@@ -94,16 +137,19 @@ export default function ShopSection({
             <div className='relative flex-1'>
               <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5 z-1' />
               <Input
-                placeholder='Makna V4'
+                placeholder='Cari produk'
                 className='pl-10 pr-0 bg-white/90 border-gray-200 rounded-l-lg rounded-r-none h-12 border-r-0'
                 value={query}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearchSubmit();
+                }}
               />
             </div>
             <div className='relative'>
               <Button
                 className='bg-brand hover:bg-brand/90 rounded-l-none rounded-r-lg h-12 px-4 border-l-0 text-white flex items-center gap-2'
-                onClick={() => onSearch?.(query)}
+                onClick={handleSearchSubmit}
                 aria-label='Search'
               >
                 <span className='text-sm font-medium'>SEARCH</span>
@@ -124,7 +170,6 @@ export default function ShopSection({
                   onClick={() => {
                     const next = isActive ? null : f.id;
                     setActive(next);
-                    // Update URL without full reload
                     const params = new URLSearchParams(searchParams.toString());
                     if (next) {
                       params.set('filter', next);

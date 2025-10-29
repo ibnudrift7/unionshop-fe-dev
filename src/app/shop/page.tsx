@@ -1,22 +1,50 @@
 'use client';
 
 import { ShopSection, FooterNavigationSection } from '@/components/sections';
-import { toast } from 'sonner';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
+import { useCartQuery } from '@/hooks/use-cart';
 import { useCartStore } from '@/store/cart';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuthStatus } from '@/hooks/use-auth-status';
+import type { CartItem } from '@/store/cart';
 
 export default function ShopPage() {
   const router = useRouter();
   const { items, getTotal } = useCartStore();
+  const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: memberCart } = useCartQuery(Boolean(isReady && isLoggedIn));
 
-  const itemsCount = useMemo(
-    () => items.reduce((sum, i) => sum + i.quantity, 0),
-    [items],
-  );
-  const totalAmount = getTotal();
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (isLoggedIn) return;
+    try {
+      const raw = localStorage.getItem('guest_cart');
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as CartItem[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        useCartStore.setState({ items: parsed });
+      }
+    } catch {}
+  }, [isLoggedIn]);
+
+  const itemsCount = useMemo(() => {
+    if (isLoggedIn) {
+      const list = memberCart?.data?.items ?? [];
+      return list.reduce((sum, i) => sum + (i.qty ?? 0), 0);
+    }
+    return items.reduce((sum, i) => sum + i.quantity, 0);
+  }, [isLoggedIn, items, memberCart]);
+
+  const totalAmount = useMemo(() => {
+    if (isLoggedIn) {
+      const raw = memberCart?.data?.summary?.subtotal;
+      const n = Number(raw ?? 0);
+      return Number.isFinite(n) ? n : 0;
+    }
+    return getTotal();
+  }, [isLoggedIn, memberCart, getTotal]);
   const totalFormatted = useMemo(
     () =>
       new Intl.NumberFormat('id-ID', {
@@ -33,11 +61,7 @@ export default function ShopPage() {
           <div className='p-4 text-sm text-gray-500'>Memuat data shop...</div>
         }
       >
-        <ShopSection
-          cartCount={3}
-          onSearch={(v) => console.log('search:', v)}
-          onCartClick={() => toast('Cart opened')}
-        />
+        <ShopSection onSearch={() => {}} />
       </Suspense>
       <div className='h-36 sm:h-40' aria-hidden />
 
