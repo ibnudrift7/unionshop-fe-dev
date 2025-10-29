@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { MobileMenu } from '@/components/sections';
 import FooterNavigationSection from '@/components/sections/shop/FooterNavigationSection';
 import { Dialog } from '@/components/ui/dialog';
@@ -14,7 +14,6 @@ import { setAuthToken } from '@/lib/auth-token';
 import type { HttpError } from '@/services/http';
 
 export default function UserPage() {
-  const search = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
@@ -33,10 +32,15 @@ export default function UserPage() {
   })();
 
   useEffect(() => {
-    const show =
-      search?.get('thankyou') === '1' || search?.get('thankyou') === 'true';
-    if (show) setOpen(true);
-  }, [search]);
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      const show =
+        url.searchParams.get('thankyou') === '1' ||
+        url.searchParams.get('thankyou') === 'true';
+      if (show) setOpen(true);
+    } catch {}
+  }, []);
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>

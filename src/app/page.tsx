@@ -12,7 +12,7 @@ import {
   FooterNavigationSection,
   PromoSection,
 } from '@/components/sections';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery } from '@/hooks/use-products';
@@ -36,7 +36,7 @@ import {
 import { useProfileQuery } from '@/hooks/use-profile';
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+  // loading placeholder flag removed (unused) — keep timeout for UX effects if needed
   const router = useRouter();
   const { items, getTotal } = useCartStore();
   const { isLoggedIn, isReady } = useAuthStatus();
@@ -90,7 +90,7 @@ export default function Home() {
   }, [isReady, isLoggedIn, profileResp]);
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
+      // noop: previously used to toggle a loading state
     }, 2000);
 
     return () => clearTimeout(timer);
