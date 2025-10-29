@@ -13,7 +13,6 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
   clear: () => set({ promo: null }),
 }));
 
-// Persist minimal state for cross-page navigation (non-critical if it fails)
 if (typeof window !== 'undefined') {
   useCheckoutStore.subscribe((state) => {
     try {
@@ -22,7 +21,6 @@ if (typeof window !== 'undefined') {
     } catch {}
   });
 
-  // Best-effort hydration
   try {
     const raw = localStorage.getItem('checkout_state');
     if (raw) {
