@@ -155,7 +155,6 @@ export default function UserPage() {
             district,
             postalCode,
             addressDetail,
-            // Default required fields for API
             gender: 'pria',
             dateOfBirth: '2000-01-01',
           };

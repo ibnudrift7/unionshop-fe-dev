@@ -11,6 +11,7 @@ import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { useGuestAddress } from '@/hooks/use-guest-address';
+import { useProfileQuery } from '@/hooks/use-profile';
 import type { ShippingServiceItem } from '@/types/shipping';
 import {
   useCouriersQuery,
@@ -24,6 +25,7 @@ interface CheckoutSectionProps {
     serviceCode: string | null;
     shippingFee: number;
     estimatedDay: string | null;
+    pointsToUse: number;
   }) => void;
 }
 
@@ -73,6 +75,7 @@ export function CheckoutSection({
 
   const isGuest = Boolean(guestToken);
   const { data: memberCart } = useCartQuery(isReady && (isLoggedIn || isGuest));
+  const { data: profileResp } = useProfileQuery(isReady && isLoggedIn);
   const [usePoints, setUsePoints] = useState(false);
   const { data: couriersRes, isLoading: loadingCouriers } = useCouriersQuery(
     isReady && (isLoggedIn || isGuest),
@@ -163,7 +166,10 @@ export function CheckoutSection({
     if (!selectedService) return 0;
     return selectedService.cost || 0;
   }, [selectedService]);
-  const pointsDiscount = usePoints ? 5000 : 0;
+  // if user chooses to use points, use their full points balance (1 point = 1 IDR)
+  const pointsBalance = profileResp?.data?.points_balance ?? 0;
+  const pointsToUse = usePoints ? pointsBalance : 0;
+  const pointsDiscount = pointsToUse;
   const totalOrder = useMemo(
     () => Math.max(0, subtotalProduct + subtotalShipping - pointsDiscount),
     [subtotalProduct, subtotalShipping, pointsDiscount],
@@ -186,8 +192,15 @@ export function CheckoutSection({
       serviceCode: selectedService?.code ?? null,
       shippingFee: subtotalShipping,
       estimatedDay: selectedService?.estimated_day ?? null,
+      pointsToUse: pointsToUse,
     });
-  }, [onSelectionChange, selectedCourier, selectedService, subtotalShipping]);
+  }, [
+    onSelectionChange,
+    selectedCourier,
+    selectedService,
+    subtotalShipping,
+    pointsToUse,
+  ]);
 
   const format = (n: number) => new Intl.NumberFormat('id-ID').format(n);
 
@@ -453,7 +466,14 @@ export function CheckoutSection({
               <h3 className='text-sm font-semibold text-gray-900'>
                 Gunakan poin
               </h3>
-              <p className='text-xs text-gray-600'>Total poin kamu : 10.050</p>
+              <p className='text-xs text-gray-600'>
+                Total poin kamu :{' '}
+                {profileResp?.data?.points_balance !== undefined
+                  ? new Intl.NumberFormat('id-ID').format(
+                      profileResp.data.points_balance,
+                    )
+                  : '—'}
+              </p>
             </label>
             <Checkbox
               id='use-points'

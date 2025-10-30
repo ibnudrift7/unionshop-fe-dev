@@ -6,6 +6,7 @@ import type {
   ApiProduct,
 } from '@/types/product';
 import type { ProductDetailResponse } from '@/types/product-detail';
+import type { ProductReviewsResponse } from '@/types/product-review';
 import type { Product } from '@/types';
 
 function parsePrice(str?: string): number | undefined {
@@ -83,6 +84,17 @@ export const productsService = {
     const path = `${API_ENDPOINTS.products}/${encodeURIComponent(slugOrId)}`;
     return httpFetch<ProductDetailResponse>(path, { method: 'GET' });
   },
+  async reviews(slug: string, page: number | string = 1) {
+    const path = `${API_ENDPOINTS.products}/${encodeURIComponent(
+      slug,
+    )}/reviews`;
+    return httpFetch<ProductReviewsResponse>(path, {
+      method: 'GET',
+      query: {
+        page: String(page),
+      },
+    });
+  },
   async getProductDetailUi(slugOrId: string): Promise<Product> {
     const res = await this.getProductDetail(slugOrId);
     const p = res.data.data;
@@ -121,8 +133,24 @@ export const productsService = {
       images: images.length > 0 ? images : undefined,
       image: images[0],
       isNew: p.is_newest === 1,
-      rating: 0,
-      sold: 0,
+      // map API average_rating (string) and formatted_sales (string) to UI fields
+      rating: (() => {
+        const r = p.average_rating;
+        if (typeof r === 'string') {
+          const n = Number(r);
+          return Number.isFinite(n) ? n : 0;
+        }
+        return 0;
+      })(),
+      sold: (() => {
+        const s = p.formatted_sales ?? undefined;
+        if (typeof s === 'string') {
+          const n = Number(s.replace(/[^0-9.-]+/g, ''));
+          return Number.isFinite(n) ? n : 0;
+        }
+        if (typeof s === 'number') return s;
+        return 0;
+      })(),
       attributes,
     };
   },

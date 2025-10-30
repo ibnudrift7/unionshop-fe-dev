@@ -1,18 +1,19 @@
 'use client';
 
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, CalendarDays } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FooterNavigationSection } from '@/components/sections';
 import { useMemo, useState } from 'react';
+import { OrderTrackingModal } from '@/components/sections/user/TrackingOrderDialog';
 import {
   useCreateOrderReviewMutation,
   useOrderHistoryQuery,
   useOrderReviewsQuery,
   useOrdersQuery,
 } from '@/hooks/use-orders';
-import type { OrderListItem } from '@/types/order';
+import type { OrderListItem, OrderHistoryItem } from '@/types/order';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { HttpError } from '@/services/http';
@@ -28,6 +29,20 @@ function formatDateTimeID(dateStr: string) {
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${date}, ${hh}:${mm}`;
+}
+
+function formatRupiah(value?: string | number | null): string {
+  if (value === null || value === undefined) return '';
+  const num =
+    typeof value === 'string'
+      ? parseFloat(value.replace(/,/g, ''))
+      : Number(value);
+  if (isNaN(num)) return String(value);
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(num);
 }
 
 function resolveOrderImage(image?: string | null): string {
@@ -93,7 +108,7 @@ export default function RiwayatPesanan() {
 
         {isError && (
           <div className='p-4 text-sm text-red-600 bg-red-50 rounded-md'>
-            Gagal memuat pesanan: {error?.message ?? 'Terjadi kesalahan'}
+            {error?.message || 'Gagal memuat riwayat pesanan.'}
           </div>
         )}
 
@@ -114,11 +129,11 @@ export default function RiwayatPesanan() {
 
 function OrderCard({ order }: { order: OrderListItem }) {
   const [openRatings, setOpenRatings] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [openTracking, setOpenTracking] = useState(false);
 
   const { data: historyData, isLoading: historyLoading } = useOrderHistoryQuery(
     order.id,
-    showHistory,
+    true,
   );
 
   const { data: reviewsData, isLoading: reviewsLoading } = useOrderReviewsQuery(
@@ -156,10 +171,7 @@ function OrderCard({ order }: { order: OrderListItem }) {
       },
     }));
 
-  const steps = (historyData?.data.history ?? []).sort(
-    (a, b) => a.sort_order - b.sort_order,
-  );
-  const lastStepSort = steps.length ? steps[steps.length - 1].sort_order : -1;
+  const stages = historyData?.data.shipping_progress ?? [];
 
   return (
     <div className='p-4 border-b-4 border-gray-300 bg-white'>
@@ -179,7 +191,8 @@ function OrderCard({ order }: { order: OrderListItem }) {
               {order.first_product?.product_name ||
                 `Pesanan ${order.invoice_no}`}
             </p>
-            <p className='text-xs text-gray-400 ml-2 whitespace-nowrap'>
+            <p className='text-xs text-gray-400 ml-2 whitespace-nowrap flex items-center gap-1'>
+              <CalendarDays className='w-4 h-4 text-gray-400' />
               {formatDateTimeID(order.created_at)}
             </p>
           </div>
@@ -198,66 +211,69 @@ function OrderCard({ order }: { order: OrderListItem }) {
       <div className='mt-2'>
         <p className='text-sm text-[#727272] mb-2 ml-10'>
           Total {order.total_items} menu •{' '}
-          <span className='font-medium text-[#727272]'>
-            {order.final_amount}
+          <span className='font-bold text-[#727272]'>
+            {formatRupiah(order.final_amount)}
           </span>
         </p>
 
         <div className='border-t border-gray-200 mb-4' />
-        {showHistory && (
-          <div className='inline-flex rounded-3xl items-center bg-white px-2 py-2 border border-gray-100 [box-shadow:0_0_5px_rgba(0,0,0,0.15)] relative'>
-            {historyLoading && (
-              <span className='text-xs text-gray-400 px-2'>
-                Memuat riwayat...
-              </span>
-            )}
-            {!historyLoading && steps.length === 0 && (
-              <span className='text-xs text-gray-400 px-2'>
-                Riwayat pengiriman belum tersedia
-              </span>
-            )}
-            {!historyLoading &&
-              steps.map((step, index) => {
-                const active = step.sort_order === lastStepSort;
-                return (
-                  <div key={step.id} className='flex items-center relative'>
-                    {active && (
-                      <Image
-                        src='/assets/check-icon.png'
-                        alt='Active Step'
-                        width={20}
-                        height={20}
-                        className='absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 drop-shadow-md'
-                      />
-                    )}
-                    <Button
-                      variant={active ? 'default' : 'outline'}
-                      size='sm'
-                      className={`px-2 py-0.5 text-[9px] sm:px-3 sm:py-1 sm:text-xs font-bold rounded-lg sm:rounded-xl whitespace-normal break-words text-center leading-tight transition-colors ${
-                        active
-                          ? 'bg-brand/30 text-brand border-brand border-2 hover:bg-brand/40'
-                          : 'bg-white text-black border-black hover:bg-gray-50'
-                      }`}
-                    >
-                      {step.status_name}
-                    </Button>
-                    {index < steps.length - 1 && (
-                      <span className='mx-0 w-3 sm:w-4 border-t-2 border-dashed border-black'></span>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
-        )}
+        <div className='inline-flex rounded-3xl items-center bg-white px-2 py-2 border border-gray-100 [box-shadow:0_0_5px_rgba(0,0,0,0.15)] relative'>
+          {historyLoading && (
+            <span className='text-xs text-gray-400 px-2'>
+              Memuat riwayat...
+            </span>
+          )}
+          {!historyLoading && stages.length === 0 && (
+            <span className='text-xs text-gray-400 px-2'>
+              Riwayat pengiriman belum tersedia
+            </span>
+          )}
+          {!historyLoading &&
+            stages.map((stage: OrderHistoryItem, index: number) => {
+              const active = Boolean(stage.active);
+              return (
+                <div key={stage.stage} className='flex items-center relative'>
+                  {active && (
+                    <Image
+                      src='/assets/check-icon.png'
+                      alt='Active Step'
+                      width={20}
+                      height={20}
+                      className='absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 drop-shadow-md'
+                    />
+                  )}
+                  <Button
+                    variant={active ? 'default' : 'outline'}
+                    size='sm'
+                    className={`px-2 py-0.5 text-[9px] sm:px-3 sm:py-1 sm:text-xs font-bold rounded-lg sm:rounded-xl whitespace-normal break-words text-center leading-tight transition-colors ${
+                      active
+                        ? 'bg-brand/30 text-brand border-brand border-2 hover:bg-brand/40'
+                        : 'bg-white text-black border-black hover:bg-gray-50'
+                    }`}
+                  >
+                    {stage.stage}
+                  </Button>
+                  {index < stages.length - 1 && (
+                    <span className='mx-0 w-3 sm:w-4 border-t-2 border-dashed border-black'></span>
+                  )}
+                </div>
+              );
+            })}
+        </div>
 
         <div className='mt-3'>
           <Button
-            onClick={() => setShowHistory((v) => !v)}
+            onClick={() => setOpenTracking(true)}
             className='bg-brand hover:bg-brand/80 text-white font-semibold rounded-xl px-4 py-2'
           >
-            {showHistory ? 'Tutup Riwayat' : 'Lacak Pesanan'}
+            Lacak Pesanan
           </Button>
         </div>
+        <OrderTrackingModal
+          orderId={order.id}
+          isOpen={openTracking}
+          onOpenChange={(open: boolean) => setOpenTracking(open)}
+        />
         <div className='border-t border-gray-200 mt-4' />
 
         {/* rating section - only show when order delivered */}

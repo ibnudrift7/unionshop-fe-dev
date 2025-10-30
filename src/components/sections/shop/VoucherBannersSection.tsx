@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { usePromotionsQuery } from '@/hooks/use-promotion';
+import type { PromotionItem } from '@/types/promotion';
 
 interface InlineVoucherModalProps {
   open: boolean;
@@ -25,6 +27,8 @@ interface InlineVoucherModalProps {
   title?: string;
   subtitle?: string;
   description?: string;
+  promotions?: PromotionItem[] | null;
+  loadingPromotions?: boolean;
 }
 
 function generatePromoCode() {
@@ -41,16 +45,21 @@ function VoucherModalInline({
   title,
   subtitle,
   description,
+  promotions,
+  loadingPromotions,
 }: InlineVoucherModalProps) {
   const [code, setCode] = React.useState<string>(() => generatePromoCode());
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
-      setCode(generatePromoCode());
+      // prefer backend promo code if available; fallback to generated code
+      const backendCode =
+        promotions && promotions.length > 0 ? promotions[0].code : null;
+      setCode(backendCode || generatePromoCode());
       setCopied(false);
     }
-  }, [open]);
+  }, [open, promotions]);
 
   const handleCopy = async () => {
     try {
@@ -70,6 +79,12 @@ function VoucherModalInline({
       setCopied(false);
     }
   };
+
+  const firstPromo = promotions && promotions.length > 0 ? promotions[0] : null;
+  const displayTitle = title || firstPromo?.name || 'VOUCHER';
+  const displaySubtitle = subtitle ?? 'Voucher';
+  const displayDescription =
+    description ?? (firstPromo?.description || undefined);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,13 +106,15 @@ function VoucherModalInline({
           <div className='flex w-2/3 flex-col items-center justify-center bg-pink-50 p-6'>
             <div className='text-center'>
               <h3 className='text-sm font-semibold text-gray-500'>
-                {subtitle ?? 'Voucher'}
+                {displaySubtitle}
               </h3>
               <h2 className='text-3xl font-extrabold text-red-600 tracking-wider my-2'>
-                {title ?? 'VOUCHER'}
+                {displayTitle}
               </h2>
-              {description && (
-                <p className='text-xs text-gray-600 mb-3'>{description}</p>
+              {displayDescription && (
+                <p className='text-xs text-gray-600 mb-3'>
+                  {displayDescription}
+                </p>
               )}
 
               <button
@@ -105,7 +122,9 @@ function VoucherModalInline({
                 aria-label='Copy voucher code'
                 className='mx-auto flex items-center gap-3 rounded-2xl border border-dashed border-red-200 bg-white/90 px-4 py-3 text-sm font-mono font-semibold text-red-600 shadow-sm hover:bg-white'
               >
-                <span className='select-all'>{code}</span>
+                <span className='select-all'>
+                  {loadingPromotions ? 'Memuat…' : code}
+                </span>
                 <span className='ml-2 rounded-md bg-red-600 px-2 py-1 text-xs font-medium text-white'>
                   {copied ? 'Disalin' : 'Salin'}
                 </span>
@@ -154,6 +173,9 @@ export default function VoucherBannersSection({
   const [voucherModalOpen, setVoucherModalOpen] = React.useState(false);
   const [selectedVoucher, setSelectedVoucher] =
     React.useState<Voucher2Props | null>(null);
+  const { data: promosResp, isLoading: loadingPromotions } =
+    usePromotionsQuery(true);
+  const promotions = promosResp?.data ?? [];
 
   return (
     <div className={`space-y-4 sm:space-y-6 md:space-y-8 ${className}`}>
@@ -262,6 +284,8 @@ export default function VoucherBannersSection({
         title={selectedVoucher?.title1 ?? selectedVoucher?.title2}
         subtitle={selectedVoucher ? 'Promo' : undefined}
         description={selectedVoucher?.description}
+        promotions={promotions}
+        loadingPromotions={loadingPromotions}
       />
     </div>
   );

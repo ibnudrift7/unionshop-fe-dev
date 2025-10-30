@@ -70,21 +70,21 @@ export interface OrderDetailResponse extends ApiResponseMeta {
   data: OrderDetailData;
 }
 
+// Updated shipment history types per new API
 export interface OrderHistoryItem {
-  id: number;
-  status_id: number;
-  status_name: string;
-  sort_order: number;
-  changed_at: string;
-  notes: string;
+  stage: string;
+  status_ids: number[];
+  label: string;
+  completed: boolean;
+  active: boolean;
 }
 
 export interface OrderHistoryResponse extends ApiResponseMeta {
   data: {
     order_id: number;
     invoice_no: string;
-    total_updates: number;
-    history: OrderHistoryItem[];
+    current_status_id: number;
+    shipping_progress: OrderHistoryItem[];
   };
 }
 
@@ -128,4 +128,29 @@ export interface OrderReviewsResponse extends ApiResponseMeta {
       product_image: string | null;
     }>;
   };
+}
+
+// Tracking API types
+export interface OrderTrackingHistoryItem {
+  desc: string;
+  date: string; // 'YYYY-MM-DD HH:mm:ss'
+  code: string;
+  status: string; // e.g., 'Pickup', 'Process'
+}
+
+export interface OrderTrackingData {
+  order_id: number;
+  invoice_no: string;
+  tracking_number: string;
+  courier: string;
+  current_status_id: number;
+  tracking_history: {
+    airway_bill: string;
+    last_status: string;
+    history: OrderTrackingHistoryItem[];
+  };
+}
+
+export interface OrderTrackingResponse extends ApiResponseMeta {
+  data: OrderTrackingData;
 }

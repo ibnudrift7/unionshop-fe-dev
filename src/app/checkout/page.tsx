@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
+import { useProfileQuery } from '@/hooks/use-profile';
 import { checkoutService } from '@/services/checkout';
 import { useCheckoutStore } from '@/store/checkout';
 import { useCartStore as useLocalCartStore } from '@/store/cart';
@@ -54,6 +55,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [total, setTotal] = useState(0);
   const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: profileResp } = useProfileQuery(isReady && isLoggedIn);
   const { data: defaultAddress } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
@@ -62,11 +64,13 @@ export default function CheckoutPage() {
     serviceCode: string | null;
     shippingFee: number;
     estimatedDay: string | null;
+    pointsToUse: number;
   }>({
     courierId: null,
     serviceCode: null,
     shippingFee: 0,
     estimatedDay: null,
+    pointsToUse: 0,
   });
   const [isPaying, setIsPaying] = useState(false);
   const promo = useCheckoutStore((s) => s.promo);
@@ -108,6 +112,7 @@ export default function CheckoutPage() {
     const serviceCode = selection.serviceCode;
     const fee = selection.shippingFee;
     const dayStr = selection.estimatedDay || '';
+    const pointsToUse = selection.pointsToUse || 0;
     const match = dayStr.match(/\d+/);
     const day = match ? match[0] : '0';
     if (!addressId || !courierId || !serviceCode || !fee) {
@@ -119,7 +124,7 @@ export default function CheckoutPage() {
       const res = await checkoutService.create({
         shipping_address_id: addressId,
         promo_code: promo?.promo_code || '',
-        points_to_use: '0',
+        points_to_use: String(pointsToUse || 0),
         order_notes: '',
         courier_id: courierId,
         shipping_package: serviceCode,
@@ -184,7 +189,6 @@ export default function CheckoutPage() {
           useLocalCartStore.setState({ items: [] });
         } catch {}
         clearCheckout();
-        // If no snap and no paymentUrl, go to user page and show thank you dialog
         router.push('/user?thankyou=1');
         return;
       }
@@ -211,6 +215,21 @@ export default function CheckoutPage() {
         </Button>
         <h1 className='text-base font-semibold text-gray-900'>Checkout</h1>
       </div>
+
+      {isLoggedIn && (
+        <div className='px-4 py-3'>
+          <p className='text-sm text-gray-600'>
+            Total poin kamu:{' '}
+            <span className='font-semibold text-gray-900'>
+              {profileResp?.data?.points_balance !== undefined
+                ? new Intl.NumberFormat('id-ID').format(
+                    profileResp.data.points_balance,
+                  )
+                : '—'}
+            </span>
+          </p>
+        </div>
+      )}
 
       <CheckoutSection
         onTotalChange={setTotal}

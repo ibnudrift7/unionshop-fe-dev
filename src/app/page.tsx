@@ -28,7 +28,6 @@ import {
   categories as mockCategories,
   voucher1Data,
   voucher2List,
-  specialTodayProducts,
   officialMerchData,
   products as mockProducts,
   promoImages,
@@ -36,7 +35,6 @@ import {
 import { useProfileQuery } from '@/hooks/use-profile';
 
 export default function Home() {
-  // loading placeholder flag removed (unused) — keep timeout for UX effects if needed
   const router = useRouter();
   const { items, getTotal } = useCartStore();
   const { isLoggedIn, isReady } = useAuthStatus();
@@ -89,9 +87,7 @@ export default function Home() {
     return Number.isFinite(n) ? n : 0;
   }, [isReady, isLoggedIn, profileResp]);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // noop: previously used to toggle a loading state
-    }, 2000);
+    const timer = setTimeout(() => {}, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -143,8 +139,7 @@ export default function Home() {
       <VoucherBannersSection voucher1={voucher1Data} vouchers={voucher2List} />
 
       <SpecialTodaySection
-        products={specialTodayProducts}
-        // isLoading={isLoading}
+        onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
       />
 
       <OfficialMerchandiseSection
