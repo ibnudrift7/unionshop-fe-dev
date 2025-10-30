@@ -35,7 +35,7 @@ export function ThankYouDialogContent({}: { onRegister?: () => void }) {
         </p>
       </div>
 
-      <div className='px-6 py-4 rounded-b-xl bg-gray-50 flex items-center gap-3 justify-between border-t-2 relative shadow-[0_-6px_8px_-6px_rgba(0,0,0,0.12)]'>
+      {/* <div className='px-6 py-4 rounded-b-xl bg-gray-50 flex items-center gap-3 justify-between border-t-2 relative shadow-[0_-6px_8px_-6px_rgba(0,0,0,0.12)]'>
         <div className='flex items-center gap-3'>
           <Image
             src={'/assets/icon-coin-thanks.png'}
@@ -49,7 +49,7 @@ export function ThankYouDialogContent({}: { onRegister?: () => void }) {
             dapatkan points dari kami!
           </p>
         </div>
-      </div>
+      </div> */}
     </DialogContent>
   );
 }

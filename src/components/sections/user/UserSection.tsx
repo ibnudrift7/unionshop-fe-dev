@@ -74,9 +74,10 @@ export default function MobileMenu() {
   const forgotTriggerRef = useRef<HTMLButtonElement | null>(null);
   const loginTriggerRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const { isLoggedIn } = useAuthStatus();
-  const { data: profileData } = useProfileQuery(isLoggedIn);
+  const { isLoggedIn, isReady } = useAuthStatus();
+  const { data: profileData } = useProfileQuery(Boolean(isReady && isLoggedIn));
   const [userName, setUserName] = useState<string | null>(null);
+  const pointsBalance = profileData?.data?.points_balance ?? 0;
   const [loginError, setLoginError] = useState<string | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
@@ -420,7 +421,7 @@ export default function MobileMenu() {
           )}
         </div>
         <div className='flex items-center justify-between'>
-          {isLoggedIn ? (
+          {isReady && isLoggedIn ? (
             <div className='flex items-center gap-2 bg-gradient-to-l from-[#f6eac7] to-white rounded-full'>
               <div className='flex items-center gap-1'>
                 <Image
@@ -435,7 +436,9 @@ export default function MobileMenu() {
                 </span>
               </div>
               <div className='flex items-end gap-1 text-black bg-white rounded-full p-1 px-3 border-2 border-gray-200'>
-                <span className='text-sm font-bold leading-none'>100</span>
+                <span className='text-sm font-bold leading-none'>
+                  {pointsBalance}
+                </span>
                 <span className='text-[10px] font-medium leading-none text-[#9a7b29]'>
                   pts
                 </span>

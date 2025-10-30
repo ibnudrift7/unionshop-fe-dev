@@ -83,7 +83,6 @@ export default function ShopSection({
     const filtered = filterProducts(products);
 
     if (active) {
-      // Category filter: title comes from category name
       const activeLabel =
         (apiCategories ?? []).find((c) => c.id === active)?.name ?? 'Kategori';
       return (
