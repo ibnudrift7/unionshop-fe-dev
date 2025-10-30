@@ -5,8 +5,8 @@ export interface ApiProduct {
   description: string;
   category_id: number;
   brand_id: number;
-  base_price: string; 
-  sale_price: string; 
+  base_price: string;
+  sale_price: string;
   stock_quantity: number;
   stock_alert_threshold: number;
   is_active: number;
@@ -26,4 +26,19 @@ export interface ProductsResponse {
 export interface ProductsQuery {
   search?: string;
   categoryId?: string;
+}
+
+// API category item
+export interface ApiCategory {
+  id: number;
+  name: string;
+  image: string | null;
+  parent_id: number;
+}
+
+export interface CategoriesResponse {
+  statusCode: number;
+  message: string;
+  success: boolean;
+  data: ApiCategory[];
 }

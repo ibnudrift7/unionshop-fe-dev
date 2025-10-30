@@ -80,6 +80,27 @@ export const productsService = {
     const list = res.data.data ?? [];
     return list.map((p) => mapApiProductToUi(p));
   },
+  async getCategories() {
+    const path = API_ENDPOINTS.productCategories;
+    return httpFetch<import('@/types/product').CategoriesResponse>(path, {
+      method: 'GET',
+    });
+  },
+  async getCategoriesUi(): Promise<import('@/types').Category[]> {
+    const res = await this.getCategories();
+    const list = res.data.data ?? [];
+    const toAbsolute = (path?: string | null) => {
+      if (!path) return '/assets/category-placeholder.png';
+      if (/^https?:\/\//i.test(path)) return path;
+      return '/assets/category-placeholder.png';
+    };
+    return (list || []).map((c) => ({
+      id: String(c.id),
+      name: c.name,
+      image: toAbsolute(c.image ?? null),
+      alt: c.name,
+    }));
+  },
   async getProductDetail(slugOrId: string) {
     const path = `${API_ENDPOINTS.products}/${encodeURIComponent(slugOrId)}`;
     return httpFetch<ProductDetailResponse>(path, { method: 'GET' });

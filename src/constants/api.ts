@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   locationDistricts: '/location/districts',
   shippingCouriers: '/shipping/couriers',
   shippingCalculate: '/shipping/calculate',
+  productCategories: '/products/category',
   checkout: '/checkout',
   checkoutApplyPromo: '/checkout/apply-promo',
   orders: '/user/order',
