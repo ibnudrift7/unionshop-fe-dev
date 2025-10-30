@@ -15,6 +15,11 @@ import type { CartItem } from '@/store/cart';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import {
+  useCouriersQuery,
+  useShippingCalculateQuery,
+} from '@/hooks/use-shipping';
+import type { ShippingCourierOption } from '@/types/shipping';
+import {
   useCartQuery,
   useUpdateCartItemQtyMutation,
   useDeleteCartItemMutation,
@@ -78,6 +83,71 @@ export default function OrderConfirmation() {
     isReady && isLoggedIn,
   );
   const { data: guestAddress } = useGuestAddress();
+
+  const [guestCartInfo, setGuestCartInfo] = useState<{
+    cart_id?: number;
+    address_id?: number;
+  } | null>(() => {
+    try {
+      if (typeof window === 'undefined') return null;
+      const raw = localStorage.getItem('guest_cart_info');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'guest_cart_info') {
+        try {
+          const raw = localStorage.getItem('guest_cart_info');
+          setGuestCartInfo(raw ? JSON.parse(raw) : null);
+        } catch {
+          setGuestCartInfo(null);
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const cartId = isLoggedIn
+    ? memberCart?.data?.cart_id
+    : guestCartInfo?.cart_id;
+  const addressId = isLoggedIn
+    ? defaultAddress?.data?.id
+    : guestCartInfo?.address_id;
+
+  const couriersEnabled =
+    isReady &&
+    (isLoggedIn || Boolean(guestToken)) &&
+    Boolean(cartId) &&
+    Boolean(addressId);
+  const { data: couriersResp } = useCouriersQuery(couriersEnabled);
+  const couriers = couriersResp?.data ?? [];
+  const defaultCourierCode = couriers.length > 0 ? couriers[0].code : null;
+
+  const shippingEnabled = couriersEnabled && Boolean(defaultCourierCode);
+  const { data: shippingResp } = useShippingCalculateQuery(shippingEnabled, {
+    courier: defaultCourierCode ?? '',
+    address_id: String(addressId ?? ''),
+    cart_id: String(cartId ?? ''),
+  });
+
+  const shippingOptions = shippingResp?.data?.shipping_options ?? {};
+  const selectedCourierOption =
+    (defaultCourierCode &&
+      (shippingOptions as Record<string, ShippingCourierOption>)[
+        defaultCourierCode
+      ]) ||
+    null;
+  const selectedService =
+    selectedCourierOption?.services && selectedCourierOption.services.length > 0
+      ? selectedCourierOption.services[0]
+      : null;
+  const shippingFee = selectedService?.cost ?? 0;
+  const estimatedDay = selectedService?.estimated_day ?? null;
 
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<ApplyPromoData | null>(null);
@@ -330,6 +400,19 @@ export default function OrderConfirmation() {
                               minimumFractionDigits: 0,
                             }).format(it.sale_price ?? it.prices ?? 0)}
                           </p>
+                          {it.attributes &&
+                            Array.isArray(it.attributes) &&
+                            it.attributes.length > 0 && (
+                              <div className='text-xs text-gray-500 mt-1'>
+                                {it.attributes
+                                  .map((a: { name?: string; value?: string }) =>
+                                    a.name
+                                      ? `${a.name}: ${a.value ?? ''}`
+                                      : `${a.value ?? ''}`,
+                                  )
+                                  .join(' • ')}
+                              </div>
+                            )}
                         </div>
                         <div className='relative w-25 h-25 rounded-lg overflow-hidden flex-shrink-0'>
                           <Image
@@ -338,7 +421,6 @@ export default function OrderConfirmation() {
                               const DEFAULT_IMG = '/assets/SpecialProduct.png';
                               if (!raw) return DEFAULT_IMG;
                               if (/^https?:\/\//i.test(raw)) return raw;
-                              // Do not use external IMG base; fallback to local asset for non-absolute paths
                               return DEFAULT_IMG;
                             })()}
                             alt={it.product_name}
@@ -460,11 +542,19 @@ export default function OrderConfirmation() {
 
             <div className='flex flex-col items-start mt-4 border-b-2'>
               <h3 className='font-bold text-base'>Biaya Pengiriman</h3>
-              <p className='text-base font-base mb-4'>Rp. 15.000</p>
+              <p className='text-base font-base mb-4'>
+                {new Intl.NumberFormat('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                  minimumFractionDigits: 0,
+                }).format(shippingFee)}
+              </p>
             </div>
 
             <h3 className='font-bold text-base mt-4 mb-2'>
-              Estimasi Pengiriman 2 - 4 hari
+              {estimatedDay
+                ? `Estimasi Pengiriman ${estimatedDay}`
+                : 'Estimasi Pengiriman'}
             </h3>
           </div>
         </div>
