@@ -8,6 +8,7 @@ import type {
   CreateOrderReviewPayload,
   CreateOrderReviewResponse,
   OrderReviewsResponse,
+  OrderTrackingResponse,
 } from '@/types/order';
 import { HttpError } from '@/services/http';
 
@@ -59,5 +60,18 @@ export function useCreateOrderReviewMutation(orderId: string | number) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders', 'reviews', orderId] });
     },
+  });
+}
+
+export function useOrderTrackingQuery(
+  orderId?: string | number,
+  enabled = false,
+) {
+  return useQuery<OrderTrackingResponse, HttpError>({
+    queryKey: ['orders', 'tracking', orderId],
+    queryFn: () =>
+      ordersService.tracking(orderId as string | number).then((r) => r.data),
+    enabled: Boolean(orderId) && enabled,
+    staleTime: 10_000,
   });
 }

@@ -270,8 +270,9 @@ function OrderCard({ order }: { order: OrderListItem }) {
           </Button>
         </div>
         <OrderTrackingModal
+          orderId={order.id}
           isOpen={openTracking}
-          onClose={() => setOpenTracking(false)}
+          onOpenChange={(open: boolean) => setOpenTracking(open)}
         />
         <div className='border-t border-gray-200 mt-4' />
 

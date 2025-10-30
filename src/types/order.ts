@@ -129,3 +129,28 @@ export interface OrderReviewsResponse extends ApiResponseMeta {
     }>;
   };
 }
+
+// Tracking API types
+export interface OrderTrackingHistoryItem {
+  desc: string;
+  date: string; // 'YYYY-MM-DD HH:mm:ss'
+  code: string;
+  status: string; // e.g., 'Pickup', 'Process'
+}
+
+export interface OrderTrackingData {
+  order_id: number;
+  invoice_no: string;
+  tracking_number: string;
+  courier: string;
+  current_status_id: number;
+  tracking_history: {
+    airway_bill: string;
+    last_status: string;
+    history: OrderTrackingHistoryItem[];
+  };
+}
+
+export interface OrderTrackingResponse extends ApiResponseMeta {
+  data: OrderTrackingData;
+}

@@ -7,6 +7,7 @@ import type {
   CreateOrderReviewPayload,
   CreateOrderReviewResponse,
   OrderReviewsResponse,
+  OrderTrackingResponse,
 } from '@/types/order';
 
 export const ordersService = {
@@ -54,5 +55,12 @@ export const ordersService = {
       String(orderId),
     )}/reviews`;
     return httpFetch<OrderReviewsResponse>(path, { method: 'GET' });
+  },
+
+  tracking(orderId: string | number) {
+    const path = `${API_ENDPOINTS.orderShipmentHistory}/${encodeURIComponent(
+      String(orderId),
+    )}/tracking`;
+    return httpFetch<OrderTrackingResponse>(path, { method: 'GET' });
   },
 };
