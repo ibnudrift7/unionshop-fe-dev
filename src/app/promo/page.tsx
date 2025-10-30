@@ -47,9 +47,11 @@ export default function PromoPage() {
       <div className='mt-4'>
         <div className='px-4'>
           <h2 id='promo-title' className='text-balance text-lg font-semibold'>
-            Title Promo
+            Produk Promo
           </h2>
-          <p className='text-sm text-black'>Informasi singkat promo.</p>
+          <p className='text-sm text-black'>
+            Nikmati berbagai produk promo menarik hanya untuk Anda
+          </p>
         </div>
         <PromoSection
           images={[

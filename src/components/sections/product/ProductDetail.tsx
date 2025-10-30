@@ -239,15 +239,15 @@ export default function ProductDetail({
             : 'Produk tidak ditemukan atau belum tersedia.'}
         </p>
 
-        {/* Color attribute ("type": "images") */}
-        <div className='mb-6'>
-          <h3 className='text-sm font-medium text-gray-900 mb-3'>
-            {colorAttr?.name ?? 'Color'}{' '}
-            <span className='text-brand'>Pilih 1</span>
-          </h3>
-          <div className='grid grid-cols-2 gap-4'>
-            {colors.length > 0 ? (
-              colors.map((color) => (
+        {/* Color attribute ("type": "images") - render only when API returns values */}
+        {colors.length > 0 && (
+          <div className='mb-6'>
+            <h3 className='text-sm font-medium text-gray-900 mb-3'>
+              {colorAttr?.name ?? 'Color'}{' '}
+              <span className='text-brand'>Pilih 1</span>
+            </h3>
+            <div className='grid grid-cols-2 gap-4'>
+              {colors.map((color) => (
                 <Card
                   key={color.id}
                   className={`w-full md:h-32 p-4 cursor-pointer transition-colors ${
@@ -278,29 +278,20 @@ export default function ProductDetail({
                     </span>
                   </div>
                 </Card>
-              ))
-            ) : (
-              <Card className='w-full md:h-32 p-4 border-gray-200'>
-                <div className='flex flex-col items-center justify-center h-full space-y-2'>
-                  <div className='w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center bg-gray-100'>
-                    <span className='text-xs text-gray-400'>—</span>
-                  </div>
-                  <span className='text-xs font-medium text-gray-400'>—</span>
-                </div>
-              </Card>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* attribute size ("type": "options") */}
-        <div className='mb-6'>
-          <h3 className='text-sm font-medium text-gray-900 mb-3'>
-            {sizeAttr?.name ?? 'Size'}{' '}
-            <span className='text-brand'>Pilih 1</span>
-          </h3>
-          <div className='flex w-full gap-2'>
-            {sizes.length > 0 ? (
-              sizes.map((size) => (
+        {/* attribute size ("type": "options") - render only when API returns values */}
+        {sizes.length > 0 && (
+          <div className='mb-6'>
+            <h3 className='text-sm font-medium text-gray-900 mb-3'>
+              {sizeAttr?.name ?? 'Size'}{' '}
+              <span className='text-brand'>Pilih 1</span>
+            </h3>
+            <div className='flex w-full gap-2'>
+              {sizes.map((size) => (
                 <Button
                   key={size.id}
                   variant={selectedSizeId === size.id ? 'default' : 'outline'}
@@ -313,17 +304,10 @@ export default function ProductDetail({
                 >
                   {size.value || '—'}
                 </Button>
-              ))
-            ) : (
-              <Button
-                variant='outline'
-                className='flex-1 py-2 border-gray-300 text-gray-400 cursor-default'
-              >
-                —
-              </Button>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {!noCart && (

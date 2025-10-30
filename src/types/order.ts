@@ -70,21 +70,21 @@ export interface OrderDetailResponse extends ApiResponseMeta {
   data: OrderDetailData;
 }
 
+// Updated shipment history types per new API
 export interface OrderHistoryItem {
-  id: number;
-  status_id: number;
-  status_name: string;
-  sort_order: number;
-  changed_at: string;
-  notes: string;
+  stage: string;
+  status_ids: number[];
+  label: string;
+  completed: boolean;
+  active: boolean;
 }
 
 export interface OrderHistoryResponse extends ApiResponseMeta {
   data: {
     order_id: number;
     invoice_no: string;
-    total_updates: number;
-    history: OrderHistoryItem[];
+    current_status_id: number;
+    shipping_progress: OrderHistoryItem[];
   };
 }
 

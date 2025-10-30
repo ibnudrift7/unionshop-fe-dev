@@ -10,6 +10,7 @@ import type { Product as UiProduct } from '@/types';
 
 interface PromoProduct {
   id: string;
+  slug?: string;
   name: string;
   image: string;
   price: number;
@@ -67,6 +68,7 @@ export function DiscountOffers() {
 
     return bundles.map((b: UiProduct) => ({
       id: b.id,
+      slug: b.slug,
       name: b.name,
       image: (b.image as string) ?? DEFAULT_IMG,
       price: (b.price as number) ?? 0,
@@ -101,11 +103,13 @@ export function DiscountOffers() {
             className='p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand'
             role='button'
             tabIndex={0}
-            onClick={() => router.push(`/promo/all/${product.id}`)}
+            onClick={() =>
+              router.push(`/promo/all/${product.slug ?? product.id}`)
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                router.push(`/promo/all/${product.id}`);
+                router.push(`/promo/all/${product.slug ?? product.id}`);
               }
             }}
           >
