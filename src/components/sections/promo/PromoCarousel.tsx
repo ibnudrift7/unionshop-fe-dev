@@ -21,35 +21,7 @@ type PromoItem = {
   image?: string;
 };
 
-const ITEMS: PromoItem[] = [
-  {
-    id: '1',
-    title: 'Makna Trio Deal',
-    price: 200000,
-    priceBefore: 350000,
-    rating: 5,
-    sold: '500+',
-    imageAlt: 'Paket Makna Trio',
-  },
-  {
-    id: '2',
-    title: 'Makna Trio Deal',
-    price: 200000,
-    shippingNote: 'Diskon Ongkir Rp. 40.000',
-    rating: 5,
-    sold: '500+',
-    imageAlt: 'Special Package',
-  },
-  {
-    id: '3',
-    title: 'Bundle Hemat',
-    price: 180000,
-    priceBefore: 250000,
-    rating: 4.8,
-    sold: '1.2k',
-    imageAlt: 'Bundle Hemat',
-  },
-];
+// No dummy fallback: render empty state when no bundles
 
 function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID', {
@@ -59,25 +31,23 @@ function formatIDR(n: number) {
   }).format(n);
 }
 
-export function PromoCarouselSection() {
+export function PromoCarouselSection({ searchTerm }: { searchTerm?: string }) {
   const scrollerRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const { data: bundles } = useBundlesQuery();
+  const { data: bundles } = useBundlesQuery({ search: searchTerm });
 
   const items: PromoItem[] = React.useMemo(() => {
-    if (bundles && bundles.length > 0) {
-      return bundles.map((p) => ({
-        id: p.id,
-        title: p.name,
-        price: p.price,
-        priceBefore: p.discountPrice,
-        rating: p.rating ?? Number((4 + Math.random()).toFixed(1)),
-        sold: `${Math.floor(Math.random() * 1000)}`,
-        imageAlt: p.name,
-        image: p.image ?? '/assets/promo-item.png',
-      }));
-    }
-    return ITEMS;
+    if (!bundles || bundles.length === 0) return [];
+    return bundles.map((p) => ({
+      id: p.id,
+      title: p.name,
+      price: p.price,
+      priceBefore: p.discountPrice,
+      rating: p.rating ?? 0,
+      sold: String(p.sold ?? 0),
+      imageAlt: p.name,
+      image: p.image ?? '/assets/promo-item.png',
+    }));
   }, [bundles]);
 
   return (
@@ -101,23 +71,29 @@ export function PromoCarouselSection() {
       </div>
 
       <div className='relative'>
-        <div
-          ref={scrollerRef}
-          className='flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1'
-          role='list'
-          aria-label='Promo pilihan'
-        >
-          {items.map((item) => (
-            <article
-              key={item.id}
-              role='listitem'
-              className='snap-start'
-              aria-roledescription='kartu promo'
-            >
-              <PromoCard item={item} />
-            </article>
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <div className='px-1 py-6 text-sm text-foreground/60'>
+            Tidak ada promo bundle ditemukan.
+          </div>
+        ) : (
+          <div
+            ref={scrollerRef}
+            className='flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1'
+            role='list'
+            aria-label='Promo pilihan'
+          >
+            {items.map((item) => (
+              <article
+                key={item.id}
+                role='listitem'
+                className='snap-start'
+                aria-roledescription='kartu promo'
+              >
+                <PromoCard item={item} />
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -135,7 +111,7 @@ function PromoCard({ item }: { item: PromoItem }) {
         </Badge>
 
         <Image
-          src={'/assets/promo-item.png'}
+          src={item.image ?? '/assets/promo-item.png'}
           alt={item.imageAlt ?? 'Gambar promo'}
           fill
           priority

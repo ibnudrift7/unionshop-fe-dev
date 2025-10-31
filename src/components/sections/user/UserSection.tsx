@@ -450,7 +450,7 @@ export default function MobileMenu() {
           <h2 className='text-lg font-bold text-black'>
             {isLoggedIn
               ? userName || profileData?.data?.full_name || 'Pengguna'
-              : 'Hey, there gorgeous'}
+              : ''}
           </h2>
         </div>
       </div>

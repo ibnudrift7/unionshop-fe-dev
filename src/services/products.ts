@@ -29,8 +29,24 @@ function mapApiProductToUi(
   const base = parsePrice(p.base_price) ?? 0;
   const hasSale = sale !== undefined && sale > 0;
   const image = toAbsolute(p.cover_image);
-  const rating = Number((4 + Math.random()).toFixed(1));
-  const sold = Math.floor(Math.random() * 1000);
+  // Prefer API-provided rating and sales when available
+  const rating = (() => {
+    const r = p.average_rating;
+    if (typeof r === 'string') {
+      const n = Number(r);
+      return Number.isFinite(n) ? n : 0;
+    }
+    return 0;
+  })();
+  const sold = (() => {
+    const s = p.formatted_sales as unknown;
+    if (typeof s === 'string') {
+      const n = Number(s.replace(/[^0-9.-]+/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    }
+    if (typeof s === 'number') return s as number;
+    return 0;
+  })();
   return {
     id: String(p.id),
     name: p.name,

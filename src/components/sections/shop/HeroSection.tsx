@@ -130,13 +130,8 @@ export default function HeroSection({
                       'pl-4 pr-3 bg-white/60 hover:bg-white/70 backdrop-blur-sm border-gray-200 h-full w-17/22 md:w-18/22 border-l-0 rounded-r-xl rounded-l-none relative z-10 transition-colors',
                       isSearchOpen ? 'shadow-sm' : '',
                     )}
-                    onChange={(e) => onSearch?.(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') setIsSearchOpen(false);
-                      if (e.key === 'Enter') {
-                        const value = (e.target as HTMLInputElement).value;
-                        onSearch?.(value);
-                      }
                     }}
                   />
                   <Button

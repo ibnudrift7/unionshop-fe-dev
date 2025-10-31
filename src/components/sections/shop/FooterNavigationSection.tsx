@@ -23,14 +23,12 @@ const defaultTabs: NavigationTab[] = [
     iconSrc: '/assets/nav/shop.png',
     activeIconSrc: '/assets/nav/shop-active.png',
     label: 'Shop',
-    badge: '3',
   },
   {
     id: 'promo',
     iconSrc: '/assets/nav/promo.png',
     activeIconSrc: '/assets/nav/promo-active.png',
     label: 'Promo',
-    badge: '2',
   },
   {
     id: 'profile',

@@ -4,10 +4,15 @@ import { useQuery } from '@tanstack/react-query';
 import { productsService } from '@/services/products';
 import type { Product } from '@/types';
 
-export function useBundlesQuery(enabled = true) {
+export function useBundlesQuery(options?: {
+  enabled?: boolean;
+  search?: string;
+}) {
+  const enabled = options?.enabled ?? true;
+  const search = options?.search;
   return useQuery<Product[], Error>({
-    queryKey: ['bundles'],
-    queryFn: () => productsService.getBundlesUi(),
+    queryKey: ['bundles', { search: search ?? '' }],
+    queryFn: () => productsService.getBundlesUi({ search }),
     enabled,
     staleTime: 30_000,
   });
