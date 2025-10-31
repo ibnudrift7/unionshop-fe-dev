@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner'; // optional jika kamu pakai toast
+import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   useProvincesQuery,
@@ -22,16 +22,14 @@ import type { Province, City, District } from '@/types/location';
 
 export interface EditAddressPayload {
   phone?: string;
-  // New fields for dropdown selections (optional for backward compat)
   provinceId?: number;
   cityId?: number;
-  districtId?: number; // kecamatan id
+  districtId?: number; 
   districtName?: string;
-  // Legacy display fields (names)
   province?: string;
   city?: string;
   district?: string;
-  postalCode: string; // kode pos
+  postalCode: string; 
   addressDetail: string;
 }
 
@@ -77,6 +75,10 @@ export default function EditAddressSheet({
   const provinces = useMemo(() => provincesRes?.data ?? [], [provincesRes]);
   const cities = useMemo(() => citiesRes?.data ?? [], [citiesRes]);
   const districts = useMemo(() => distsRes?.data ?? [], [distsRes]);
+  const [cityQuery, setCityQuery] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const [districtQuery, setDistrictQuery] = useState('');
+  const [districtOpen, setDistrictOpen] = useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let v = String(e.target.value || '').replace(/\D/g, '');
@@ -184,56 +186,136 @@ export default function EditAddressSheet({
           </div>
           <div className='space-y-1'>
             <Label htmlFor='edit-city'>Kota/Kabupaten</Label>
-            <select
-              id='edit-city'
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-              value={cityId}
-              onChange={(e) => {
-                const val = e.target.value ? Number(e.target.value) : '';
-                setCityId(val);
-                setDistrictId('');
-              }}
-              disabled={!provinceId}
-            >
-              <option value='' disabled>
-                {!provinceId
-                  ? 'Pilih provinsi dahulu'
-                  : loadingCity
-                  ? 'Memuat…'
-                  : 'Pilih kota/kabupaten'}
-              </option>
-              {cities.map((c: City) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className='relative'>
+              <input
+                id='edit-city'
+                role='combobox'
+                aria-expanded={cityOpen}
+                aria-controls='city-listbox'
+                placeholder={
+                  !provinceId
+                    ? 'Pilih provinsi dahulu'
+                    : loadingCity
+                    ? 'Memuat…'
+                    : 'Cari atau pilih kota'
+                }
+                className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                value={
+                  typeof cityId === 'number'
+                    ? cities.find((c) => c.id === cityId)?.name ?? ''
+                    : cityQuery
+                }
+                onChange={(e) => {
+                  setCityQuery(e.target.value);
+                  setCityOpen(true);
+                }}
+                onFocus={() => setCityOpen(true)}
+                disabled={!provinceId}
+              />
+              {cityOpen && provinceId && (
+                <ul
+                  id='city-listbox'
+                  role='listbox'
+                  className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+                >
+                  {(loadingCity ? [] : cities)
+                    .filter((c) =>
+                      cityQuery
+                        ? c.name.toLowerCase().includes(cityQuery.toLowerCase())
+                        : true,
+                    )
+                    .map((c: City) => (
+                      <li
+                        key={c.id}
+                        role='option'
+                        aria-selected={cityId === c.id}
+                        className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          setCityId(c.id);
+                          setCityQuery('');
+                          setCityOpen(false);
+                          setDistrictId('');
+                        }}
+                      >
+                        {c.name}
+                      </li>
+                    ))}
+                  {!loadingCity && cities.length === 0 && (
+                    <li className='px-3 py-2 text-sm text-gray-500'>
+                      Tidak ada kota.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
           </div>
           <div className='space-y-1'>
             <Label htmlFor='edit-district'>Kecamatan</Label>
-            <select
-              id='edit-district'
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-              value={districtId}
-              onChange={(e) => {
-                const val = e.target.value ? Number(e.target.value) : '';
-                setDistrictId(val);
-              }}
-              disabled={!cityId}
-            >
-              <option value='' disabled>
-                {!cityId
-                  ? 'Pilih kota dahulu'
-                  : loadingDist
-                  ? 'Memuat…'
-                  : 'Pilih kecamatan'}
-              </option>
-              {districts.map((d: District) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+            <div className='relative'>
+              <input
+                id='edit-district'
+                role='combobox'
+                aria-expanded={districtOpen}
+                aria-controls='district-listbox'
+                placeholder={
+                  !cityId
+                    ? 'Pilih kota dahulu'
+                    : loadingDist
+                    ? 'Memuat…'
+                    : 'Cari atau pilih kecamatan'
+                }
+                className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                value={
+                  typeof districtId === 'number'
+                    ? districts.find((d) => d.id === districtId)?.name ?? ''
+                    : districtQuery
+                }
+                onChange={(e) => {
+                  setDistrictQuery(e.target.value);
+                  setDistrictOpen(true);
+                }}
+                onFocus={() => setDistrictOpen(true)}
+                disabled={!cityId}
+              />
+              {districtOpen && cityId && (
+                <ul
+                  id='district-listbox'
+                  role='listbox'
+                  className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+                >
+                  {(loadingDist ? [] : districts)
+                    .filter((d) =>
+                      districtQuery
+                        ? d.name
+                            .toLowerCase()
+                            .includes(districtQuery.toLowerCase())
+                        : true,
+                    )
+                    .map((d: District) => (
+                      <li
+                        key={d.id}
+                        role='option'
+                        aria-selected={districtId === d.id}
+                        className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          setDistrictId(d.id);
+                          setDistrictQuery('');
+                          setDistrictOpen(false);
+                        }}
+                      >
+                        {d.name}
+                      </li>
+                    ))}
+                  {!loadingDist && districts.length === 0 && (
+                    <li className='px-3 py-2 text-sm text-gray-500'>
+                      Tidak ada kecamatan.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
           </div>
           <div className='space-y-1'>
             <Label htmlFor='edit-postal'>Kode pos</Label>

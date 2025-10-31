@@ -2,25 +2,25 @@
 
 import * as React from 'react';
 import { FooterNavigationSection, HeroSection } from '@/components/sections';
-import { CheckinClaimSection } from '@/components/sections/promo/CheckinClaim';
-import ClaimResultCard from '@/components/sections/promo/ClaimResultCard';
+// import { CheckinClaimSection } from '@/components/sections/promo/CheckinClaim';
+// import ClaimResultCard from '@/components/sections/promo/ClaimResultCard';
 import { PromoCarouselSection } from '@/components/sections/promo/PromoCarousel';
 import PromoSection from '@/components/sections/shop/PromoSection';
 
 export default function PromoPage() {
-  const [showResult, setShowResult] = React.useState(false);
-  const [reward, setReward] = React.useState<number>(0);
-  const [claimed, setClaimed] = React.useState(0);
+  // const [showResult, setShowResult] = React.useState(false);
+  // const [reward, setReward] = React.useState<number>(0);
+  // const [claimed, setClaimed] = React.useState(0);
 
-  function handleClaim(rewardAmount: number) {
-    setReward(rewardAmount);
-    setClaimed((c) => Math.min(7, c + 1));
-    setShowResult(true);
-  }
+  // function handleClaim(rewardAmount: number) {
+  //   setReward(rewardAmount);
+  //   setClaimed((c) => Math.min(7, c + 1));
+  //   setShowResult(true);
+  // }
 
-  function handleCloseResult() {
-    setShowResult(false);
-  }
+  // function handleCloseResult() {
+  //   setShowResult(false);
+  // }
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
@@ -32,13 +32,13 @@ export default function PromoPage() {
         ]}
       />
 
-      <div className='mt-2'>
+      {/* <div className='mt-2'>
         {!showResult ? (
           <CheckinClaimSection onClaim={handleClaim} claimed={claimed} />
         ) : (
           <ClaimResultCard reward={reward} onClose={handleCloseResult} />
         )}
-      </div>
+      </div> */}
 
       <div className='mt-6 px-4'>
         <PromoCarouselSection />

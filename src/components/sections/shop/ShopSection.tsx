@@ -7,8 +7,7 @@ import { Search } from 'lucide-react';
 import ProductSection from '../product/ProductSection';
 import { Product } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { shopFilters as FILTERS, ShopFilter } from './data';
-import { useProductsQuery } from '@/hooks/use-products';
+import { useProductsQuery, useCategoriesQuery } from '@/hooks/use-products';
 
 interface ShopSectionProps {
   cartCount?: number;
@@ -23,15 +22,15 @@ export default function ShopSection({
 }: ShopSectionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(''); // input text only
-  const [active, setActive] = useState<ShopFilter | null>(null);
-  const [committedQuery, setCommittedQuery] = useState(''); // applied when clicking search
+  const [query, setQuery] = useState('');
+  const [active, setActive] = useState<string | null>(null);
+  const [committedQuery, setCommittedQuery] = useState('');
 
   useEffect(() => {
-    const f = searchParams.get('filter');
-    if (f && FILTERS.some((fi) => fi.id === f)) {
-      setActive(f as ShopFilter);
-    } else if (!f) {
+    const c = searchParams.get('category');
+    if (c) {
+      setActive(c);
+    } else {
       setActive(null);
     }
   }, [searchParams]);
@@ -53,8 +52,11 @@ export default function ShopSection({
     error,
   } = useProductsQuery({
     search: committedQuery || undefined,
-    // Note: category filter remains dummy for now; don't pass categoryId
+    categoryId: active ?? undefined,
   });
+
+  const { data: apiCategories, isLoading: categoriesLoading } =
+    useCategoriesQuery();
 
   const filterProducts = useCallback(
     (products: Product[]) => {
@@ -66,11 +68,9 @@ export default function ShopSection({
   );
 
   const content = useMemo(() => {
-    // Loading state
     if (isLoading) {
       return <div className='px-4 text-sm text-gray-500'>Memuat produk…</div>;
     }
-    // Error state
     if (isError) {
       return (
         <div className='px-4 text-sm text-red-600'>
@@ -83,11 +83,12 @@ export default function ShopSection({
     const filtered = filterProducts(products);
 
     if (active) {
-      // Category filter is dummy: only affects title; list remains from API
+      const activeLabel =
+        (apiCategories ?? []).find((c) => c.id === active)?.name ?? 'Kategori';
       return (
         <div className='space-y-6'>
           <ProductSection
-            title={FILTERS.find((f) => f.id === active)?.label}
+            title={activeLabel}
             products={filtered}
             onProductClick={(p) => {
               onProductClick?.(p);
@@ -127,6 +128,7 @@ export default function ShopSection({
     isLoading,
     isError,
     error,
+    apiCategories,
   ]);
 
   return (
@@ -160,43 +162,49 @@ export default function ShopSection({
 
         <div className='px-4 py-3 bg-white border-b'>
           <div className='flex gap-4 flex-wrap' role='tablist'>
-            {FILTERS.map((f) => {
-              const isActive = active === f.id;
-              return (
-                <button
-                  key={f.id}
-                  role='tab'
-                  aria-selected={isActive}
-                  onClick={() => {
-                    const next = isActive ? null : f.id;
-                    setActive(next);
-                    const params = new URLSearchParams(searchParams.toString());
-                    if (next) {
-                      params.set('filter', next);
-                    } else {
-                      params.delete('filter');
-                    }
-                    router.push(
-                      `/shop${
-                        params.toString() ? `?${params.toString()}` : ''
-                      }`,
-                    );
-                  }}
-                  className='px-1 text-sm font-medium transition-colors cursor-pointer'
-                >
-                  <span
-                    className={
-                      'inline-block pb-2 border-b-2 ' +
-                      (isActive
-                        ? 'border-brand text-brand'
-                        : 'border-transparent text-gray-700 hover:text-gray-900')
-                    }
+            {categoriesLoading && (
+              <div className='px-2 text-sm text-gray-500'>Memuat kategori…</div>
+            )}
+            {!categoriesLoading &&
+              (apiCategories ?? []).map((cat) => {
+                const isActive = active === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    role='tab'
+                    aria-selected={isActive}
+                    onClick={() => {
+                      const next = isActive ? null : cat.id;
+                      setActive(next);
+                      const params = new URLSearchParams(
+                        searchParams.toString(),
+                      );
+                      if (next) {
+                        params.set('category', next);
+                      } else {
+                        params.delete('category');
+                      }
+                      router.push(
+                        `/shop${
+                          params.toString() ? `?${params.toString()}` : ''
+                        }`,
+                      );
+                    }}
+                    className='px-1 text-sm font-medium transition-colors cursor-pointer'
                   >
-                    {f.label}
-                  </span>
-                </button>
-              );
-            })}
+                    <span
+                      className={
+                        'inline-block pb-2 border-b-2 ' +
+                        (isActive
+                          ? 'border-brand text-brand'
+                          : 'border-transparent text-gray-700 hover:text-gray-900')
+                      }
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
         </div>
       </div>

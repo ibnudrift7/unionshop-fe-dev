@@ -47,6 +47,10 @@ export default function GuestAddressPage() {
   const provinces = provincesQuery.data?.data ?? [];
   const cities = citiesQuery.data?.data ?? [];
   const districts = districtsQuery.data?.data ?? [];
+  const [cityQuery, setCityQuery] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const [districtQuery, setDistrictQuery] = useState('');
+  const [districtOpen, setDistrictOpen] = useState(false);
   const { mutate: registerGuest, isPending } = useRegisterGuestMutation();
 
   const onProvinceChange = (id: string) => {
@@ -136,12 +140,10 @@ export default function GuestAddressPage() {
     registerGuest(payload, {
       onSuccess: (res) => {
         try {
-          // Store guest token under a separate key so app doesn't treat guest as full auth
           if (res.data?.token) {
             localStorage.setItem('guest_token', res.data.token);
           }
 
-          // Persist minimal user and cart info for reference
           localStorage.setItem('guest_user', JSON.stringify(res.data.user));
           localStorage.setItem(
             'guest_cart_info',
@@ -151,7 +153,6 @@ export default function GuestAddressPage() {
             }),
           );
 
-          // Save the address locally so OrderConfirmation reads it from local storage
           const provinceName =
             provinces.find((p) => String(p.id) === String(provinceId))?.name ??
             '';
@@ -174,7 +175,6 @@ export default function GuestAddressPage() {
             addressDetail,
           };
           setGuestAddress(guestAddr);
-          // Note: do NOT clear local guest cart so that OrderConfirmation continues to show guest items
         } catch {}
 
         toast.success(
@@ -288,51 +288,140 @@ export default function GuestAddressPage() {
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-city'>Kota/Kabupaten</Label>
-          <select
-            id='addr-city'
-            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-            value={cityId}
-            onChange={(e) => onCityChange(e.target.value)}
-            disabled={!provinceId || citiesQuery.isLoading}
-          >
-            <option value=''>
-              {!provinceId
-                ? 'Pilih provinsi dulu'
-                : citiesQuery.isLoading
-                ? 'Memuat...'
-                : 'Pilih kota/kabupaten'}
-            </option>
-            {cities.map((c) => (
-              <option key={c.id} value={String(c.id)}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <div className='relative'>
+            <input
+              id='addr-city'
+              role='combobox'
+              aria-expanded={cityOpen}
+              aria-controls='guest-city-listbox'
+              placeholder={
+                !provinceId
+                  ? 'Pilih provinsi dulu'
+                  : citiesQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Cari atau pilih kota'
+              }
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+              value={
+                cityId
+                  ? cities.find((c) => String(c.id) === String(cityId))?.name ??
+                    ''
+                  : cityQuery
+              }
+              onChange={(e) => {
+                setCityQuery(e.target.value);
+                setCityOpen(true);
+              }}
+              onFocus={() => setCityOpen(true)}
+              disabled={!provinceId || citiesQuery.isLoading}
+            />
+            {cityOpen && provinceId && (
+              <ul
+                id='guest-city-listbox'
+                role='listbox'
+                className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+              >
+                {(citiesQuery.isLoading ? [] : cities)
+                  .filter((c) =>
+                    cityQuery
+                      ? c.name.toLowerCase().includes(cityQuery.toLowerCase())
+                      : true,
+                  )
+                  .map((c) => (
+                    <li
+                      key={c.id}
+                      role='option'
+                      aria-selected={String(cityId) === String(c.id)}
+                      className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                      onMouseDown={(ev) => ev.preventDefault()}
+                      onClick={() => {
+                        onCityChange(String(c.id));
+                        setCityQuery('');
+                        setCityOpen(false);
+                        // reset district related
+                        setDistrictQuery('');
+                        setDistrictOpen(false);
+                      }}
+                    >
+                      {c.name}
+                    </li>
+                  ))}
+                {!citiesQuery.isLoading && cities.length === 0 && (
+                  <li className='px-3 py-2 text-sm text-gray-500'>
+                    Tidak ada kota.
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-district'>Kecamatan</Label>
-          <select
-            id='addr-district'
-            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-            value={districtId}
-            onChange={(e) => onDistrictChange(e.target.value)}
-            disabled={!provinceId || !cityId || districtsQuery.isLoading}
-          >
-            <option value=''>
-              {!provinceId
-                ? 'Pilih provinsi dulu'
-                : !cityId
-                ? 'Pilih kota/kabupaten dulu'
-                : districtsQuery.isLoading
-                ? 'Memuat...'
-                : 'Pilih kecamatan'}
-            </option>
-            {districts.map((d) => (
-              <option key={d.id} value={String(d.id)}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+          <div className='relative'>
+            <input
+              id='addr-district'
+              role='combobox'
+              aria-expanded={districtOpen}
+              aria-controls='guest-district-listbox'
+              placeholder={
+                !cityId
+                  ? 'Pilih kota/kabupaten dulu'
+                  : districtsQuery.isLoading
+                  ? 'Memuat...'
+                  : 'Cari atau pilih kecamatan'
+              }
+              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+              value={
+                districtId
+                  ? districts.find((d) => String(d.id) === String(districtId))
+                      ?.name ?? ''
+                  : districtQuery
+              }
+              onChange={(e) => {
+                setDistrictQuery(e.target.value);
+                setDistrictOpen(true);
+              }}
+              onFocus={() => setDistrictOpen(true)}
+              disabled={!provinceId || !cityId || districtsQuery.isLoading}
+            />
+            {districtOpen && cityId && (
+              <ul
+                id='guest-district-listbox'
+                role='listbox'
+                className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+              >
+                {(districtsQuery.isLoading ? [] : districts)
+                  .filter((d) =>
+                    districtQuery
+                      ? d.name
+                          .toLowerCase()
+                          .includes(districtQuery.toLowerCase())
+                      : true,
+                  )
+                  .map((d) => (
+                    <li
+                      key={d.id}
+                      role='option'
+                      aria-selected={String(districtId) === String(d.id)}
+                      className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                      onMouseDown={(ev) => ev.preventDefault()}
+                      onClick={() => {
+                        onDistrictChange(String(d.id));
+                        setDistrictQuery('');
+                        setDistrictOpen(false);
+                      }}
+                    >
+                      {d.name}
+                    </li>
+                  ))}
+                {!districtsQuery.isLoading && districts.length === 0 && (
+                  <li className='px-3 py-2 text-sm text-gray-500'>
+                    Tidak ada kecamatan.
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
         </div>
         <div className='space-y-1'>
           <Label htmlFor='addr-postal'>Kode pos</Label>

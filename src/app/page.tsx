@@ -15,7 +15,7 @@ import {
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
-import { useProductsQuery } from '@/hooks/use-products';
+import { useProductsQuery, useCategoriesQuery } from '@/hooks/use-products';
 import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { useCartStore } from '@/store/cart';
@@ -41,6 +41,8 @@ export default function Home() {
   const { data: memberCart } = useCartQuery(Boolean(isReady && isLoggedIn));
   const { data: productsData, isLoading: isLoadingProducts } =
     useProductsQuery();
+  const { data: categoriesData, isLoading: categoriesLoading } =
+    useCategoriesQuery();
   const { data: defaultAddressResp } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
@@ -131,8 +133,8 @@ export default function Home() {
 
       <div className='pt-36'>
         <CategoryGridSection
-          categories={mockCategories}
-          // isLoading={isLoading}
+          categories={categoriesData ?? mockCategories}
+          isLoading={categoriesLoading}
         />
       </div>
 

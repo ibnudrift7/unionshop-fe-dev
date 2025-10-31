@@ -14,3 +14,11 @@ export function useProductsQuery(params: ProductsQuery = {}) {
     staleTime: 30_000,
   });
 }
+
+export function useCategoriesQuery() {
+  return useQuery({
+    queryKey: ['products', 'categories'],
+    queryFn: () => productsService.getCategoriesUi(),
+    staleTime: 60_000,
+  });
+}
