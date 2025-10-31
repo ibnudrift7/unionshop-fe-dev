@@ -8,6 +8,7 @@ import { PromoCarouselSection } from '@/components/sections/promo/PromoCarousel'
 import PromoSection from '@/components/sections/shop/PromoSection';
 
 export default function PromoPage() {
+  const [searchTerm, setSearchTerm] = React.useState<string>('');
   // const [showResult, setShowResult] = React.useState(false);
   // const [reward, setReward] = React.useState<number>(0);
   // const [claimed, setClaimed] = React.useState(0);
@@ -30,6 +31,7 @@ export default function PromoPage() {
           '/assets/Background.png',
           '/assets/Background.png',
         ]}
+        onSearch={(value) => setSearchTerm(value)}
       />
 
       {/* <div className='mt-2'>
@@ -41,7 +43,7 @@ export default function PromoPage() {
       </div> */}
 
       <div className='mt-6 px-4'>
-        <PromoCarouselSection />
+        <PromoCarouselSection searchTerm={searchTerm} />
       </div>
 
       <div className='mt-4'>
