@@ -83,6 +83,10 @@ export function RegisterSheet({
   const [province, setProvince] = useState('');
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
+  const [cityQuery, setCityQuery] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const [districtQuery, setDistrictQuery] = useState('');
+  const [districtOpen, setDistrictOpen] = useState(false);
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
 
@@ -389,56 +393,144 @@ export function RegisterSheet({
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-city'>Kota/Kabupaten</Label>
-            <select
-              id='register-city'
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-              value={city}
-              onChange={(e) => handleCityChange(e.target.value)}
-              disabled={isSubmitting || !province || citiesQuery.isLoading}
-            >
-              <option value='' disabled>
-                {!province
-                  ? 'Pilih provinsi dulu'
-                  : citiesQuery.isLoading
-                  ? 'Memuat...'
-                  : 'Pilih kota/kabupaten'}
-              </option>
-              {cities.map((c) => (
-                <option key={c.id} value={String(c.id)}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className='relative'>
+              <input
+                id='register-city'
+                role='combobox'
+                aria-expanded={cityOpen}
+                aria-controls='register-city-listbox'
+                placeholder={
+                  !province
+                    ? 'Pilih provinsi dulu'
+                    : citiesQuery.isLoading
+                    ? 'Memuat...'
+                    : 'Cari atau pilih kota'
+                }
+                className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                value={
+                  city
+                    ? cities.find((c) => String(c.id) === String(city))?.name ??
+                      ''
+                    : cityQuery
+                }
+                onChange={(e) => {
+                  setCityQuery(e.target.value);
+                  setCityOpen(true);
+                }}
+                onFocus={() => setCityOpen(true)}
+                disabled={isSubmitting || !province || citiesQuery.isLoading}
+              />
+              {cityOpen && province && (
+                <ul
+                  id='register-city-listbox'
+                  role='listbox'
+                  className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+                >
+                  {(citiesQuery.isLoading ? [] : cities)
+                    .filter((c) =>
+                      cityQuery
+                        ? c.name.toLowerCase().includes(cityQuery.toLowerCase())
+                        : true,
+                    )
+                    .map((c) => (
+                      <li
+                        key={c.id}
+                        role='option'
+                        aria-selected={String(city) === String(c.id)}
+                        className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          handleCityChange(String(c.id));
+                          setCityQuery('');
+                          setCityOpen(false);
+                          setDistrictQuery('');
+                          setDistrictOpen(false);
+                        }}
+                      >
+                        {c.name}
+                      </li>
+                    ))}
+                  {!citiesQuery.isLoading && cities.length === 0 && (
+                    <li className='px-3 py-2 text-sm text-gray-500'>
+                      Tidak ada kota.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
             {fieldErrors.city ? (
               <p className='text-xs text-red-600'>{fieldErrors.city}</p>
             ) : null}
           </div>
           <div className='space-y-1'>
             <Label htmlFor='register-district'>Kecamatan</Label>
-            <select
-              id='register-district'
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              disabled={
-                isSubmitting || !province || !city || districtsQuery.isLoading
-              }
-            >
-              <option value='' disabled>
-                {!province
-                  ? 'Pilih provinsi dulu'
-                  : !city
-                  ? 'Pilih kota/kabupaten dulu'
-                  : districtsQuery.isLoading
-                  ? 'Memuat...'
-                  : 'Pilih kecamatan'}
-              </option>
-              {districts.map((d) => (
-                <option key={d.id} value={String(d.id)}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+            <div className='relative'>
+              <input
+                id='register-district'
+                role='combobox'
+                aria-expanded={districtOpen}
+                aria-controls='register-district-listbox'
+                placeholder={
+                  !city
+                    ? 'Pilih kota/kabupaten dulu'
+                    : districtsQuery.isLoading
+                    ? 'Memuat...'
+                    : 'Cari atau pilih kecamatan'
+                }
+                className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                value={
+                  district
+                    ? districts.find((d) => String(d.id) === String(district))
+                        ?.name ?? ''
+                    : districtQuery
+                }
+                onChange={(e) => {
+                  setDistrictQuery(e.target.value);
+                  setDistrictOpen(true);
+                }}
+                onFocus={() => setDistrictOpen(true)}
+                disabled={
+                  isSubmitting || !province || !city || districtsQuery.isLoading
+                }
+              />
+              {districtOpen && city && (
+                <ul
+                  id='register-district-listbox'
+                  role='listbox'
+                  className='absolute z-20 left-0 right-0 mt-1 max-h-56 overflow-auto bg-white border border-gray-200 rounded-md shadow-sm'
+                >
+                  {(districtsQuery.isLoading ? [] : districts)
+                    .filter((d) =>
+                      districtQuery
+                        ? d.name
+                            .toLowerCase()
+                            .includes(districtQuery.toLowerCase())
+                        : true,
+                    )
+                    .map((d) => (
+                      <li
+                        key={d.id}
+                        role='option'
+                        aria-selected={String(district) === String(d.id)}
+                        className='px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm'
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          setDistrict(String(d.id));
+                          setDistrictQuery('');
+                          setDistrictOpen(false);
+                        }}
+                      >
+                        {d.name}
+                      </li>
+                    ))}
+                  {!districtsQuery.isLoading && districts.length === 0 && (
+                    <li className='px-3 py-2 text-sm text-gray-500'>
+                      Tidak ada kecamatan.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
             {fieldErrors.district ? (
               <p className='text-xs text-red-600'>{fieldErrors.district}</p>
             ) : null}
