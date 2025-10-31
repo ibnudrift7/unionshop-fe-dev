@@ -7,8 +7,32 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { useSettingsQuery } from '@/hooks/use-setting';
+import { useAuthStatus } from '@/hooks/use-auth-status';
 
 export function ThankYouDialogContent({}: { onRegister?: () => void }) {
+  const { isLoggedIn } = useAuthStatus();
+  const { data: settings, isLoading } = useSettingsQuery();
+  const router = useRouter();
+
+  const defaultMessage =
+    'Pesanan anda sedang kami proses dan akan segera dikirim. Untuk informasi belanja anda, silakan check email.';
+
+  const message = (() => {
+    try {
+      const flat = settings?.data?.flat || [];
+      const member = flat.find((s) => s.name === 'order_success_member')?.value;
+      const guest = flat.find((s) => s.name === 'order_success_guest')?.value;
+      const chosen = isLoggedIn ? member : guest;
+      const trimmed = (chosen ?? '').trim();
+      return trimmed.length > 0 ? trimmed : defaultMessage;
+    } catch {
+      return defaultMessage;
+    }
+  })();
+
   return (
     <DialogContent className='p-0 gap-0 rounded-xl'>
       <DialogHeader className='px-6 pt-6'>
@@ -29,27 +53,25 @@ export function ThankYouDialogContent({}: { onRegister?: () => void }) {
       </DialogHeader>
 
       <div className='px-6 my-4'>
-        <p className='text-sm md:text-sm text-foreground/80 leading-relaxed text-center'>
-          Pesanan anda sedang kami proses dan akan segera dikirim. Untuk
-          informasi belanja anda, silakan check email.
+        <p className='text-sm md:text-sm text-foreground/80 leading-relaxed text-center whitespace-pre-line'>
+          {isLoading ? defaultMessage : message}
         </p>
       </div>
 
-      {/* <div className='px-6 py-4 rounded-b-xl bg-gray-50 flex items-center gap-3 justify-between border-t-2 relative shadow-[0_-6px_8px_-6px_rgba(0,0,0,0.12)]'>
-        <div className='flex items-center gap-3'>
-          <Image
-            src={'/assets/icon-coin-thanks.png'}
-            alt='Ikon poin'
-            width={36}
-            height={36}
-            className='flex-shrink-0'
-          />
-          <p className='text-sm font-semibold text-gray-900'>
-            Cek email anda, untuk segera ganti password akun anda. dan
-            dapatkan points dari kami!
-          </p>
-        </div>
-      </div> */}
+      <div className='px-6 py-4 rounded-b-xl'>
+        {isLoggedIn ? (
+          <div className='flex items-center justify-end w-full'>
+            <div className='ml-auto'>
+              <Button
+                onClick={() => router.push('/orders')}
+                className='bg-brand text-white font-bold hover:bg-brand/90'
+              >
+                Lihat Pesanan
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </DialogContent>
   );
 }
