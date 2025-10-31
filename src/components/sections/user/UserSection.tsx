@@ -24,6 +24,7 @@ import {
 } from '@/hooks/use-auth';
 import { useProfileQuery } from '@/hooks/use-profile';
 import { setAuthToken, useAuthStatus } from '@/hooks/use-auth-status';
+import { useSettingsMapQuery } from '@/hooks/use-setting';
 import { clearUserLocalStorage } from '@/lib/auth-token';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
 import { locationService } from '@/services/location';
@@ -76,6 +77,7 @@ export default function MobileMenu() {
   const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
   const { data: profileData } = useProfileQuery(Boolean(isReady && isLoggedIn));
+  const { data: settingsMap } = useSettingsMapQuery();
   const [userName, setUserName] = useState<string | null>(null);
   const pointsBalance = profileData?.data?.points_balance ?? 0;
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -507,38 +509,48 @@ export default function MobileMenu() {
       )}
 
       <div className='p-4 space-y-2'>
-        {visibleMenuItems.map((item, index) => (
-          <Card
-            key={index}
-            className='border-0 shadow-none hover:bg-gray-50 transition-colors cursor-pointer'
-          >
-            <div
-              className='flex items-center gap-4 p-4'
-              role='button'
-              tabIndex={0}
-              onClick={() =>
-                item.newTab
-                  ? window.open(item.href, '_blank', 'noopener,noreferrer')
-                  : router.push(item.href)
-              }
-              onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  if (item.newTab) {
-                    window.open(item.href, '_blank', 'noopener,noreferrer');
-                  } else {
-                    router.push(item.href);
-                  }
-                }
-              }}
+        {visibleMenuItems.map((item, index) => {
+          const isWa = item.label === 'Pelayanan Whatsapp';
+          const rawWa =
+            (isWa && settingsMap?.contact_wa?.value) ||
+            (isWa ? '6283854560095' : undefined);
+          const cleanWa = rawWa ? String(rawWa).replace(/[^0-9+]/g, '') : null;
+          const waHref = cleanWa ? `https://wa.me/${cleanWa}` : item.href;
+          const hrefToUse = isWa ? waHref : item.href;
+
+          return (
+            <Card
+              key={index}
+              className='border-0 shadow-none hover:bg-gray-50 transition-colors cursor-pointer'
             >
-              <div className='flex-shrink-0'>{item.icon}</div>
-              <span className='text-gray-700 font-medium flex-1'>
-                {item.label}
-              </span>
-            </div>
-          </Card>
-        ))}
+              <div
+                className='flex items-center gap-4 p-4'
+                role='button'
+                tabIndex={0}
+                onClick={() =>
+                  item.newTab
+                    ? window.open(hrefToUse, '_blank', 'noopener,noreferrer')
+                    : router.push(hrefToUse)
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (item.newTab) {
+                      window.open(hrefToUse, '_blank', 'noopener,noreferrer');
+                    } else {
+                      router.push(hrefToUse);
+                    }
+                  }
+                }}
+              >
+                <div className='flex-shrink-0'>{item.icon}</div>
+                <span className='text-gray-700 font-medium flex-1'>
+                  {item.label}
+                </span>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <RegisterSheet
@@ -573,7 +585,6 @@ export default function MobileMenu() {
               },
               onError: (err) => {
                 const msg = err.message || 'Gagal mengirim tautan reset.';
-                // Try backend error mapping
                 const data = (err as unknown as { data?: unknown })?.data;
                 if (
                   data &&
