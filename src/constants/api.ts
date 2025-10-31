@@ -29,4 +29,5 @@ export const API_ENDPOINTS = {
   orderReviews: '/user/order',
   promotionCodes: '/promotion',
   webhookOrderStatus: '/webhooks/order-status',
+  setting: '/setting',
 } as const;
