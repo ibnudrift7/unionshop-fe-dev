@@ -14,10 +14,9 @@ export interface ApiProduct {
   sku_code: string;
   category_name: string;
   cover_image: string;
-  // Optional fields present in some endpoints (e.g., bundles)
-  average_rating?: string; // e.g., "5.0"
+  average_rating?: string;
   total_reviews?: number;
-  formatted_sales?: string; // e.g., "8" or formatted text
+  formatted_sales?: string; 
 }
 
 export interface ProductsResponse {
