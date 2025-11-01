@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import CheckoutSection from '@/components/sections/checkout/CheckoutSection';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
-import { useProfileQuery } from '@/hooks/use-profile';
 import { checkoutService } from '@/services/checkout';
 import { useCheckoutStore } from '@/store/checkout';
 import { useCartStore as useLocalCartStore } from '@/store/cart';
@@ -55,7 +54,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [total, setTotal] = useState(0);
   const { isLoggedIn, isReady } = useAuthStatus();
-  const { data: profileResp } = useProfileQuery(isReady && isLoggedIn);
   const { data: defaultAddress } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
@@ -215,21 +213,6 @@ export default function CheckoutPage() {
         </Button>
         <h1 className='text-base font-semibold text-gray-900'>Checkout</h1>
       </div>
-
-      {isLoggedIn && (
-        <div className='px-4 py-3'>
-          <p className='text-sm text-gray-600'>
-            Total poin kamu:{' '}
-            <span className='font-semibold text-gray-900'>
-              {profileResp?.data?.points_balance !== undefined
-                ? new Intl.NumberFormat('id-ID').format(
-                    profileResp.data.points_balance,
-                  )
-                : '—'}
-            </span>
-          </p>
-        </div>
-      )}
 
       <CheckoutSection
         onTotalChange={setTotal}

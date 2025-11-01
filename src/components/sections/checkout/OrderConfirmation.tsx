@@ -179,6 +179,7 @@ export default function OrderConfirmation() {
       : null;
   const shippingFee = selectedService?.cost ?? 0;
   const estimatedDay = selectedService?.estimated_day ?? null;
+  // const courir = selectedService?.name || '';
 
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<ApplyPromoData | null>(null);
@@ -572,7 +573,7 @@ export default function OrderConfirmation() {
 
             <h3 className='font-bold text-base mt-4 mb-2'>
               {estimatedDay
-                ? `Estimasi Pengiriman ${estimatedDay}`
+                ? `Estimasi Pengiriman ${estimatedDay}/${defaultCourierCode}`
                 : 'Estimasi Pengiriman'}
             </h3>
           </div>
