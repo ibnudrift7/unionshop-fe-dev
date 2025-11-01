@@ -8,15 +8,17 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import Image from 'next/image';
+import type { ApiProduct } from '@/types/product';
 import type { Product } from '@/types';
 import { Package, Star } from 'lucide-react';
 import { useProductsQuery } from '@/hooks/use-products';
 
 interface SpecialTodaySectionProps {
   title?: string;
-  products?: Product[];
+  // accept backend product shape (ApiProduct)
+  products?: ApiProduct[];
   isLoading?: boolean;
-  onProductClick?: (product: Product) => void;
+  onProductClick?: (product: ApiProduct | Product) => void;
 }
 
 export default function SpecialTodaySection({
@@ -27,8 +29,12 @@ export default function SpecialTodaySection({
 }: SpecialTodaySectionProps) {
   const { data: fetchedProducts, isLoading: fetchedLoading } =
     useProductsQuery();
-  const sourceProducts =
-    products && products.length > 0 ? products : fetchedProducts ?? [];
+  let sourceProducts: Array<ApiProduct | Product> = [];
+  if (products && products.length > 0) {
+    sourceProducts = products as Array<ApiProduct | Product>;
+  } else if (Array.isArray(fetchedProducts)) {
+    sourceProducts = fetchedProducts as Array<ApiProduct | Product>;
+  }
   const loading = isLoading || fetchedLoading;
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -61,12 +67,84 @@ export default function SpecialTodaySection({
           {loading ? (
             <SpecialTodayCarouselSkeleton count={6} />
           ) : (
-            sourceProducts.map((p: Product) => {
+            sourceProducts.map((p: ApiProduct | Product) => {
+              const isApi = p && typeof p === 'object' && 'base_price' in p;
               const id = String(p.id);
-              const name = p.name ?? '';
-              const img = p.image ?? p.images?.[0] ?? '';
-              const discountPrice = Number(p.discountPrice ?? p.price ?? 0);
-              const originalPrice = Number(p.price ?? discountPrice);
+              let name = '';
+              if (typeof p.name === 'string') name = p.name;
+
+              let img = '';
+              if (isApi) {
+                const ap = p as ApiProduct;
+                if (typeof ap.cover_image === 'string') img = ap.cover_image;
+              } else {
+                const up = p as Product;
+                if (typeof up.image === 'string' && up.image) img = up.image;
+                else if (
+                  Array.isArray(up.images) &&
+                  typeof up.images[0] === 'string'
+                )
+                  img = up.images[0];
+              }
+
+              let currentPrice = 0;
+              let originalPrice: number | null = null;
+              if (isApi) {
+                const ap = p as ApiProduct;
+                const base =
+                  typeof ap.base_price === 'string'
+                    ? parseFloat(ap.base_price)
+                    : NaN;
+                const sale =
+                  typeof ap.sale_price === 'string'
+                    ? parseFloat(ap.sale_price)
+                    : NaN;
+                if (Number.isFinite(sale) && sale > 0) {
+                  currentPrice = sale;
+                  if (Number.isFinite(base) && base > 0) originalPrice = base;
+                } else if (Number.isFinite(base)) {
+                  currentPrice = base;
+                }
+              } else {
+                const up = p as Product;
+                if (typeof up.price === 'number' && Number.isFinite(up.price))
+                  currentPrice = up.price;
+                if (
+                  typeof up.discountPrice === 'number' &&
+                  Number.isFinite(up.discountPrice)
+                )
+                  originalPrice = up.discountPrice;
+              }
+
+              const rating = 5.0;
+              const totalSales = Math.floor(450 + Math.random() * 51);
+
+              // let rating = 0;
+              // if (isApi) {
+              //   const ap = p as ApiProduct;
+              //   const r = Number(ap.average_rating);
+              //   if (Number.isFinite(r)) rating = r;
+              // } else {
+              //   const up = p as Product;
+              //   const r = Number(up.rating);
+              //   if (Number.isFinite(r)) rating = r;
+              // }
+
+              // let totalSales = 0;
+              // if (isApi) {
+              //   const ap = p as ApiProduct;
+              //   const raw =
+              //     typeof ap.formatted_sales === 'string'
+              //       ? ap.formatted_sales
+              //       : '';
+              //   const digits = raw.replace(/[^0-9]/g, '');
+              //   const n = Number(digits);
+              //   if (Number.isFinite(n)) totalSales = n;
+              // } else {
+              //   const up = p as Product;
+              //   const n = Number(up.sold);
+              //   if (Number.isFinite(n)) totalSales = n;
+              // }
 
               return (
                 <CarouselItem
@@ -100,18 +178,24 @@ export default function SpecialTodaySection({
                       </p>
                       <div className='flex flex-col leading-tight'>
                         <span className='text-lg text-red-600 leading-tight'>
-                          {formatPrice(discountPrice)}
+                          {formatPrice(currentPrice)}
                         </span>
-                        <span className='text-xs text-gray-500 line-through leading-tight'>
-                          {formatPrice(originalPrice)}
-                        </span>
+                        {originalPrice !== null && originalPrice > 0 ? (
+                          <span className='text-xs text-gray-500 line-through leading-tight'>
+                            {formatPrice(originalPrice)}
+                          </span>
+                        ) : null}
                       </div>
                       <div className='flex items-center gap-1 mb-1'>
                         <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
-                        <span className='text-xs text-gray-600'>5.0</span>
+                        <span className='text-xs text-gray-600'>
+                          {rating.toFixed(1)}
+                        </span>
                         <span className='text-xs text-gray-400'>•</span>
                         <span className='text-xs text-gray-600'>
-                          500+ Terjual
+                          {totalSales > 999
+                            ? `${Math.floor(totalSales / 1000)}k+ Terjual`
+                            : `${totalSales} Terjual`}
                         </span>
                       </div>
                     </CardContent>

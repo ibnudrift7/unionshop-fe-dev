@@ -324,6 +324,7 @@ export default function EditAddressSheet({
               type='text'
               inputMode='numeric'
               placeholder='Kode pos'
+              maxLength={7}
               required
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}

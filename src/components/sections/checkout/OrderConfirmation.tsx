@@ -2,6 +2,14 @@
 
 import { ArrowLeft, Minus, Plus, Coins, CircleArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +38,24 @@ import type { ApplyPromoData } from '@/types/promo';
 import { useCheckoutStore } from '@/store/checkout';
 
 export default function OrderConfirmation() {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<{
+    productId: string;
+    memberItemId?: number;
+  } | null>(null);
+
+  const askRemove = (productId: string, memberItemId?: number) => {
+    setPendingRemove({ productId, memberItemId });
+    setConfirmOpen(true);
+  };
+
+  const confirmRemove = () => {
+    if (pendingRemove) {
+      handleRemove(pendingRemove.productId, pendingRemove.memberItemId);
+    }
+    setConfirmOpen(false);
+    setPendingRemove(null);
+  };
   const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
 
@@ -377,7 +403,7 @@ export default function OrderConfirmation() {
                         <Button
                           variant='ghost'
                           className='text-xs text-red-500 hover:text-red-600'
-                          onClick={() => handleRemove(product.id)}
+                          onClick={() => askRemove(product.id)}
                         >
                           Hapus
                         </Button>
@@ -466,7 +492,7 @@ export default function OrderConfirmation() {
                           variant='ghost'
                           className='text-xs text-red-500 hover:text-red-600'
                           onClick={() =>
-                            handleRemove(String(it.product_id), it.id)
+                            askRemove(String(it.product_id), it.id)
                           }
                         >
                           Hapus
@@ -586,6 +612,26 @@ export default function OrderConfirmation() {
 
         <div className='h-40 sm:h-44' />
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hapus produk?</DialogTitle>
+            <DialogDescription>
+              Tindakan ini akan menghapus produk dari keranjang Anda. Tindakan
+              ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setConfirmOpen(false)}>
+              Batal
+            </Button>
+            <Button variant='destructive' onClick={confirmRemove}>
+              Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
-import {
-  useProvincesQuery,
-  useCitiesQuery,
-  useDistrictsQuery,
-} from '@/hooks/use-location';
+// import {
+//   useProvincesQuery,
+//   useCitiesQuery,
+//   useDistrictsQuery,
+// } from '@/hooks/use-location';
 import {
   Sheet,
   SheetContent,
@@ -26,7 +26,7 @@ export interface RegisterSheetProps {
     password: string;
     phone?: string;
     gender?: 'wanita' | 'pria' | '';
-    dateOfBirth?: string; // ISO yyyy-mm-dd
+    dateOfBirth?: string; 
     province?: string;
     city?: string;
     district?: string;
@@ -59,7 +59,7 @@ export function RegisterSheet({
   onSubmit,
   onSwitchToLogin,
   isSubmitting = false,
-  errorMessage = null,
+  // errorMessage = null,
   fieldErrors = {},
 }: RegisterSheetProps) {
   const [name, setName] = useState('');
@@ -80,34 +80,35 @@ export function RegisterSheet({
   const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
   const [dateOfBirth, setDateOfBirth] = useState(''); // ISO yyyy-mm-dd
   const [dobDraft, setDobDraft] = useState('');
-  const [province, setProvince] = useState('');
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [cityQuery, setCityQuery] = useState('');
-  const [cityOpen, setCityOpen] = useState(false);
-  const [districtQuery, setDistrictQuery] = useState('');
-  const [districtOpen, setDistrictOpen] = useState(false);
-  const [postalCode, setPostalCode] = useState('');
-  const [addressDetail, setAddressDetail] = useState('');
+  const [dobError, setDobError] = useState<string | null>(null);
+  // const [province, setProvince] = useState('');
+  // const [city, setCity] = useState('');
+  // const [district, setDistrict] = useState('');
+  // const [cityQuery, setCityQuery] = useState('');
+  // const [cityOpen, setCityOpen] = useState(false);
+  // const [districtQuery, setDistrictQuery] = useState('');
+  // const [districtOpen, setDistrictOpen] = useState(false);
+  // const [postalCode, setPostalCode] = useState('');
+  // const [addressDetail, setAddressDetail] = useState('');
 
-  const provincesQuery = useProvincesQuery(true);
-  const citiesQuery = useCitiesQuery(province || undefined);
-  const districtsQuery = useDistrictsQuery(city || undefined);
+  // const provincesQuery = useProvincesQuery(true);
+  // const citiesQuery = useCitiesQuery(province || undefined);
+  // const districtsQuery = useDistrictsQuery(city || undefined);
 
-  const provinces = provincesQuery.data?.data ?? [];
-  const cities = citiesQuery.data?.data ?? [];
-  const districts = districtsQuery.data?.data ?? [];
+  // const provinces = provincesQuery.data?.data ?? [];
+  // const cities = citiesQuery.data?.data ?? [];
+  // const districts = districtsQuery.data?.data ?? [];
 
-  const handleProvinceChange = (id: string) => {
-    setProvince(id);
-    setCity('');
-    setDistrict('');
-  };
+  // const handleProvinceChange = (id: string) => {
+  //   setProvince(id);
+  //   setCity('');
+  //   setDistrict('');
+  // };
 
-  const handleCityChange = (id: string) => {
-    setCity(id);
-    setDistrict('');
-  };
+  // const handleCityChange = (id: string) => {
+  //   setCity(id);
+  //   setDistrict('');
+  // };
 
   const handleSubmit = () => {
     if (!/[a-z]/.test(password)) {
@@ -141,6 +142,30 @@ export function RegisterSheet({
     }
     setPhoneError(null);
 
+    if (dateOfBirth) {
+      try {
+        const birth = new Date(dateOfBirth);
+        if (isNaN(birth.getTime())) {
+          setDobError('Tanggal lahir tidak valid');
+          return;
+        }
+        const now = new Date();
+        let age = now.getFullYear() - birth.getFullYear();
+        const m = now.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+          age--;
+        }
+        if (age < 13) {
+          setDobError('Anda harus berusia minimal 13 tahun');
+          return;
+        }
+      } catch {
+        setDobError('Tanggal lahir tidak valid');
+        return;
+      }
+    }
+    setDobError(null);
+
     onSubmit?.({
       name,
       email,
@@ -148,16 +173,37 @@ export function RegisterSheet({
       phone,
       gender,
       dateOfBirth,
-      province,
-      city,
-      district,
-      postalCode,
-      addressDetail,
+      // province,
+      // city,
+      // district,
+      // postalCode,
+      // addressDetail,
     });
   };
 
+  const resetForm = () => {
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+    setPhone('');
+    setPhoneError(null);
+    setGender('');
+    setDateOfBirth('');
+    setDobDraft('');
+    setDobError(null);
+    setPasswordError(null);
+  };
+
   return (
-    <Sheet>
+    <Sheet
+      onOpenChange={(open) => {
+        if (!open) {
+          resetForm();
+        }
+      }}
+    >
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side='bottom'
@@ -332,7 +378,10 @@ export function RegisterSheet({
                       id='dob-input'
                       type='date'
                       value={dobDraft || dateOfBirth}
-                      onChange={(e) => setDobDraft(e.target.value)}
+                      onChange={(e) => {
+                        setDobDraft(e.target.value);
+                        setDobError(null);
+                      }}
                       disabled={isSubmitting}
                     />
                   </div>
@@ -354,6 +403,7 @@ export function RegisterSheet({
                         onClick={() => {
                           setDateOfBirth(dobDraft || dateOfBirth);
                           setDobDraft('');
+                          setDobError(null);
                         }}
                         disabled={isSubmitting}
                       >
@@ -364,12 +414,14 @@ export function RegisterSheet({
                 </div>
               </SheetContent>
             </Sheet>
-            {fieldErrors.dateOfBirth ? (
+            {dobError ? (
+              <p className='text-xs text-red-600'>{dobError}</p>
+            ) : fieldErrors.dateOfBirth ? (
               <p className='text-xs text-red-600'>{fieldErrors.dateOfBirth}</p>
             ) : null}
           </div>
 
-          <div className='space-y-1 pt-1'>
+          {/* <div className='space-y-1 pt-1'>
             <Label htmlFor='register-province'>Provinsi</Label>
             <select
               id='register-province'
@@ -569,7 +621,7 @@ export function RegisterSheet({
           </div>
           {errorMessage ? (
             <p className='text-sm text-red-600'>{errorMessage}</p>
-          ) : null}
+          ) : null} */}
           <div className='pt-2'>
             <Button
               className='w-full bg-brand hover:bg-brand/90 text-white'

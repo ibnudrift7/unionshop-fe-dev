@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ShopFilter } from './data';
 import { CategoryGridSkeleton } from '@/components/ui/skeleton';
 import { Category } from '@/types';
 
@@ -19,18 +18,12 @@ export default function CategoryGridSection({
 }: CategoryGridSectionProps) {
   const router = useRouter();
 
-  const categoryToFilter: Record<string, ShopFilter | undefined> = {
-    'starter-kit': 'starter',
-    'freebase-liquid': 'freebase',
-    'saltnic-liquid': 'saltnic',
-    'official-merchandise': 'official',
-  };
-
   const handleClick = (category: Category) => {
     onCategoryClick?.(category);
-    const f = categoryToFilter[category.id];
-    if (f) {
-      router.push(`/shop?filter=${f}`);
+    try {
+      router.push(`/shop?category=${encodeURIComponent(category.id)}`);
+    } catch {
+      router.push(`/shop?category=${category.id}`);
     }
   };
   return (
