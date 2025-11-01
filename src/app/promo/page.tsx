@@ -6,9 +6,11 @@ import { FooterNavigationSection, HeroSection } from '@/components/sections';
 // import ClaimResultCard from '@/components/sections/promo/ClaimResultCard';
 import { PromoCarouselSection } from '@/components/sections/promo/PromoCarousel';
 import PromoSection from '@/components/sections/shop/PromoSection';
+import { useSlidersQuery } from '@/hooks/use-sliders';
 
 export default function PromoPage() {
   const [searchTerm, setSearchTerm] = React.useState<string>('');
+  const { data: promoSliderImages } = useSlidersQuery(2);
   // const [showResult, setShowResult] = React.useState(false);
   // const [reward, setReward] = React.useState<number>(0);
   // const [claimed, setClaimed] = React.useState(0);
@@ -26,11 +28,11 @@ export default function PromoPage() {
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[550px] border-x border-gray-200'>
       <HeroSection
-        images={[
-          '/assets/Background.png',
-          '/assets/Background.png',
-          '/assets/Background.png',
-        ]}
+        images={
+          (promoSliderImages && promoSliderImages.length > 0
+            ? promoSliderImages
+            : ['/assets/Background.png', '/assets/Background.png']) as string[]
+        }
         onSearch={(value) => setSearchTerm(value)}
       />
 

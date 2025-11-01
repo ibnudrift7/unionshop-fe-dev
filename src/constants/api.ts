@@ -30,4 +30,5 @@ export const API_ENDPOINTS = {
   promotionCodes: '/promotion',
   webhookOrderStatus: '/webhooks/order-status',
   setting: '/setting',
+  sliderType: '/slider/type',
 } as const;

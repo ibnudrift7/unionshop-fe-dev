@@ -16,6 +16,7 @@ import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery, useCategoriesQuery } from '@/hooks/use-products';
+import { useSlidersQuery } from '@/hooks/use-sliders';
 import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { useCartStore } from '@/store/cart';
@@ -43,6 +44,7 @@ export default function Home() {
     useProductsQuery();
   const { data: categoriesData, isLoading: categoriesLoading } =
     useCategoriesQuery();
+  const { data: homeSliderImages } = useSlidersQuery(1);
   const { data: defaultAddressResp } = useDefaultAddressQuery(
     isReady && isLoggedIn,
   );
@@ -110,7 +112,14 @@ export default function Home() {
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
       <div className='relative'>
-        <HeroSection searchPlaceholder='Makna V4' images={heroImages} />
+        <HeroSection
+          searchPlaceholder='Makna V4'
+          images={
+            (homeSliderImages && homeSliderImages.length > 0
+              ? homeSliderImages
+              : heroImages) as string[]
+          }
+        />
 
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>
           <LocationSection
