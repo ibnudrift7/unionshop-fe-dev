@@ -12,7 +12,7 @@ import {
   FooterNavigationSection,
   PromoSection,
 } from '@/components/sections';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useProductsQuery, useCategoriesQuery } from '@/hooks/use-products';
@@ -37,11 +37,13 @@ import { useProfileQuery } from '@/hooks/use-profile';
 
 export default function Home() {
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
   const { items, getTotal } = useCartStore();
   const { isLoggedIn, isReady } = useAuthStatus();
   const { data: memberCart } = useCartQuery(Boolean(isReady && isLoggedIn));
-  const { data: productsData, isLoading: isLoadingProducts } =
-    useProductsQuery();
+  const { data: productsData, isLoading: isLoadingProducts } = useProductsQuery(
+    { search: searchTerm },
+  );
   const { data: categoriesData, isLoading: categoriesLoading } =
     useCategoriesQuery();
   const { data: homeSliderImages } = useSlidersQuery(1);
@@ -119,6 +121,7 @@ export default function Home() {
               ? homeSliderImages
               : heroImages) as string[]
           }
+          onSearch={(value) => setSearchTerm(value)}
         />
 
         <div className='absolute bottom-0 left-0 right-0 transform translate-y-3/4 z-1'>

@@ -603,7 +603,29 @@ export default function OrderConfirmation() {
             </div>
             <Button
               className='bg-brand hover:bg-brand/80 text-white py-5 px-4 shrink-0'
-              onClick={() => router.push('/checkout')}
+              disabled={
+                (() => {
+                  const effectiveTotal =
+                    appliedPromo && isLoggedIn
+                      ? Number(appliedPromo.total_after_discount || 0)
+                      : total;
+                  const itemsCount = isLoggedIn
+                    ? memberCart?.data?.items?.length ?? 0
+                    : items.length;
+                  return !(effectiveTotal > 0 && itemsCount > 0);
+                })()
+              }
+              onClick={() => {
+                const effectiveTotal =
+                  appliedPromo && isLoggedIn
+                    ? Number(appliedPromo.total_after_discount || 0)
+                    : total;
+                const itemsCount = isLoggedIn
+                  ? memberCart?.data?.items?.length ?? 0
+                  : items.length;
+                if (effectiveTotal > 0 && itemsCount > 0)
+                  router.push('/checkout');
+              }}
             >
               Pilih Pembayaran
             </Button>
