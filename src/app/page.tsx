@@ -164,6 +164,7 @@ export default function Home() {
         subtitle={officialMerchData.subtitle}
         buttonText={officialMerchData.buttonText}
         imageSrc={officialMerchData.imageSrc}
+        onOrderClick={() => router.push('/shop?category=8')}
       />
 
       <ProductSection

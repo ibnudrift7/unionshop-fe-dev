@@ -36,6 +36,7 @@ import { useGuestAddress } from '@/hooks/use-guest-address';
 import { useApplyPromoMutation } from '@/hooks/use-checkout';
 import type { ApplyPromoData } from '@/types/promo';
 import { useCheckoutStore } from '@/store/checkout';
+import { formatIDR, resolveMemberUnitPrice, toNumber } from '@/lib/utils';
 
 export default function OrderConfirmation() {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -59,7 +60,7 @@ export default function OrderConfirmation() {
   const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
 
-  const { items, updateQuantity, removeItem, getTotal } = useCartStore();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const guestToken = typeof window !== 'undefined' ? getGuestToken() : null;
   const { data: memberCart } = useCartQuery(
     isReady && (isLoggedIn || Boolean(guestToken)),
@@ -68,12 +69,16 @@ export default function OrderConfirmation() {
   const { mutate: deleteMemberItem } = useDeleteCartItemMutation();
 
   const total = useMemo(() => {
-    if (isLoggedIn && memberCart?.data?.summary?.subtotal) {
-      const n = Number(memberCart.data.summary.subtotal);
+    if (isLoggedIn) {
+      const raw = memberCart?.data?.summary?.subtotal ?? 0;
+      const n = Number(raw);
       return Number.isFinite(n) ? n : 0;
     }
-    return getTotal();
-  }, [isLoggedIn, memberCart, getTotal]);
+    return items.reduce(
+      (sum, i) => sum + Number(i.product?.price ?? 0) * Number(i.quantity ?? 0),
+      0,
+    );
+  }, [isLoggedIn, memberCart?.data?.summary?.subtotal, items]);
 
   const handleDecrease = (
     productId: string,
@@ -332,11 +337,7 @@ export default function OrderConfirmation() {
                             {product.name}
                           </h3>
                           <p className='text-base font-semibold'>
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(product.price)}
+                            {formatIDR(product.price)}
                           </p>
                           {(
                             product as unknown as {
@@ -420,11 +421,7 @@ export default function OrderConfirmation() {
                             {it.product_name}
                           </h3>
                           <p className='text-base font-semibold'>
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                            }).format(it.sale_price ?? it.prices ?? 0)}
+                            {formatIDR(resolveMemberUnitPrice(it))}
                           </p>
                           {it.attributes &&
                             Array.isArray(it.attributes) &&
@@ -569,11 +566,7 @@ export default function OrderConfirmation() {
             <div className='flex flex-col items-start mt-4 border-b-2'>
               <h3 className='font-bold text-base'>Biaya Pengiriman</h3>
               <p className='text-base font-base mb-4'>
-                {new Intl.NumberFormat('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  minimumFractionDigits: 0,
-                }).format(shippingFee)}
+                {formatIDR(shippingFee)}
               </p>
             </div>
 
@@ -590,31 +583,25 @@ export default function OrderConfirmation() {
             <div className='flex flex-col items-start'>
               <span className='text-gray-400'>Total</span>
               <span className='text-lg font-semibold text-gray-900'>
-                {new Intl.NumberFormat('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  minimumFractionDigits: 0,
-                }).format(
+                {formatIDR(
                   appliedPromo && isLoggedIn
-                    ? Number(appliedPromo.total_after_discount || 0)
+                    ? toNumber(appliedPromo.total_after_discount || 0)
                     : total,
                 )}
               </span>
             </div>
             <Button
               className='bg-brand hover:bg-brand/80 text-white py-5 px-4 shrink-0'
-              disabled={
-                (() => {
-                  const effectiveTotal =
-                    appliedPromo && isLoggedIn
-                      ? Number(appliedPromo.total_after_discount || 0)
-                      : total;
-                  const itemsCount = isLoggedIn
-                    ? memberCart?.data?.items?.length ?? 0
-                    : items.length;
-                  return !(effectiveTotal > 0 && itemsCount > 0);
-                })()
-              }
+              disabled={(() => {
+                const effectiveTotal =
+                  appliedPromo && isLoggedIn
+                    ? Number(appliedPromo.total_after_discount || 0)
+                    : total;
+                const itemsCount = isLoggedIn
+                  ? memberCart?.data?.items?.length ?? 0
+                  : items.length;
+                return !(effectiveTotal > 0 && itemsCount > 0);
+              })()}
               onClick={() => {
                 const effectiveTotal =
                   appliedPromo && isLoggedIn
