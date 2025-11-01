@@ -135,6 +135,9 @@ export default function Home() {
         <CategoryGridSection
           categories={categoriesData ?? mockCategories}
           isLoading={categoriesLoading}
+          onCategoryClick={(category) =>
+            router.push(`/shop?category=${category.id}`)
+          }
         />
       </div>
 

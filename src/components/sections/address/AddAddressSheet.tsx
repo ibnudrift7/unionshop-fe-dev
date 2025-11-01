@@ -369,6 +369,7 @@ export default function AddAddressSheet({
               inputMode='numeric'
               placeholder='Kode pos'
               value={postalCode}
+              maxLength={7}
               onChange={(e) => setPostalCode(e.target.value)}
             />
           </div>
