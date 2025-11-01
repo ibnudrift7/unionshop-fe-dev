@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import RegisterSheet from '@/components/sections/auth/RegisterSheet';
 
 interface LocationSectionProps {
   onLocationClick?: () => void;
@@ -49,18 +50,25 @@ export default function LocationSection({
           </div>
           <div className='flex items-center gap-2 text-gray-900'>
             {isGuest ? (
-              <>
-                <span className='text-base sm:text-lg leading-none text-black'>
-                  Daftar aja !
-                </span>
-                <Image
-                  src='/assets/arrow-right-homepage.png'
-                  alt='Arrow Right'
-                  width={20}
-                  height={20}
-                  className='w-5 h-5 sm:w-6 sm:h-6'
-                />
-              </>
+              <RegisterSheet
+                trigger={
+                  <button
+                    type='button'
+                    className='flex items-center gap-2 cursor-pointer'
+                  >
+                    <span className='text-base sm:text-lg leading-none text-black'>
+                      Daftar aja !
+                    </span>
+                    <Image
+                      src='/assets/arrow-right-homepage.png'
+                      alt='Arrow Right'
+                      width={20}
+                      height={20}
+                      className='w-5 h-5 sm:w-6 sm:h-6'
+                    />
+                  </button>
+                }
+              />
             ) : (
               <>
                 <span className='text-lg sm:text-xl font-extrabold leading-none'>
