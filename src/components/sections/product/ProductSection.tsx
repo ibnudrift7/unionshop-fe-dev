@@ -8,6 +8,20 @@ import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import { Package, Star } from 'lucide-react';
 
+const getDummySold = (seed: string | number) => {
+  const s = String(seed ?? 'seed');
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash << 5) - hash + s.charCodeAt(i);
+    hash |= 0;
+  }
+  const min = 450;
+  const max = 500;
+  const range = max - min + 1;
+  const normalized = Math.abs(hash) % range;
+  return min + normalized;
+};
+
 interface ProductSectionProps {
   title?: string;
   products: Product[];
@@ -121,9 +135,10 @@ export default function ProductSection({
                       <span>
                         <Star className='w-3 h-3 fill-yellow-400 text-yellow-400' />
                       </span>
-                      <span className='text-gray-600'>{product.rating}</span>
-                      <span className='text-gray-600'>
-                        • {product.sold}+ terjual
+                      {/* <span className='text-gray-600'>{product.rating}</span> */}
+                      <span className='text-gray-600'>5.0</span>
+                      <span className='text-gray-600 ml-1'>
+                        • {getDummySold(product.id)}+ terjual
                       </span>
                     </div>
                   </div>

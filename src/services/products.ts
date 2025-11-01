@@ -170,7 +170,6 @@ export const productsService = {
       images: images.length > 0 ? images : undefined,
       image: images[0],
       isNew: p.is_newest === 1,
-      // map API average_rating (string) and formatted_sales (string) to UI fields
       rating: (() => {
         const r = p.average_rating;
         if (typeof r === 'string') {

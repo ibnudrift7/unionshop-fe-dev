@@ -19,9 +19,8 @@ type PromoItem = {
   sold: string;
   imageAlt?: string;
   image?: string;
+  slug?: string;
 };
-
-// No dummy fallback: render empty state when no bundles
 
 function formatIDR(n: number) {
   return new Intl.NumberFormat('id-ID', {
@@ -43,8 +42,11 @@ export function PromoCarouselSection({ searchTerm }: { searchTerm?: string }) {
       title: p.name,
       price: p.price,
       priceBefore: p.discountPrice,
-      rating: p.rating ?? 0,
-      sold: String(p.sold ?? 0),
+      slug: (p as unknown as { slug?: string }).slug,
+      // rating: p.rating ?? 0,
+      // sold: String(p.sold ?? 0),
+      rating: 5.0,
+      sold: String(Math.floor(450 + Math.random() * 51)),
       imageAlt: p.name,
       image: p.image ?? '/assets/promo-item.png',
     }));
@@ -100,8 +102,13 @@ export function PromoCarouselSection({ searchTerm }: { searchTerm?: string }) {
 }
 
 function PromoCard({ item }: { item: PromoItem }) {
+  const router = useRouter();
+
   return (
-    <Card className='w-[175px] md:w-[245px] shrink-0 overflow-hidden p-0 flex flex-col border-1'>
+    <Card
+      className='w-[175px] md:w-[245px] shrink-0 overflow-hidden p-0 flex flex-col border-1 cursor-pointer'
+      onClick={() => router.push(`/promo/all/${item.slug ?? item.id}`)}
+    >
       <div className='relative aspect-[16/10] w-full overflow-hidden rounded-xl cursor-pointer'>
         <Badge
           className='absolute left-2 top-2 z-10 rounded-full px-2 py-0.5'

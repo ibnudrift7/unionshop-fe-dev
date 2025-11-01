@@ -8,6 +8,7 @@ import type {
   CartItem as MemberCartItem,
 } from '@/types/cart';
 import { HttpError } from '@/services/http';
+import { resolveMemberUnitPrice } from '@/lib/utils';
 
 export function useCartQuery(enabled: boolean) {
   return useQuery<CartResponse, HttpError>({
@@ -65,12 +66,7 @@ export function useUpdateCartItemQtyMutation() {
       const previous = qc.getQueryData<CartResponse>(['member-cart']);
 
       if (previous?.data?.items) {
-        const unitPrice = (it: MemberCartItem) => {
-          const p = it.sale_price ?? it.prices ?? it.price;
-          if (typeof p === 'number' && Number.isFinite(p)) return p;
-          const inferred = it.subtotal && it.qty ? it.subtotal / it.qty : 0;
-          return Number.isFinite(inferred) ? inferred : 0;
-        };
+        const unitPrice = (it: MemberCartItem) => resolveMemberUnitPrice(it);
 
         const nextItems = previous.data.items.map((it) => {
           if (it.id !== itemId) return it;
