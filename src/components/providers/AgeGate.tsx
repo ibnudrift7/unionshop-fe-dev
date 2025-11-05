@@ -12,6 +12,7 @@ export default function AgeGate() {
   const [rejected, setRejected] = React.useState(false);
   const [showSplash, setShowSplash] = React.useState(false);
   const [countdown, setCountdown] = React.useState(3);
+  const INITIAL_COUNT = 3;
 
   React.useEffect(() => {
     let intervalId: number | undefined;
@@ -91,9 +92,49 @@ export default function AgeGate() {
               sizes='(max-width: 550px) 100vw, 550px'
               className='object-cover'
             />
-            <div className='absolute top-3 right-3'>
-              <div className='rounded-full bg-black/70 text-white text-xs font-semibold px-3 py-1'>
-                {countdown}s
+            <div className='absolute right-3 top-10 md:top-16'>
+              <div className='relative w-8 h-8 md:w-9 md:h-9'>
+                {(() => {
+                  const R = 14;
+                  const C = 2 * Math.PI * R;
+                  const progress = Math.max(
+                    0,
+                    Math.min(1, countdown / INITIAL_COUNT),
+                  );
+                  const offset = C * (1 - progress);
+                  return (
+                    <svg
+                      className='absolute inset-0 w-full h-full'
+                      viewBox='0 0 36 36'
+                    >
+                      <circle
+                        cx='18'
+                        cy='18'
+                        r={R}
+                        fill='none'
+                        stroke='rgba(16,185,129,0.12)'
+                        strokeWidth='3'
+                      />
+                      <circle
+                        cx='18'
+                        cy='18'
+                        r={R}
+                        fill='none'
+                        stroke='#10B981'
+                        strokeOpacity='1'
+                        strokeWidth='3'
+                        strokeDasharray={C}
+                        strokeDashoffset={offset}
+                        strokeLinecap='round'
+                        transform='rotate(-90 18 18)'
+                      />
+                    </svg>
+                  );
+                })()}
+
+                <div className='absolute inset-0 flex items-center justify-center text-black text-sm font-semibold'>
+                  {countdown}s
+                </div>
               </div>
             </div>
           </div>
@@ -108,7 +149,7 @@ export default function AgeGate() {
 
       {rejected && (
         <div className='fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto'>
-          <div className='absolute inset-0 bg-black/70' />
+          <div className='absolute inset-0' />
           <AgeVerificationRejectModal open={true} />
         </div>
       )}
