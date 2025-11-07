@@ -179,22 +179,24 @@ export default function Home() {
 
       <div className='h-36 sm:h-40' aria-hidden />
 
-      <div className='fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-24 w-full max-w-[550px] px-4 z-50'>
-        <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
-          <div className='flex flex-col leading-tight'>
-            <span className='text-xs opacity-90'>{itemsCount} produk</span>
-            <span className='text-lg font-semibold'>{totalFormatted}</span>
+      {itemsCount > 0 && (
+        <div className='fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-24 w-full max-w-[550px] px-4 z-50'>
+          <div className='w-full bg-brand text-white rounded-xl px-4 py-3 flex items-center justify-between shadow-lg'>
+            <div className='flex flex-col leading-tight'>
+              <span className='text-xs opacity-90'>{itemsCount} produk</span>
+              <span className='text-lg font-semibold'>{totalFormatted}</span>
+            </div>
+            <Button
+              size='icon'
+              className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90'
+              onClick={() => router.push('/order-confirmation')}
+              aria-label='Lanjut ke order confirmation'
+            >
+              <ArrowRight className='h-5 w-5' />
+            </Button>
           </div>
-          <Button
-            size='icon'
-            className='h-8 w-8 rounded-full bg-white text-brand hover:bg-white/90'
-            onClick={() => router.push('/order-confirmation')}
-            aria-label='Lanjut ke order confirmation'
-          >
-            <ArrowRight className='h-5 w-5' />
-          </Button>
         </div>
-      </div>
+      )}
 
       <FooterNavigationSection activeTab='home' />
     </div>
