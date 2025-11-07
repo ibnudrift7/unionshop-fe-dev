@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useSettingsQuery } from '@/hooks/use-setting';
 import { useAuthStatus } from '@/hooks/use-auth-status';
+import { useForgotPasswordMutation } from '@/hooks/use-auth';
+import { toast } from 'sonner';
 
 export function ThankYouDialogContent({}: { onRegister?: () => void }) {
   const { isLoggedIn } = useAuthStatus();
@@ -32,6 +34,42 @@ export function ThankYouDialogContent({}: { onRegister?: () => void }) {
       return defaultMessage;
     }
   })();
+
+  const guestEmail = React.useMemo(() => {
+    try {
+      if (typeof window === 'undefined') return '';
+      const raw = localStorage.getItem('guest_user');
+      if (!raw) return '';
+      const obj = JSON.parse(raw) as { email?: string };
+      return obj.email || '';
+    } catch {
+      return '';
+    }
+  }, []);
+
+  const forgotMutation = useForgotPasswordMutation();
+  const handleGuestForgot = () => {
+    if (!guestEmail) {
+      toast.error('Email tamu tidak ditemukan');
+      return;
+    }
+    forgotMutation.mutate(
+      { email: guestEmail },
+      {
+        onSuccess: (res) => {
+          toast.success(
+            res.message ||
+              'Link reset password telah dikirim (jika email terdaftar).',
+          );
+        },
+        onError: (err) => {
+          const msg =
+            err?.message || 'Gagal mengirim permintaan reset password';
+          toast.error(msg);
+        },
+      },
+    );
+  };
 
   return (
     <DialogContent className='p-0 gap-0 rounded-xl'>
@@ -60,17 +98,28 @@ export function ThankYouDialogContent({}: { onRegister?: () => void }) {
 
       <div className='px-6 py-4 rounded-b-xl'>
         {isLoggedIn ? (
-          <div className='flex items-center justify-end w-full'>
-            <div className='ml-auto'>
-              <Button
-                onClick={() => router.push('/orders')}
-                className='bg-brand text-white font-bold hover:bg-brand/90'
-              >
-                Lihat Pesanan
-              </Button>
-            </div>
+          <div className='flex items-center justify-end w-full gap-3'>
+            <Button
+              onClick={() => router.push('/orders')}
+              className='bg-brand text-white font-bold hover:bg-brand/90'
+            >
+              Lihat Pesanan
+            </Button>
           </div>
-        ) : null}
+        ) : (
+          // <div className='flex flex-col sm:flex-row items-center justify-center gap-3'>
+          <div className='flex items-center justify-end w-full gap-3'>
+            <Button
+              onClick={handleGuestForgot}
+              disabled={forgotMutation.status === 'pending'}
+              className='bg-brand text-white font-bold hover:bg-brand/90 w-full sm:w-auto'
+            >
+              {forgotMutation.status === 'pending'
+                ? 'Mengirim...'
+                : 'Reset Password'}
+            </Button>
+          </div>
+        )}
       </div>
     </DialogContent>
   );
