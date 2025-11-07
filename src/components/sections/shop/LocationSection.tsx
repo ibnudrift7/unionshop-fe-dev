@@ -29,7 +29,7 @@ export default function LocationSection({
           <div className='flex items-center'>
             <div className='flex items-center gap-2 px-3 py-1 rounded-xl border border-black/5 bg-gradient-to-bl from-[#F6E8C3] to-white'>
               {isGuest ? (
-                <span className='text-lg md:text-xl font-bold text-orange-500'>
+                <span className='text-lg md:text-xl font-extrabold text-[#9a7b29]'>
                   Mau poin gratis ?
                 </span>
               ) : (

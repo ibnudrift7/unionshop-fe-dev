@@ -93,28 +93,28 @@ export default function HeroSection({
         <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-5 px-4'>
           <div className='flex items-center gap-0 w-full'>
             <div className='relative flex items-center w-full justify-start'>
-              <Button
+                <Button
                 size='icon'
                 aria-label='Search'
                 aria-expanded={isSearchOpen}
                 className={cn(
-                  'bg-white/50 hover:bg-white/60 text-brand backdrop-blur-sm h-8 w-10 sm:h-9 sm:w-12 border border-gray-200',
+                  'bg-white/70 hover:bg-white/50 text-brand backdrop-blur-sm h-8 w-10 sm:h-9 sm:w-12 border border-gray-200',
                   isSearchOpen
-                    ? 'rounded-l-lg rounded-r-none border-r-0'
-                    : 'rounded-lg',
+                  ? 'rounded-l-lg rounded-r-none border-r-0'
+                  : 'rounded-lg',
                 )}
                 onClick={toggleSearch}
-              >
-                <Search className='w-4 h-4 sm:w-5 sm:h-5' />
-              </Button>
-              <div
+                >
+                <Search className='w-4 h-4 md:w-5 md:h-5 text-[#7c7c7c]' strokeWidth={2} />
+                </Button>
+                <div
                 className={cn(
                   'relative overflow-hidden min-w-0 transition-all duration-300 ease-in-out',
                   isSearchOpen
-                    ? 'w-[calc(100%-40px)] sm:w-[calc(100%-48px)]'
-                    : 'w-0',
+                  ? 'w-[calc(100%-40px)] sm:w-[calc(100%-48px)]'
+                  : 'w-0',
                 )}
-              >
+                >
                 <div
                   className={cn(
                     'relative h-8 md:h-9 flex-1 overflow-visible',
@@ -127,7 +127,7 @@ export default function HeroSection({
                     ref={searchInputRef}
                     placeholder={searchPlaceholder}
                     className={cn(
-                      'pl-4 pr-3 bg-white/60 hover:bg-white/70 backdrop-blur-sm border-gray-200 h-full w-17/22 md:w-18/22 border-l-0 rounded-r-xl rounded-l-none relative z-10 transition-colors',
+                      'pl-4 pr-3 bg-white/70 hover:bg-white/50 backdrop-blur-sm border-gray-200 h-full w-17/22 md:w-18/22 border-l-0 rounded-r-xl rounded-l-none relative z-10 transition-colors',
                       isSearchOpen ? 'shadow-sm' : '',
                     )}
                     onKeyDown={(e) => {
