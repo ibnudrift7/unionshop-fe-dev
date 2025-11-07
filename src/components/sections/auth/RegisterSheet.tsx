@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, ChangeEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useRegisterMutation } from '@/hooks/use-auth';
+import { setAuthToken } from '@/lib/auth-token';
 // import {
 //   useProvincesQuery,
 //   useCitiesQuery,
@@ -26,7 +30,7 @@ export interface RegisterSheetProps {
     password: string;
     phone?: string;
     gender?: 'wanita' | 'pria' | '';
-    dateOfBirth?: string; 
+    dateOfBirth?: string;
     province?: string;
     city?: string;
     district?: string;
@@ -166,7 +170,7 @@ export function RegisterSheet({
     }
     setDobError(null);
 
-    onSubmit?.({
+    const payload = {
       name,
       email,
       password,
@@ -178,6 +182,50 @@ export function RegisterSheet({
       // district,
       // postalCode,
       // addressDetail,
+    };
+
+    if (typeof onSubmit === 'function') {
+      onSubmit(payload);
+      return;
+    }
+
+    registerMutation.mutate(payload, {
+      onSuccess: (response) => {
+        try {
+          const token =
+            (response?.data?.token as string | undefined) ||
+            ((response?.data?.tokens as { accessToken?: string } | undefined)
+              ?.accessToken as string | undefined) ||
+            undefined;
+          if (token) setAuthToken(token);
+        } catch {}
+        toast.success('Registrasi berhasil. Selamat datang!');
+        try {
+          router.push('/user');
+        } catch {}
+      },
+      onError: (error: unknown) => {
+        try {
+          let msg = 'Registrasi gagal';
+          if (typeof error === 'object' && error !== null) {
+            const e = error as Record<string, unknown>;
+            const data = e.data;
+            if (typeof data === 'object' && data !== null) {
+              const d = data as Record<string, unknown>;
+              if (typeof d.message === 'string') msg = d.message;
+            }
+            if (msg === 'Registrasi gagal' && typeof e.message === 'string')
+              msg = e.message;
+          }
+          if (msg.includes('Email already registered')) {
+            toast.error('Email sudah terdaftar. Silakan masuk.');
+          } else {
+            toast.error(msg);
+          }
+        } catch {
+          toast.error('Registrasi gagal');
+        }
+      },
     });
   };
 
@@ -195,6 +243,10 @@ export function RegisterSheet({
     setDobError(null);
     setPasswordError(null);
   };
+
+  const router = useRouter();
+  const registerMutation = useRegisterMutation();
+  const submitting = isSubmitting || registerMutation.status === 'pending';
 
   return (
     <Sheet
@@ -627,9 +679,9 @@ export function RegisterSheet({
               className='w-full bg-brand hover:bg-brand/90 text-white'
               onClick={handleSubmit}
               type='button'
-              disabled={isSubmitting}
+              disabled={submitting}
             >
-              {isSubmitting ? 'Memproses...' : 'Simpan'}
+              {submitting ? 'Memproses...' : 'Simpan'}
             </Button>
           </div>
           <div className='pt-2 text-center text-sm'>
