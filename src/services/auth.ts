@@ -1,5 +1,10 @@
 import { API_ENDPOINTS } from '@/constants/api';
-import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth';
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  VerifyEmailResponse,
+} from '@/types/auth';
 import { api } from '@/lib/api';
 
 export const authService = {
@@ -30,6 +35,13 @@ export const authService = {
     const params = new URLSearchParams();
     params.set('email', email);
     return api.post<AuthResponse>(API_ENDPOINTS.forgotPassword, params, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+  },
+  verifyEmail(token: string) {
+    const params = new URLSearchParams();
+    params.set('token', token);
+    return api.post<VerifyEmailResponse>(API_ENDPOINTS.verifyEmail, params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
   },
