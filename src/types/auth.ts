@@ -46,3 +46,9 @@ export interface AuthResponse {
   success?: boolean;
   [key: string]: unknown;
 }
+
+export interface VerifyEmailResponse {
+  statusCode?: number;
+  message?: string;
+  success?: boolean;
+}

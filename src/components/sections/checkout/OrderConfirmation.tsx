@@ -187,6 +187,7 @@ export default function OrderConfirmation() {
   const { mutate: applyPromoMutate, isPending: isApplying } =
     useApplyPromoMutation();
   const setCheckoutPromo = useCheckoutStore((s) => s.setPromo);
+  const [needAddressHighlight, setNeedAddressHighlight] = useState(false);
 
   const applyPromo = () => {
     setPromoError(null);
@@ -248,6 +249,11 @@ export default function OrderConfirmation() {
       }
     } catch {}
   }, [isLoggedIn]);
+
+  // Clear highlight once guest address is provided
+  useEffect(() => {
+    if (guestAddress) setNeedAddressHighlight(false);
+  }, [guestAddress]);
 
   return (
     <div className='min-h-screen bg-gray-50 mx-auto max-w-[720px] border-x border-gray-200'>
@@ -540,7 +546,14 @@ export default function OrderConfirmation() {
                 onClick={() => router.push('/order-confirmation/address')}
                 className='w-full text-left mb-3'
               >
-                <div className='py-5 border-t border-b hover:bg-gray-50 transition'>
+                <div
+                  className={
+                    'py-5 transition ' +
+                    (needAddressHighlight
+                      ? 'border-2 border-red-500 rounded-md'
+                      : 'border-t border-b hover:bg-gray-50')
+                  }
+                >
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
                       <div>
@@ -604,6 +617,12 @@ export default function OrderConfirmation() {
                 return !(effectiveTotal > 0 && itemsCount > 0);
               })()}
               onClick={() => {
+                // Guest validation: ensure address exists before proceeding
+                if (!isLoggedIn && !guestAddress) {
+                  setNeedAddressHighlight(true);
+                  toast.error('Silakan isi data pengiriman terlebih dahulu');
+                  return;
+                }
                 const effectiveTotal =
                   appliedPromo && isLoggedIn
                     ? Number(appliedPromo.total_after_discount || 0)
