@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import AgeGate from '@/components/providers/AgeGate';
 import { Toaster } from '@/components/ui/sonner';
-// @ts-expect-error allow global CSS side-effect import
-import '@/app/globals.css';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Unionlabs - Liquid Vapor Premium',

@@ -171,7 +171,7 @@ export default function UserPage() {
                     undefined);
                 if (token) setAuthToken(token);
               } catch {}
-              toast.success('Registrasi berhasil. Selamat datang!');
+              toast.success('Registrasi berhasil. Cek email Anda untuk verifikasi.');
               setGuestOpen(false);
               try {
                 router.refresh();
