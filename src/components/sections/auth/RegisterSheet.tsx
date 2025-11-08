@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 export interface RegisterSheetProps {
   trigger: React.ReactNode;
@@ -261,219 +262,228 @@ export function RegisterSheet({
         side='bottom'
         className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[720px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
       >
-        <SheetHeader>
-          <SheetTitle className='text-center text-lg'>Daftar</SheetTitle>
-        </SheetHeader>
-        <div className='px-4 pb-4 space-y-3'>
-          <div className='space-y-1'>
-            <Label htmlFor='register-name'>Nama</Label>
-            <Input
-              id='register-name'
-              type='text'
-              placeholder='Nama lengkap'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isSubmitting}
-            />
-            {fieldErrors.name ? (
-              <p className='text-xs text-red-600'>{fieldErrors.name}</p>
-            ) : null}
-          </div>
-          <div className='space-y-1'>
-            <Label htmlFor='register-email'>Email</Label>
-            <Input
-              id='register-email'
-              type='email'
-              placeholder='nama@email.com'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-            />
-            {fieldErrors.email ? (
-              <p className='text-xs text-red-600'>{fieldErrors.email}</p>
-            ) : null}
-          </div>
-          <div className='space-y-1'>
-            <Label htmlFor='register-password'>Kata sandi</Label>
-            <Input
-              id='register-password'
-              type={showPassword ? 'text' : 'password'}
-              placeholder='••••••••'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isSubmitting}
-            />
-            {passwordError ? (
-              <p className='text-xs text-red-600'>{passwordError}</p>
-            ) : null}
-            {fieldErrors.password ? (
-              <p className='text-xs text-red-600'>{fieldErrors.password}</p>
-            ) : null}
-          </div>
-          <div className='space-y-1'>
-            <Label htmlFor='register-password-confirm'>
-              Konfirmasi kata sandi
-            </Label>
-            <Input
-              id='register-password-confirm'
-              type={showPassword ? 'text' : 'password'}
-              placeholder='••••••••'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className='flex items-center gap-2 pt-1'>
-            <input
-              id='register-show-password'
-              type='checkbox'
-              className='h-4 w-4 rounded border-gray-300'
-              checked={showPassword}
-              onChange={(e) => setShowPassword(e.target.checked)}
-              disabled={isSubmitting}
-            />
-            <Label htmlFor='register-show-password' className='text-sm'>
-              Perlihatkan password
-            </Label>
-          </div>
-          <p className='text-xs text-gray-500'>
-            *Kata sandi anda harus terdiri dari setidaknya 8 karakter
-          </p>
-
-          <div className='space-y-1 pt-2'>
-            <Label htmlFor='register-phone'>Nomor handphone</Label>
-            <Input
-              id='register-phone'
-              type='tel'
-              inputMode='tel'
-              placeholder='08xxxxxxxxxx'
-              value={phone}
-              onChange={handlePhoneChange}
-              maxLength={15}
-              disabled={isSubmitting}
-            />
-            {phoneError ? (
-              <p className='text-xs text-red-600'>{phoneError}</p>
-            ) : fieldErrors.phone ? (
-              <p className='text-xs text-red-600'>{fieldErrors.phone}</p>
-            ) : null}
-          </div>
-
-          <div className='space-y-2 pt-1'>
-            <Label>Jenis kelamin</Label>
-            <div className='flex items-center gap-2'>
-              <Button
-                type='button'
-                variant='outline'
-                className={
-                  'flex-1 border ' +
-                  (gender === 'wanita'
-                    ? 'bg-brand text-white border-brand'
-                    : 'bg-white text-black border-gray-300')
-                }
-                onClick={() => setGender('wanita')}
-                disabled={isSubmitting}
-              >
-                Wanita
-              </Button>
-              <Button
-                type='button'
-                variant='outline'
-                className={
-                  'flex-1 border ' +
-                  (gender === 'pria'
-                    ? 'bg-brand text-white border-brand'
-                    : 'bg-white text-black border-gray-300')
-                }
-                onClick={() => setGender('pria')}
-                disabled={isSubmitting}
-              >
-                Pria
-              </Button>
+        <div className='relative'>
+          {submitting && (
+            <div className='absolute inset-0 z-50 bg-white/70 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3 pointer-events-auto'>
+              <Spinner className='size-8 text-brand' />
+              <p className='text-sm text-gray-700'>Memproses pendaftaran…</p>
             </div>
-            {fieldErrors.gender ? (
-              <p className='text-xs text-red-600'>{fieldErrors.gender}</p>
-            ) : null}
-          </div>
+          )}
+          <SheetHeader>
+            <SheetTitle className='text-center text-lg'>Daftar</SheetTitle>
+          </SheetHeader>
+          <div className='px-4 pb-4 space-y-3'>
+            <div className='space-y-1'>
+              <Label htmlFor='register-name'>Nama</Label>
+              <Input
+                id='register-name'
+                type='text'
+                placeholder='Nama lengkap'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isSubmitting}
+              />
+              {fieldErrors.name ? (
+                <p className='text-xs text-red-600'>{fieldErrors.name}</p>
+              ) : null}
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='register-email'>Email</Label>
+              <Input
+                id='register-email'
+                type='email'
+                placeholder='nama@email.com'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+              />
+              {fieldErrors.email ? (
+                <p className='text-xs text-red-600'>{fieldErrors.email}</p>
+              ) : null}
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='register-password'>Kata sandi</Label>
+              <Input
+                id='register-password'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='••••••••'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
+              />
+              {passwordError ? (
+                <p className='text-xs text-red-600'>{passwordError}</p>
+              ) : null}
+              {fieldErrors.password ? (
+                <p className='text-xs text-red-600'>{fieldErrors.password}</p>
+              ) : null}
+            </div>
+            <div className='space-y-1'>
+              <Label htmlFor='register-password-confirm'>
+                Konfirmasi kata sandi
+              </Label>
+              <Input
+                id='register-password-confirm'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='••••••••'
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className='flex items-center gap-2 pt-1'>
+              <input
+                id='register-show-password'
+                type='checkbox'
+                className='h-4 w-4 rounded border-gray-300'
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                disabled={isSubmitting}
+              />
+              <Label htmlFor='register-show-password' className='text-sm'>
+                Perlihatkan password
+              </Label>
+            </div>
+            <p className='text-xs text-gray-500'>
+              *Kata sandi anda harus terdiri dari setidaknya 8 karakter
+            </p>
 
-          <div className='space-y-2 pt-1'>
-            <Label>Tanggal lahir</Label>
-            <Sheet>
-              <SheetTrigger asChild>
-                <button
+            <div className='space-y-1 pt-2'>
+              <Label htmlFor='register-phone'>Nomor handphone</Label>
+              <Input
+                id='register-phone'
+                type='tel'
+                inputMode='tel'
+                placeholder='08xxxxxxxxxx'
+                value={phone}
+                onChange={handlePhoneChange}
+                maxLength={15}
+                disabled={isSubmitting}
+              />
+              {phoneError ? (
+                <p className='text-xs text-red-600'>{phoneError}</p>
+              ) : fieldErrors.phone ? (
+                <p className='text-xs text-red-600'>{fieldErrors.phone}</p>
+              ) : null}
+            </div>
+
+            <div className='space-y-2 pt-1'>
+              <Label>Jenis kelamin</Label>
+              <div className='flex items-center gap-2'>
+                <Button
                   type='button'
-                  className='w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                  variant='outline'
+                  className={
+                    'flex-1 border ' +
+                    (gender === 'wanita'
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-black border-gray-300')
+                  }
+                  onClick={() => setGender('wanita')}
                   disabled={isSubmitting}
                 >
-                  {dateOfBirth ? (
-                    <span>
-                      {new Date(dateOfBirth).toLocaleDateString('id-ID')}
-                    </span>
-                  ) : (
-                    <span className='text-gray-500'>Pilih tanggal lahir</span>
-                  )}
-                </button>
-              </SheetTrigger>
-              <SheetContent
-                side='bottom'
-                className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[720px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
-              >
-                <SheetHeader>
-                  <SheetTitle className='text-center text-lg'>
-                    Pilih tanggal lahir
-                  </SheetTitle>
-                </SheetHeader>
-                <div className='px-4 pb-4 space-y-3'>
-                  <div className='space-y-1'>
-                    <Label htmlFor='dob-input'>Tanggal</Label>
-                    <Input
-                      id='dob-input'
-                      type='date'
-                      value={dobDraft || dateOfBirth}
-                      onChange={(e) => {
-                        setDobDraft(e.target.value);
-                        setDobError(null);
-                      }}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className='pt-2 flex gap-2'>
-                    <SheetClose asChild>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        className='flex-1'
-                        disabled={isSubmitting}
-                      >
-                        Batal
-                      </Button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <Button
-                        type='button'
-                        className='flex-1 bg-brand hover:bg-brand/90 text-white'
-                        onClick={() => {
-                          setDateOfBirth(dobDraft || dateOfBirth);
-                          setDobDraft('');
+                  Wanita
+                </Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  className={
+                    'flex-1 border ' +
+                    (gender === 'pria'
+                      ? 'bg-brand text-white border-brand'
+                      : 'bg-white text-black border-gray-300')
+                  }
+                  onClick={() => setGender('pria')}
+                  disabled={isSubmitting}
+                >
+                  Pria
+                </Button>
+              </div>
+              {fieldErrors.gender ? (
+                <p className='text-xs text-red-600'>{fieldErrors.gender}</p>
+              ) : null}
+            </div>
+
+            <div className='space-y-2 pt-1'>
+              <Label>Tanggal lahir</Label>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button
+                    type='button'
+                    className='w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                    disabled={isSubmitting}
+                  >
+                    {dateOfBirth ? (
+                      <span>
+                        {new Date(dateOfBirth).toLocaleDateString('id-ID')}
+                      </span>
+                    ) : (
+                      <span className='text-gray-500'>Pilih tanggal lahir</span>
+                    )}
+                  </button>
+                </SheetTrigger>
+                <SheetContent
+                  side='bottom'
+                  className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[720px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
+                >
+                  <SheetHeader>
+                    <SheetTitle className='text-center text-lg'>
+                      Pilih tanggal lahir
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className='px-4 pb-4 space-y-3'>
+                    <div className='space-y-1'>
+                      <Label htmlFor='dob-input'>Tanggal</Label>
+                      <Input
+                        id='dob-input'
+                        type='date'
+                        value={dobDraft || dateOfBirth}
+                        onChange={(e) => {
+                          setDobDraft(e.target.value);
                           setDobError(null);
                         }}
                         disabled={isSubmitting}
-                      >
-                        Simpan tanggal
-                      </Button>
-                    </SheetClose>
+                      />
+                    </div>
+                    <div className='pt-2 flex gap-2'>
+                      <SheetClose asChild>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          className='flex-1'
+                          disabled={isSubmitting}
+                        >
+                          Batal
+                        </Button>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Button
+                          type='button'
+                          className='flex-1 bg-brand hover:bg-brand/90 text-white'
+                          onClick={() => {
+                            setDateOfBirth(dobDraft || dateOfBirth);
+                            setDobDraft('');
+                            setDobError(null);
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          Simpan tanggal
+                        </Button>
+                      </SheetClose>
+                    </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-            {dobError ? (
-              <p className='text-xs text-red-600'>{dobError}</p>
-            ) : fieldErrors.dateOfBirth ? (
-              <p className='text-xs text-red-600'>{fieldErrors.dateOfBirth}</p>
-            ) : null}
-          </div>
+                </SheetContent>
+              </Sheet>
+              {dobError ? (
+                <p className='text-xs text-red-600'>{dobError}</p>
+              ) : fieldErrors.dateOfBirth ? (
+                <p className='text-xs text-red-600'>
+                  {fieldErrors.dateOfBirth}
+                </p>
+              ) : null}
+            </div>
 
-          {/* <div className='space-y-1 pt-1'>
+            {/* <div className='space-y-1 pt-1'>
             <Label htmlFor='register-province'>Provinsi</Label>
             <select
               id='register-province'
@@ -674,28 +684,29 @@ export function RegisterSheet({
           {errorMessage ? (
             <p className='text-sm text-red-600'>{errorMessage}</p>
           ) : null} */}
-          <div className='pt-2'>
-            <Button
-              className='w-full bg-brand hover:bg-brand/90 text-white'
-              onClick={handleSubmit}
-              type='button'
-              disabled={submitting}
-            >
-              {submitting ? 'Memproses...' : 'Simpan'}
-            </Button>
-          </div>
-          <div className='pt-2 text-center text-sm'>
-            Sudah punya akun?{' '}
-            <SheetClose asChild>
-              <button
-                className='font-semibold text-brand'
-                onClick={onSwitchToLogin}
+            <div className='pt-2'>
+              <Button
+                className='w-full bg-brand hover:bg-brand/90 text-white'
+                onClick={handleSubmit}
                 type='button'
-                disabled={isSubmitting}
+                disabled={submitting}
               >
-                Masuk sekarang
-              </button>
-            </SheetClose>
+                {submitting ? 'Memproses...' : 'Simpan'}
+              </Button>
+            </div>
+            <div className='pt-2 text-center text-sm'>
+              Sudah punya akun?{' '}
+              <SheetClose asChild>
+                <button
+                  className='font-semibold text-brand'
+                  onClick={onSwitchToLogin}
+                  type='button'
+                  disabled={isSubmitting}
+                >
+                  Masuk sekarang
+                </button>
+              </SheetClose>
+            </div>
           </div>
         </div>
       </SheetContent>

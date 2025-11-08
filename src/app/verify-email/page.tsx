@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-export default function VerifyEmailPage() {
+function VerifyEmailClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = useMemo(() => searchParams.get('token') || '', [searchParams]);
@@ -80,5 +80,22 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200 flex items-center justify-center px-6'>
+          <div className='w-full text-center space-y-4'>
+            <h1 className='text-xl font-semibold'>Verifikasi Email</h1>
+            <p className='text-sm text-gray-700'>Memuat…</p>
+          </div>
+        </div>
+      }
+    >
+      <VerifyEmailClient />
+    </Suspense>
   );
 }
