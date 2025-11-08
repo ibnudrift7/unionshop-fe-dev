@@ -4,7 +4,8 @@ import Image from 'next/image';
 import { useRef, useState } from 'react';
 import RegisterSheet from '@/components/sections/auth/RegisterSheet';
 import LoginSheet from '@/components/sections/auth/LoginSheet';
-import { useLoginMutation } from '@/hooks/use-auth';
+import ForgotPasswordSheet from '@/components/sections/auth/ForgotPasswordSheet';
+import { useForgotPasswordMutation, useLoginMutation } from '@/hooks/use-auth';
 import { setAuthToken } from '@/lib/auth-token';
 import { toast } from 'sonner';
 
@@ -25,11 +26,11 @@ export default function LocationSection({
 }: LocationSectionProps) {
   const registerTriggerRef = useRef<HTMLButtonElement | null>(null);
   const loginTriggerRef = useRef<HTMLButtonElement | null>(null);
-  // local state reserved if we decide to surface inline login error later
-  // currently not rendered; keeping for potential future UI improvements
+  const forgotTriggerRef = useRef<HTMLButtonElement | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loginError, setLoginError] = useState<string | null>(null);
   const loginMutation = useLoginMutation();
+  const forgotMutation = useForgotPasswordMutation();
   const handleLogin = (payload: { email: string; password: string }) => {
     setLoginError(null);
     loginMutation.mutate(payload, {
@@ -43,7 +44,6 @@ export default function LocationSection({
           if (token) setAuthToken(token);
         } catch {}
         toast.success('Berhasil masuk');
-        // optional: reload or route; kept minimal here
       },
       onError: (error) => {
         let msg = 'Gagal masuk';
@@ -129,6 +129,44 @@ export default function LocationSection({
                   }
                   onSubmit={handleLogin}
                   isSubmitting={loginMutation.status === 'pending'}
+                  onForgotPassword={() =>
+                    setTimeout(() => forgotTriggerRef.current?.click(), 0)
+                  }
+                  onSwitchToRegister={() =>
+                    setTimeout(() => registerTriggerRef.current?.click(), 0)
+                  }
+                />
+                <ForgotPasswordSheet
+                  trigger={
+                    <button
+                      ref={forgotTriggerRef}
+                      type='button'
+                      className='hidden'
+                      aria-hidden='true'
+                    />
+                  }
+                  isSubmitting={forgotMutation.status === 'pending'}
+                  onSubmit={({ email }) =>
+                    forgotMutation.mutate(
+                      { email },
+                      {
+                        onSuccess: (res) => {
+                          toast.success(
+                            res?.message ||
+                              'Jika email terdaftar, tautan reset telah dikirim.',
+                          );
+                        },
+                        onError: (err) => {
+                          const msg =
+                            err?.message || 'Gagal mengirim tautan reset.';
+                          toast.error(msg);
+                        },
+                      },
+                    )
+                  }
+                  onSwitchToLogin={() =>
+                    setTimeout(() => loginTriggerRef.current?.click(), 0)
+                  }
                   onSwitchToRegister={() =>
                     setTimeout(() => registerTriggerRef.current?.click(), 0)
                   }
