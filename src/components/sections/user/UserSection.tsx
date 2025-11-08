@@ -572,6 +572,7 @@ export default function MobileMenu() {
 
       <ForgotPasswordSheet
         trigger={<button ref={forgotTriggerRef} className='hidden' />}
+        isSubmitting={forgotMutation.isPending}
         onSubmit={({ email }) => {
           forgotMutation.mutate(
             { email },

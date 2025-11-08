@@ -1,7 +1,12 @@
 'use client';
 
 import Image from 'next/image';
+import { useRef, useState } from 'react';
 import RegisterSheet from '@/components/sections/auth/RegisterSheet';
+import LoginSheet from '@/components/sections/auth/LoginSheet';
+import { useLoginMutation } from '@/hooks/use-auth';
+import { setAuthToken } from '@/lib/auth-token';
+import { toast } from 'sonner';
 
 interface LocationSectionProps {
   onLocationClick?: () => void;
@@ -18,6 +23,45 @@ export default function LocationSection({
   address,
   isGuest = false,
 }: LocationSectionProps) {
+  const registerTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const loginTriggerRef = useRef<HTMLButtonElement | null>(null);
+  // local state reserved if we decide to surface inline login error later
+  // currently not rendered; keeping for potential future UI improvements
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const loginMutation = useLoginMutation();
+  const handleLogin = (payload: { email: string; password: string }) => {
+    setLoginError(null);
+    loginMutation.mutate(payload, {
+      onSuccess: (resp) => {
+        try {
+          const token =
+            (resp?.data?.token as string | undefined) ||
+            ((resp?.data?.tokens as { accessToken?: string } | undefined)
+              ?.accessToken as string | undefined) ||
+            undefined;
+          if (token) setAuthToken(token);
+        } catch {}
+        toast.success('Berhasil masuk');
+        // optional: reload or route; kept minimal here
+      },
+      onError: (error) => {
+        let msg = 'Gagal masuk';
+        if (error && typeof error === 'object') {
+          const errObj = error as { data?: unknown; message?: unknown };
+          if (errObj.data && typeof errObj.data === 'object') {
+            const dataObj = errObj.data as { message?: unknown };
+            if (typeof dataObj.message === 'string') msg = dataObj.message;
+          }
+          if (msg === 'Gagal masuk' && typeof errObj.message === 'string') {
+            msg = errObj.message;
+          }
+        }
+        setLoginError(msg);
+        toast.error(msg);
+      },
+    });
+  };
   const truncatedAddressMobile =
     address.length > 37 ? address.slice(0, 37) + '…' : address;
   const truncatedAddressDesktop =
@@ -50,25 +94,46 @@ export default function LocationSection({
           </div>
           <div className='flex items-center gap-2 text-gray-900'>
             {isGuest ? (
-              <RegisterSheet
-                trigger={
-                  <button
-                    type='button'
-                    className='flex items-center gap-2 cursor-pointer'
-                  >
-                    <span className='text-base sm:text-lg leading-none text-black'>
-                      Daftar aja !
-                    </span>
-                    <Image
-                      src='/assets/arrow-right-homepage.png'
-                      alt='Arrow Right'
-                      width={20}
-                      height={20}
-                      className='w-5 h-5 sm:w-6 sm:h-6'
+              <>
+                <RegisterSheet
+                  trigger={
+                    <button
+                      ref={registerTriggerRef}
+                      type='button'
+                      className='flex items-center gap-2 cursor-pointer'
+                    >
+                      <span className='text-base sm:text-lg leading-none text-black'>
+                        Daftar aja !
+                      </span>
+                      <Image
+                        src='/assets/arrow-right-homepage.png'
+                        alt='Arrow Right'
+                        width={20}
+                        height={20}
+                        className='w-5 h-5 sm:w-6 sm:h-6'
+                      />
+                    </button>
+                  }
+                  onSwitchToLogin={() =>
+                    setTimeout(() => loginTriggerRef.current?.click(), 0)
+                  }
+                />
+                <LoginSheet
+                  trigger={
+                    <button
+                      ref={loginTriggerRef}
+                      type='button'
+                      className='hidden'
+                      aria-hidden='true'
                     />
-                  </button>
-                }
-              />
+                  }
+                  onSubmit={handleLogin}
+                  isSubmitting={loginMutation.status === 'pending'}
+                  onSwitchToRegister={() =>
+                    setTimeout(() => registerTriggerRef.current?.click(), 0)
+                  }
+                />
+              </>
             ) : (
               <>
                 <span className='text-lg sm:text-xl font-extrabold leading-none'>
