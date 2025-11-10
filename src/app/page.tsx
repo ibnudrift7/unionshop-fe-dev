@@ -54,11 +54,17 @@ export default function Home() {
   const defaultAddress = defaultAddressResp?.data ?? null;
   const cityName = defaultAddress?.city_name;
   const districtName = defaultAddress?.subdistrict_name;
+  const isSearching = searchTerm.trim() !== '';
   const productsForHome = useMemo(() => {
+    // When searching, prefer server results (even if empty) and do not fall back to mock data.
+    if (isSearching) {
+      return productsData && productsData.length > 0 ? productsData : [];
+    }
+    // Not searching: show server products if available, otherwise mock products.
     return productsData && productsData.length > 0
       ? productsData
       : mockProducts;
-  }, [productsData]);
+  }, [productsData, isSearching]);
 
   const itemsCount = useMemo(() => {
     if (isLoggedIn) {
@@ -167,11 +173,19 @@ export default function Home() {
         onOrderClick={() => router.push('/shop?category=8')}
       />
 
-      <ProductSection
-        products={productsForHome}
-        isLoading={isLoadingProducts}
-        onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
-      />
+      <div id='product-section'>
+        {isSearching && productsData && productsData.length === 0 ? (
+          <div className='px-4 py-6 text-center text-sm text-gray-600'>
+            {`maaf produk search '${searchTerm}' tidak ada dalam list produk kami`}
+          </div>
+        ) : (
+          <ProductSection
+            products={productsForHome}
+            isLoading={isLoadingProducts}
+            onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
+          />
+        )}
+      </div>
 
       <PromoSection images={promoImages} />
 
