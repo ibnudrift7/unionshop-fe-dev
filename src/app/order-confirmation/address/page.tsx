@@ -1,13 +1,13 @@
 'use client';
 
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { setGuestAddress } from '@/hooks/use-guest-address';
+import { getGuestAddress, setGuestAddress } from '@/hooks/use-guest-address';
 import { useRegisterGuestMutation } from '@/hooks/use-auth';
 import { useCartStore } from '@/store/cart';
 import {
@@ -23,7 +23,6 @@ export default function GuestAddressPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [provinceId, setProvinceId] = useState('');
-  // provinceName and cityName no longer needed once we send IDs directly
   const [cityId, setCityId] = useState('');
   const [districtId, setDistrictId] = useState('');
   const [districtName, setDistrictName] = useState('');
@@ -55,7 +54,6 @@ export default function GuestAddressPage() {
 
   const onProvinceChange = (id: string) => {
     setProvinceId(id);
-    // Name not needed for payload; sending IDs
     setCityId('');
     setDistrictId('');
     setDistrictName('');
@@ -63,7 +61,6 @@ export default function GuestAddressPage() {
 
   const onCityChange = (id: string) => {
     setCityId(id);
-    // Name not needed for payload; sending IDs
     setDistrictId('');
     setDistrictName('');
   };
@@ -96,7 +93,6 @@ export default function GuestAddressPage() {
     }
     setPhoneError(null);
 
-    // Build cart items from local guest cart
     const cartItems = guestItems.map((i) => {
       const pid = Number(i.product.id);
       const qty = i.quantity;
@@ -208,6 +204,21 @@ export default function GuestAddressPage() {
       },
     });
   };
+
+  useEffect(() => {
+    const existing = getGuestAddress();
+    if (existing) {
+      setName(existing.name || '');
+      setEmail(existing.email || '');
+      setPhone(existing.phone || '');
+      setProvinceId(existing.provinceId || '');
+      setCityId(existing.cityId || '');
+      setDistrictId(existing.districtId || '');
+      setDistrictName(existing.districtName || existing.district || '');
+      setPostalCode(existing.postalCode || '');
+      setAddressDetail(existing.addressDetail || '');
+    }
+  }, []);
 
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>

@@ -141,6 +141,7 @@ export default function CheckoutPage() {
             localStorage.removeItem('guest_cart');
             localStorage.removeItem('guest_cart_info');
             localStorage.removeItem('guest_token');
+            localStorage.removeItem('guest_address');
           } catch {}
           try {
             useLocalCartStore.setState({ items: [] });
