@@ -32,12 +32,61 @@ export default function GuestAddressPage() {
     null,
   );
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [provinceError, setProvinceError] = useState<string | null>(null);
+  const [cityError, setCityError] = useState<string | null>(null);
+  const [districtError, setDistrictError] = useState<string | null>(null);
+  const [postalCodeError, setPostalCodeError] = useState<string | null>(null);
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     let v = String(e.target.value || '')?.replace(/\D/g, '');
     if (v.length > 15) v = v.slice(0, 15);
     setPhone(v);
-    if (!v || /^(08|62)\d*$/.test(v)) setPhoneError(null);
-    else setPhoneError('Nomor harus diawali dengan 08 atau 62');
+    if (!v) {
+      setPhoneError('Nomor handphone wajib diisi');
+    } else if (!/^(08|62)\d*$/.test(v)) {
+      setPhoneError('Nomor harus diawali dengan 08 atau 62');
+    } else if (v.length < 10) {
+      setPhoneError('Nomor minimal 10 digit');
+    } else {
+      setPhoneError(null);
+    }
+  };
+
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setName(v);
+    if (!v.trim()) {
+      setNameError('Nama penerima wajib diisi');
+    } else if (v.trim().length < 3) {
+      setNameError('Nama minimal 3 karakter');
+    } else {
+      setNameError(null);
+    }
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setEmail(v);
+    if (!v.trim()) {
+      setEmailError('Email wajib diisi');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      setEmailError('Format email tidak valid');
+    } else {
+      setEmailError(null);
+    }
+  };
+
+  const handlePostalCodeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '');
+    setPostalCode(v);
+    if (!v) {
+      setPostalCodeError('Kode pos wajib diisi');
+    } else if (v.length < 5) {
+      setPostalCodeError('Kode pos minimal 5 digit');
+    } else {
+      setPostalCodeError(null);
+    }
   };
 
   const provincesQuery = useProvincesQuery(true);
@@ -57,41 +106,122 @@ export default function GuestAddressPage() {
     setCityId('');
     setDistrictId('');
     setDistrictName('');
+    if (!id) {
+      setProvinceError('Provinsi wajib dipilih');
+    } else {
+      setProvinceError(null);
+    }
   };
 
   const onCityChange = (id: string) => {
     setCityId(id);
     setDistrictId('');
     setDistrictName('');
+    if (!id) {
+      setCityError('Kota/Kabupaten wajib dipilih');
+    } else {
+      setCityError(null);
+    }
   };
 
   const onDistrictChange = (id: string) => {
     setDistrictId(id);
     const selected = districts.find((d) => String(d.id) === String(id));
     setDistrictName(selected?.name ?? '');
+    if (!id) {
+      setDistrictError('Kecamatan wajib dipilih');
+    } else {
+      setDistrictError(null);
+    }
   };
 
   const handleSubmit = () => {
-    if (addressDetail.trim().length < 10) {
-      setAddressDetailError('Detail alamat minimal 10 karakter');
-      return;
+    let hasError = false;
+
+    if (!name.trim()) {
+      setNameError('Nama penerima wajib diisi');
+      hasError = true;
+    } else if (name.trim().length < 3) {
+      setNameError('Nama minimal 3 karakter');
+      hasError = true;
+    } else {
+      setNameError(null);
     }
-    if (phone) {
+
+    if (!email.trim()) {
+      setEmailError('Email wajib diisi');
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Format email tidak valid');
+      hasError = true;
+    } else {
+      setEmailError(null);
+    }
+
+    if (!phone) {
+      setPhoneError('Nomor handphone wajib diisi');
+      hasError = true;
+    } else {
       const digits = phone.replace(/\D/g, '');
       if (!/^(08|62)/.test(digits)) {
         setPhoneError('Nomor harus diawali dengan 08 atau 62');
-        return;
-      }
-      if (!/^\d+$/.test(digits)) {
+        hasError = true;
+      } else if (!/^\d+$/.test(digits)) {
         setPhoneError('Nomor hanya boleh berisi angka');
-        return;
-      }
-      if (digits.length > 15 || digits.length < 10) {
+        hasError = true;
+      } else if (digits.length > 15 || digits.length < 10) {
         setPhoneError('Nomor harus antara 10 hingga 15 digit');
-        return;
+        hasError = true;
+      } else {
+        setPhoneError(null);
       }
     }
-    setPhoneError(null);
+
+    if (!provinceId) {
+      setProvinceError('Provinsi wajib dipilih');
+      hasError = true;
+    } else {
+      setProvinceError(null);
+    }
+
+    if (!cityId) {
+      setCityError('Kota/Kabupaten wajib dipilih');
+      hasError = true;
+    } else {
+      setCityError(null);
+    }
+
+    if (!districtId) {
+      setDistrictError('Kecamatan wajib dipilih');
+      hasError = true;
+    } else {
+      setDistrictError(null);
+    }
+
+    if (!postalCode.trim()) {
+      setPostalCodeError('Kode pos wajib diisi');
+      hasError = true;
+    } else if (postalCode.length < 5) {
+      setPostalCodeError('Kode pos minimal 5 digit');
+      hasError = true;
+    } else {
+      setPostalCodeError(null);
+    }
+
+    if (!addressDetail.trim()) {
+      setAddressDetailError('Detail alamat wajib diisi');
+      hasError = true;
+    } else if (addressDetail.trim().length < 10) {
+      setAddressDetailError('Detail alamat minimal 10 karakter');
+      hasError = true;
+    } else {
+      setAddressDetailError(null);
+    }
+
+    if (hasError) {
+      toast.error('Harap lengkapi semua field yang wajib diisi');
+      return;
+    }
 
     const cartItems = guestItems.map((i) => {
       const pid = Number(i.product.id);
@@ -241,29 +371,43 @@ export default function GuestAddressPage() {
 
       <div className='px-4 pb-8 space-y-3'>
         <div className='space-y-1'>
-          <Label htmlFor='name'>Nama</Label>
+          <Label htmlFor='name'>
+            Nama <span className='text-red-500'>*</span>
+          </Label>
           <Input
             id='name'
             type='text'
             placeholder='Nama penerima'
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={handleNameChange}
+            className={nameError ? 'border-red-500' : ''}
           />
+          {nameError ? (
+            <p className='text-xs text-red-600'>{nameError}</p>
+          ) : null}
         </div>
 
         <div className='space-y-1'>
-          <Label htmlFor='email'>Email</Label>
+          <Label htmlFor='email'>
+            Email <span className='text-red-500'>*</span>
+          </Label>
           <Input
             id='email'
             type='email'
             placeholder='email@example.com'
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
+            className={emailError ? 'border-red-500' : ''}
           />
+          {emailError ? (
+            <p className='text-xs text-red-600'>{emailError}</p>
+          ) : null}
         </div>
 
         <div className='space-y-1'>
-          <Label htmlFor='phone'>Nomor Handphone</Label>
+          <Label htmlFor='phone'>
+            Nomor Handphone <span className='text-red-500'>*</span>
+          </Label>
           <Input
             id='phone'
             type='tel'
@@ -272,6 +416,7 @@ export default function GuestAddressPage() {
             value={phone}
             onChange={handlePhoneChange}
             maxLength={15}
+            className={phoneError ? 'border-red-500' : ''}
           />
           {phoneError ? (
             <p className='text-xs text-red-600'>{phoneError}</p>
@@ -279,10 +424,14 @@ export default function GuestAddressPage() {
         </div>
 
         <div className='space-y-1'>
-          <Label htmlFor='addr-province'>Provinsi</Label>
+          <Label htmlFor='addr-province'>
+            Provinsi <span className='text-red-500'>*</span>
+          </Label>
           <select
             id='addr-province'
-            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+            className={`w-full border rounded-md px-3 py-2 text-sm bg-white ${
+              provinceError ? 'border-red-500' : 'border-gray-300'
+            }`}
             value={provinceId}
             onChange={(e) => onProvinceChange(e.target.value)}
             disabled={provincesQuery.isLoading}
@@ -296,9 +445,14 @@ export default function GuestAddressPage() {
               </option>
             ))}
           </select>
+          {provinceError ? (
+            <p className='text-xs text-red-600'>{provinceError}</p>
+          ) : null}
         </div>
         <div className='space-y-1'>
-          <Label htmlFor='addr-city'>Kota/Kabupaten</Label>
+          <Label htmlFor='addr-city'>
+            Kota/Kabupaten <span className='text-red-500'>*</span>
+          </Label>
           <div className='relative'>
             <input
               id='addr-city'
@@ -312,7 +466,9 @@ export default function GuestAddressPage() {
                   ? 'Memuat...'
                   : 'Cari atau pilih kota'
               }
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+              className={`w-full border rounded-md px-3 py-2 text-sm bg-white ${
+                cityError ? 'border-red-500' : 'border-gray-300'
+              }`}
               value={
                 cityId
                   ? cities.find((c) => String(c.id) === String(cityId))?.name ??
@@ -365,9 +521,14 @@ export default function GuestAddressPage() {
               </ul>
             )}
           </div>
+          {cityError ? (
+            <p className='text-xs text-red-600'>{cityError}</p>
+          ) : null}
         </div>
         <div className='space-y-1'>
-          <Label htmlFor='addr-district'>Kecamatan</Label>
+          <Label htmlFor='addr-district'>
+            Kecamatan <span className='text-red-500'>*</span>
+          </Label>
           <div className='relative'>
             <input
               id='addr-district'
@@ -381,7 +542,9 @@ export default function GuestAddressPage() {
                   ? 'Memuat...'
                   : 'Cari atau pilih kecamatan'
               }
-              className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+              className={`w-full border rounded-md px-3 py-2 text-sm bg-white ${
+                districtError ? 'border-red-500' : 'border-gray-300'
+              }`}
               value={
                 districtId
                   ? districts.find((d) => String(d.id) === String(districtId))
@@ -433,31 +596,49 @@ export default function GuestAddressPage() {
               </ul>
             )}
           </div>
+          {districtError ? (
+            <p className='text-xs text-red-600'>{districtError}</p>
+          ) : null}
         </div>
         <div className='space-y-1'>
-          <Label htmlFor='addr-postal'>Kode pos</Label>
+          <Label htmlFor='addr-postal'>
+            Kode pos <span className='text-red-500'>*</span>
+          </Label>
           <Input
             id='addr-postal'
             type='text'
             inputMode='numeric'
             placeholder='Kode pos'
             value={postalCode}
-            onChange={(e) => setPostalCode(e.target.value)}
+            onChange={handlePostalCodeChange}
+            className={postalCodeError ? 'border-red-500' : ''}
           />
+          {postalCodeError ? (
+            <p className='text-xs text-red-600'>{postalCodeError}</p>
+          ) : null}
         </div>
         <div className='space-y-1'>
-          <Label htmlFor='addr-detail'>Detail alamat</Label>
+          <Label htmlFor='addr-detail'>
+            Detail alamat <span className='text-red-500'>*</span>
+          </Label>
           <textarea
             id='addr-detail'
             rows={3}
-            className='w-full border border-gray-300 rounded-md px-3 py-2 text-sm'
+            className={`w-full border rounded-md px-3 py-2 text-sm ${
+              addressDetailError ? 'border-red-500' : 'border-gray-300'
+            }`}
             placeholder='Nama jalan, no rumah, RT/RW, patokan, dsb.'
             value={addressDetail}
             onChange={(e) => {
               const v = (e.target as HTMLTextAreaElement).value;
               setAddressDetail(v);
-              if (v.trim().length >= 10) setAddressDetailError(null);
-              else setAddressDetailError('Detail alamat minimal 10 karakter');
+              if (!v.trim()) {
+                setAddressDetailError('Detail alamat wajib diisi');
+              } else if (v.trim().length < 10) {
+                setAddressDetailError('Detail alamat minimal 10 karakter');
+              } else {
+                setAddressDetailError(null);
+              }
             }}
           />
           {addressDetailError ? (

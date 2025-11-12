@@ -488,7 +488,7 @@ export function CheckoutSection({
             <p className='text-base text-brand'>
               Kamu akan mendapatkan{' '}
               <span className='font-bold text-brand'>
-                {Math.max(0, Math.round(subtotalProduct / 10000) * 10)} point
+                400 point
               </span>{' '}
               dari total belanja ini.
             </p>

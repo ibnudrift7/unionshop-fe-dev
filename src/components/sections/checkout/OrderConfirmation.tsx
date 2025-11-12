@@ -572,7 +572,7 @@ export default function OrderConfirmation() {
               <Coins className='h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0' />
               <p className='text-sm text-gray-900'>
                 Kamu akan mendapatkan{' '}
-                <span className='font-semibold'>50 point</span> dari total
+                <span className='font-semibold'>400 point</span> dari total
                 belanja ini
               </p>
             </div>

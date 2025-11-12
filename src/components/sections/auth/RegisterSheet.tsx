@@ -68,24 +68,99 @@ export function RegisterSheet({
   fieldErrors = {},
 }: RegisterSheetProps) {
   const [name, setName] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState<
+    string | null
+  >(null);
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [genderError, setGenderError] = useState<string | null>(null);
+  const [dobError, setDobError] = useState<string | null>(null);
+
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setName(v);
+    if (!v.trim()) {
+      setNameError('Nama lengkap wajib diisi');
+    } else if (v.trim().length < 3) {
+      setNameError('Nama minimal 3 karakter');
+    } else {
+      setNameError(null);
+    }
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setEmail(v);
+    if (!v.trim()) {
+      setEmailError('Email wajib diisi');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      setEmailError('Format email tidak valid');
+    } else {
+      setEmailError(null);
+    }
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setPassword(v);
+    if (!v) {
+      setPasswordError('Kata sandi wajib diisi');
+    } else if (v.length < 8) {
+      setPasswordError('Kata sandi minimal 8 karakter');
+    } else if (!/[a-z]/.test(v)) {
+      setPasswordError('Kata sandi harus mengandung minimal 1 huruf kecil');
+    } else if (!/[A-Z]/.test(v)) {
+      setPasswordError('Kata sandi harus mengandung minimal 1 huruf kapital');
+    } else {
+      setPasswordError(null);
+    }
+    // Revalidate confirm password if it's already filled
+    if (confirmPassword) {
+      if (confirmPassword !== v) {
+        setConfirmPasswordError('Konfirmasi kata sandi tidak cocok');
+      } else {
+        setConfirmPasswordError(null);
+      }
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setConfirmPassword(v);
+    if (!v) {
+      setConfirmPasswordError('Konfirmasi kata sandi wajib diisi');
+    } else if (v !== password) {
+      setConfirmPasswordError('Konfirmasi kata sandi tidak cocok');
+    } else {
+      setConfirmPasswordError(null);
+    }
+  };
+
   const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     let v = String(e.target.value || '')?.replace(/\D/g, '');
     if (v.length > 15) v = v.slice(0, 15);
     setPhone(v);
-    if (!v || /^(08|62)\d*$/.test(v)) setPhoneError(null);
-    else setPhoneError('Nomor harus diawali dengan 08 atau 62');
+    if (!v) {
+      setPhoneError('Nomor handphone wajib diisi');
+    } else if (!/^(08|62)\d*$/.test(v)) {
+      setPhoneError('Nomor harus diawali dengan 08 atau 62');
+    } else if (v.length < 10) {
+      setPhoneError('Nomor minimal 10 digit');
+    } else {
+      setPhoneError(null);
+    }
   };
+
   const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
   const [dateOfBirth, setDateOfBirth] = useState(''); // ISO yyyy-mm-dd
   const [dobDraft, setDobDraft] = useState('');
-  const [dobError, setDobError] = useState<string | null>(null);
   // const [province, setProvince] = useState('');
   // const [city, setCity] = useState('');
   // const [district, setDistrict] = useState('');
@@ -116,60 +191,113 @@ export function RegisterSheet({
   // };
 
   const handleSubmit = () => {
-    if (!/[a-z]/.test(password)) {
-      setPasswordError('Password harus mengandung minimal 1 huruf kecil');
-      return;
-    }
-    if (password.length < 8) {
-      setPasswordError('Password minimal 8 karakter');
-      return;
-    }
-    if (confirmPassword !== password) {
-      setPasswordError('Konfirmasi kata sandi tidak cocok');
-      return;
-    }
-    setPasswordError(null);
+    let hasError = false;
 
-    if (phone) {
+    if (!name.trim()) {
+      setNameError('Nama lengkap wajib diisi');
+      hasError = true;
+    } else if (name.trim().length < 3) {
+      setNameError('Nama minimal 3 karakter');
+      hasError = true;
+    } else {
+      setNameError(null);
+    }
+
+    if (!email.trim()) {
+      setEmailError('Email wajib diisi');
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Format email tidak valid');
+      hasError = true;
+    } else {
+      setEmailError(null);
+    }
+
+    if (!password) {
+      setPasswordError('Kata sandi wajib diisi');
+      hasError = true;
+    } else if (password.length < 8) {
+      setPasswordError('Kata sandi minimal 8 karakter');
+      hasError = true;
+    } else if (!/[a-z]/.test(password)) {
+      setPasswordError('Kata sandi harus mengandung minimal 1 huruf kecil');
+      hasError = true;
+    } else if (!/[A-Z]/.test(password)) {
+      setPasswordError('Kata sandi harus mengandung minimal 1 huruf kapital');
+      hasError = true;
+    } else {
+      setPasswordError(null);
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError('Konfirmasi kata sandi wajib diisi');
+      hasError = true;
+    } else if (confirmPassword !== password) {
+      setConfirmPasswordError('Konfirmasi kata sandi tidak cocok');
+      hasError = true;
+    } else {
+      setConfirmPasswordError(null);
+    }
+
+    if (!phone) {
+      setPhoneError('Nomor handphone wajib diisi');
+      hasError = true;
+    } else {
       const digits = phone.replace(/\D/g, '');
       if (!/^(08|62)/.test(digits)) {
         setPhoneError('Nomor harus diawali dengan 08 atau 62');
-        return;
-      }
-      if (!/^\d+$/.test(digits)) {
+        hasError = true;
+      } else if (!/^\d+$/.test(digits)) {
         setPhoneError('Nomor hanya boleh berisi angka');
-        return;
-      }
-      if (digits.length < 10 || digits.length > 15) {
+        hasError = true;
+      } else if (digits.length < 10 || digits.length > 15) {
         setPhoneError('Nomor harus antara 10 hingga 15 digit');
-        return;
+        hasError = true;
+      } else {
+        setPhoneError(null);
       }
     }
-    setPhoneError(null);
 
-    if (dateOfBirth) {
+    if (!gender) {
+      setGenderError('Jenis kelamin wajib dipilih');
+      hasError = true;
+    } else {
+      setGenderError(null);
+    }
+
+    if (!dateOfBirth) {
+      setDobError('Tanggal lahir wajib diisi');
+      hasError = true;
+    } else {
       try {
         const birth = new Date(dateOfBirth);
         if (isNaN(birth.getTime())) {
           setDobError('Tanggal lahir tidak valid');
-          return;
-        }
-        const now = new Date();
-        let age = now.getFullYear() - birth.getFullYear();
-        const m = now.getMonth() - birth.getMonth();
-        if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-          age--;
-        }
-        if (age < 13) {
-          setDobError('Anda harus berusia minimal 13 tahun');
-          return;
+          hasError = true;
+        } else {
+          const now = new Date();
+          let age = now.getFullYear() - birth.getFullYear();
+          const m = now.getMonth() - birth.getMonth();
+          if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+            age--;
+          }
+          if (age < 13) {
+            setDobError('Anda harus berusia minimal 13 tahun');
+            hasError = true;
+          } else {
+            setDobError(null);
+          }
         }
       } catch {
         setDobError('Tanggal lahir tidak valid');
-        return;
+        hasError = true;
       }
     }
-    setDobError(null);
+
+    if (hasError) {
+      toast.error('Harap lengkapi semua field yang wajib diisi dengan benar');
+      return;
+    }
 
     const payload = {
       name,
@@ -232,17 +360,21 @@ export function RegisterSheet({
 
   const resetForm = () => {
     setName('');
+    setNameError(null);
     setEmail('');
+    setEmailError(null);
     setPassword('');
+    setPasswordError(null);
     setConfirmPassword('');
+    setConfirmPasswordError(null);
     setShowPassword(false);
     setPhone('');
     setPhoneError(null);
     setGender('');
+    setGenderError(null);
     setDateOfBirth('');
     setDobDraft('');
     setDobError(null);
-    setPasswordError(null);
   };
 
   const router = useRouter();
@@ -274,42 +406,57 @@ export function RegisterSheet({
           </SheetHeader>
           <div className='px-4 pb-4 space-y-3'>
             <div className='space-y-1'>
-              <Label htmlFor='register-name'>Nama</Label>
+              <Label htmlFor='register-name'>
+                Nama <span className='text-red-500'>*</span>
+              </Label>
               <Input
                 id='register-name'
                 type='text'
                 placeholder='Nama lengkap'
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={handleNameChange}
                 disabled={isSubmitting}
+                className={nameError ? 'border-red-500' : ''}
               />
+              {nameError ? (
+                <p className='text-xs text-red-600'>{nameError}</p>
+              ) : null}
               {fieldErrors.name ? (
                 <p className='text-xs text-red-600'>{fieldErrors.name}</p>
               ) : null}
             </div>
             <div className='space-y-1'>
-              <Label htmlFor='register-email'>Email</Label>
+              <Label htmlFor='register-email'>
+                Email <span className='text-red-500'>*</span>
+              </Label>
               <Input
                 id='register-email'
                 type='email'
                 placeholder='nama@email.com'
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 disabled={isSubmitting}
+                className={emailError ? 'border-red-500' : ''}
               />
+              {emailError ? (
+                <p className='text-xs text-red-600'>{emailError}</p>
+              ) : null}
               {fieldErrors.email ? (
                 <p className='text-xs text-red-600'>{fieldErrors.email}</p>
               ) : null}
             </div>
             <div className='space-y-1'>
-              <Label htmlFor='register-password'>Kata sandi</Label>
+              <Label htmlFor='register-password'>
+                Kata sandi <span className='text-red-500'>*</span>
+              </Label>
               <Input
                 id='register-password'
                 type={showPassword ? 'text' : 'password'}
                 placeholder='••••••••'
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 disabled={isSubmitting}
+                className={passwordError ? 'border-red-500' : ''}
               />
               {passwordError ? (
                 <p className='text-xs text-red-600'>{passwordError}</p>
@@ -320,16 +467,20 @@ export function RegisterSheet({
             </div>
             <div className='space-y-1'>
               <Label htmlFor='register-password-confirm'>
-                Konfirmasi kata sandi
+                Konfirmasi kata sandi <span className='text-red-500'>*</span>
               </Label>
               <Input
                 id='register-password-confirm'
                 type={showPassword ? 'text' : 'password'}
                 placeholder='••••••••'
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={handleConfirmPasswordChange}
                 disabled={isSubmitting}
+                className={confirmPasswordError ? 'border-red-500' : ''}
               />
+              {confirmPasswordError ? (
+                <p className='text-xs text-red-600'>{confirmPasswordError}</p>
+              ) : null}
             </div>
             <div className='flex items-center gap-2 pt-1'>
               <input
@@ -345,11 +496,14 @@ export function RegisterSheet({
               </Label>
             </div>
             <p className='text-xs text-gray-500'>
-              *Kata sandi anda harus terdiri dari setidaknya 8 karakter
+              *Kata sandi anda harus terdiri dari setidaknya 8 karakter,
+              mengandung minimal 1 huruf kecil dan 1 huruf kapital
             </p>
 
             <div className='space-y-1 pt-2'>
-              <Label htmlFor='register-phone'>Nomor handphone</Label>
+              <Label htmlFor='register-phone'>
+                Nomor handphone <span className='text-red-500'>*</span>
+              </Label>
               <Input
                 id='register-phone'
                 type='tel'
@@ -359,6 +513,7 @@ export function RegisterSheet({
                 onChange={handlePhoneChange}
                 maxLength={15}
                 disabled={isSubmitting}
+                className={phoneError ? 'border-red-500' : ''}
               />
               {phoneError ? (
                 <p className='text-xs text-red-600'>{phoneError}</p>
@@ -368,7 +523,9 @@ export function RegisterSheet({
             </div>
 
             <div className='space-y-2 pt-1'>
-              <Label>Jenis kelamin</Label>
+              <Label>
+                Jenis kelamin <span className='text-red-500'>*</span>
+              </Label>
               <div className='flex items-center gap-2'>
                 <Button
                   type='button'
@@ -379,7 +536,10 @@ export function RegisterSheet({
                       ? 'bg-brand text-white border-brand'
                       : 'bg-white text-black border-gray-300')
                   }
-                  onClick={() => setGender('wanita')}
+                  onClick={() => {
+                    setGender('wanita');
+                    setGenderError(null);
+                  }}
                   disabled={isSubmitting}
                 >
                   Wanita
@@ -393,24 +553,34 @@ export function RegisterSheet({
                       ? 'bg-brand text-white border-brand'
                       : 'bg-white text-black border-gray-300')
                   }
-                  onClick={() => setGender('pria')}
+                  onClick={() => {
+                    setGender('pria');
+                    setGenderError(null);
+                  }}
                   disabled={isSubmitting}
                 >
                   Pria
                 </Button>
               </div>
+              {genderError ? (
+                <p className='text-xs text-red-600'>{genderError}</p>
+              ) : null}
               {fieldErrors.gender ? (
                 <p className='text-xs text-red-600'>{fieldErrors.gender}</p>
               ) : null}
             </div>
 
             <div className='space-y-2 pt-1'>
-              <Label>Tanggal lahir</Label>
+              <Label>
+                Tanggal lahir <span className='text-red-500'>*</span>
+              </Label>
               <Sheet>
                 <SheetTrigger asChild>
                   <button
                     type='button'
-                    className='w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm bg-white'
+                    className={`w-full text-left border rounded-md px-3 py-2 text-sm bg-white ${
+                      dobError ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     disabled={isSubmitting}
                   >
                     {dateOfBirth ? (

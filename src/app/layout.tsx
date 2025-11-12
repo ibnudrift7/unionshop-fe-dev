@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const settingsResp = resp.data;
     const flat = settingsResp?.data?.flat ?? [];
     const map: Record<string, string> = {};
-    for (const it of flat) {
+    for (const it of flat) { 
       if (it && typeof it.name === 'string') map[it.name] = it.value ?? '';
     }
 
