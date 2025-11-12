@@ -8,6 +8,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { ApiProduct } from '@/types/product';
 import type { Product } from '@/types';
 import { Package, Star } from 'lucide-react';
@@ -15,7 +16,6 @@ import { useProductsQuery } from '@/hooks/use-products';
 
 interface SpecialTodaySectionProps {
   title?: string;
-  // accept backend product shape (ApiProduct)
   products?: ApiProduct[];
   isLoading?: boolean;
   onProductClick?: (product: ApiProduct | Product) => void;
@@ -48,13 +48,15 @@ export default function SpecialTodaySection({
     <section className='px-4'>
       <div className='flex items-center justify-between mb-4'>
         <div className='text-start font-bold text-black text-xl'>{title}</div>
-        <Image
-          src='/assets/icon-arrow.png'
-          alt='Arrow'
-          width={20}
-          height={20}
-          className='w-5 h-5'
-        />
+        <Link href='/shop' className='cursor-pointer'>
+          <Image
+            src='/assets/icon-arrow.png'
+            alt='Arrow'
+            width={20}
+            height={20}
+            className='w-5 h-5'
+          />
+        </Link>
       </div>
       <Carousel
         opts={{

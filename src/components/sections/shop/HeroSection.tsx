@@ -69,6 +69,7 @@ export default function HeroSection({
           opts={{
             align: 'start',
             loop: true,
+            watchDrag: true,
           }}
         >
           <CarouselContent>
@@ -90,7 +91,7 @@ export default function HeroSection({
         </Carousel>
         <div className='absolute inset-0 bg-gradient-to-r from-black/20 to-transparent pointer-events-none' />
 
-        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-5 px-4'>
+        <div className='absolute inset-0 flex flex-col justify-start items-center text-center pt-4 sm:pt-5 px-4 pointer-events-none'>
           <div className='flex items-center gap-0 w-full'>
             <div className='relative flex items-center w-full justify-start'>
               <Button
@@ -98,7 +99,7 @@ export default function HeroSection({
                 aria-label='Search'
                 aria-expanded={isSearchOpen}
                 className={cn(
-                  'bg-white/70 hover:bg-white/50 text-brand backdrop-blur-sm h-8 w-10 sm:h-9 sm:w-12 border border-gray-200',
+                  'bg-white/70 hover:bg-white/50 text-brand backdrop-blur-sm h-8 w-10 sm:h-9 sm:w-12 border border-gray-200 pointer-events-auto',
                   isSearchOpen
                     ? 'rounded-l-lg rounded-r-none border-r-0'
                     : 'rounded-lg',
@@ -120,7 +121,7 @@ export default function HeroSection({
               >
                 <div
                   className={cn(
-                    'relative h-8 md:h-9 flex-1 overflow-visible',
+                    'relative h-8 md:h-9 flex-1 overflow-visible pointer-events-auto',
                     isSearchOpen
                       ? 'opacity-100'
                       : 'opacity-0 pointer-events-none',
@@ -149,9 +150,7 @@ export default function HeroSection({
                     z-[5] border border-brand/80'
                     onClick={() => {
                       const value = searchInputRef.current?.value || '';
-                      // Tell parent to run the search (update state / fetch)
                       onSearch?.(value);
-                      // Smooth scroll to the product section on the home page
                       try {
                         const el = document.getElementById('product-section');
                         if (el)

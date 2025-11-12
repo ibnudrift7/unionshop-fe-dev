@@ -36,6 +36,7 @@ export default function ProductDetail({
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType | null>(
     null,
   );
@@ -165,8 +166,8 @@ export default function ProductDetail({
           <button
             type='button'
             className='absolute left-2 top-1/3 -translate-y-1/2 z-10 h-10 w-10 flex items-center justify-center'
-            onClick={() => carouselApi?.scrollPrev?.()}
-            aria-label='Sebelumnya'
+            onClick={() => router.back()}
+            aria-label='Kembali'
           >
             <Image
               src='/assets/carousel-arrow-l.png'
