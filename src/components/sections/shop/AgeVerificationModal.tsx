@@ -67,9 +67,39 @@ export function AgeVerificationModal({
 }
 
 export function AgeVerificationRejectModal({ open }: { open: boolean }) {
+  const handleClose = () => {
+    window.location.href =
+      'https://kemkes.go.id/eng/layanan/-indonesian-stop-smoking-program';
+  };
+
   return (
     <Dialog open={open}>
-      <DialogContent className='max-w-md border-0 shadow-lg p-0 gap-0'>
+      <DialogContent
+        className='max-w-md border-0 shadow-lg p-0 gap-0'
+        showCloseButton={false}
+      >
+        <button
+          onClick={handleClose}
+          className='absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10'
+          aria-label='Close'
+        >
+          <svg
+            xmlns='http://www.w3.org/2000/svg'
+            width='24'
+            height='24'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            className='h-4 w-4'
+          >
+            <path d='M18 6 6 18' />
+            
+            <path d='m6 6 12 12' />
+          </svg>
+        </button>
         <div className='px-6 py-8'>
           <DialogHeader>
             <DialogTitle className='text-2xl font-extrabold text-center text-black'>

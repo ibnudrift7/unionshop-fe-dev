@@ -73,7 +73,7 @@ export default function AgeGate() {
   return (
     <>
       {showSplash && (
-        <div className='fixed inset-0 z-[9998] flex items-stretch justify-center pointer-events-auto'>
+        <div className='fixed inset-0 flex items-stretch justify-center pointer-events-auto'>
           <div
             className='relative w-full max-w-[550px] h-screen bg-black'
             style={{
@@ -148,7 +148,7 @@ export default function AgeGate() {
       />
 
       {rejected && (
-        <div className='fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto'>
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-auto'>
           <div className='absolute inset-0' />
           <AgeVerificationRejectModal open={true} />
         </div>
