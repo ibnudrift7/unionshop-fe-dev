@@ -148,7 +148,7 @@ export default function AgeGate() {
       />
 
       {rejected && (
-        <div className='fixed inset-0 z-[999] flex items-center justify-center pointer-events-auto'>
+        <div className='fixed inset-0 flex items-center justify-center pointer-events-auto'>
           <div className='absolute inset-0' />
           <AgeVerificationRejectModal open={true} />
         </div>
