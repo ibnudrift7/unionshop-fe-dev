@@ -60,6 +60,14 @@ export default function EditProfilePage() {
     } else {
       setDateOfBirth('');
     }
+    if (p.gender) {
+      const apiGender = p.gender.toUpperCase();
+      if (apiGender === 'L') {
+        setGender('pria');
+      } else if (apiGender === 'P') {
+        setGender('wanita');
+      }
+    }
   }, [profile?.data]);
 
   const handleSaveProfile = () => {

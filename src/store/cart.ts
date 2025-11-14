@@ -15,8 +15,20 @@ interface CartState {
   getTotal: () => number;
 }
 
+const loadInitialCart = (): CartItem[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('guest_cart');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CartItem[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export const useCartStore = create<CartState>((set, get) => ({
-  items: [],
+  items: loadInitialCart(),
   addItem: (product, quantity = 1) => {
     set((state) => {
       const existing = state.items.find((i) => i.product.id === product.id);
