@@ -20,7 +20,6 @@ import { useSlidersQuery } from '@/hooks/use-sliders';
 import { useCartQuery } from '@/hooks/use-cart';
 import { useDefaultAddressQuery } from '@/hooks/use-address';
 import { useCartStore } from '@/store/cart';
-import type { CartItem } from '@/store/cart';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import {
@@ -56,11 +55,9 @@ export default function Home() {
   const districtName = defaultAddress?.subdistrict_name;
   const isSearching = searchTerm.trim() !== '';
   const productsForHome = useMemo(() => {
-    // When searching, prefer server results (even if empty) and do not fall back to mock data.
     if (isSearching) {
       return productsData && productsData.length > 0 ? productsData : [];
     }
-    // Not searching: show server products if available, otherwise mock products.
     return productsData && productsData.length > 0
       ? productsData
       : mockProducts;
@@ -103,19 +100,6 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (isLoggedIn) return;
-    try {
-      const raw = localStorage.getItem('guest_cart');
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as CartItem[];
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        useCartStore.setState({ items: parsed });
-      }
-    } catch {}
-  }, [isLoggedIn]);
 
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
