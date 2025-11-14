@@ -73,7 +73,7 @@ export default function AgeGate() {
   return (
     <>
       {showSplash && (
-        <div className='fixed inset-0 flex items-stretch justify-center pointer-events-auto'>
+        <div className='fixed inset-0 flex items-stretch justify-center pointer-events-auto z-[999]'>
           <div
             className='relative w-full max-w-[550px] h-screen bg-black'
             style={{
