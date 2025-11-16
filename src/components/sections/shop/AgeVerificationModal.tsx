@@ -70,6 +70,8 @@ export function AgeVerificationRejectModal({ open }: { open: boolean }) {
   const handleClose = () => {
     window.location.href =
       'https://kemkes.go.id/eng/layanan/-indonesian-stop-smoking-program';
+    localStorage.removeItem('age_verified');
+    localStorage.removeItem('age_rejected');
   };
 
   return (
