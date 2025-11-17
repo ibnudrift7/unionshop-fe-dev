@@ -52,3 +52,14 @@ export interface VerifyEmailResponse {
   message?: string;
   success?: boolean;
 }
+
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
+}
+
+export interface ResetPasswordResponse {
+  statusCode?: number;
+  message?: string;
+  success?: boolean;
+}

@@ -4,6 +4,8 @@ import type {
   LoginPayload,
   RegisterPayload,
   VerifyEmailResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
 } from '@/types/auth';
 import { api } from '@/lib/api';
 
@@ -44,5 +46,17 @@ export const authService = {
     return api.post<VerifyEmailResponse>(API_ENDPOINTS.verifyEmail, params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
+  },
+  resetPassword(payload: ResetPasswordPayload) {
+    const params = new URLSearchParams();
+    params.set('token', payload.token);
+    params.set('password', payload.password);
+    return api.post<ResetPasswordResponse>(
+      API_ENDPOINTS.resetPassword,
+      params,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
   },
 };

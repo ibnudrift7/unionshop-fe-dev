@@ -3,7 +3,13 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
 import { guestService } from '@/services/guest';
-import type { AuthResponse, LoginPayload, RegisterPayload } from '@/types/auth';
+import type {
+  AuthResponse,
+  LoginPayload,
+  RegisterPayload,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
+} from '@/types/auth';
 import type {
   RegisterGuestPayload,
   RegisterGuestResponse,
@@ -50,5 +56,19 @@ export const useRegisterGuestMutation = (
     mutationKey: ['auth', 'register-guest'],
     mutationFn: (payload) =>
       guestService.registerGuest(payload).then((res) => res.data),
+    ...options,
+  });
+
+export const useResetPasswordMutation = (
+  options?: UseMutationOptions<
+    ResetPasswordResponse,
+    HttpError,
+    ResetPasswordPayload
+  >,
+) =>
+  useMutation<ResetPasswordResponse, HttpError, ResetPasswordPayload>({
+    mutationKey: ['auth', 'reset-password'],
+    mutationFn: (payload) =>
+      authService.resetPassword(payload).then((res) => res.data),
     ...options,
   });
