@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['console-stg.unionlabs.my.id', 'console.unionlabs.my.id'],
+    domains: ['console-stg.unionlabs.my.id', 'console.unionlabs.my.id', 'console-dev.unionlabs.my.id'],
   },
 };
 

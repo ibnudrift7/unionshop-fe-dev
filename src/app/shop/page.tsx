@@ -9,6 +9,7 @@ import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import type { CartItem } from '@/store/cart';
+import { formatIDR } from '@/lib/utils';
 
 export default function ShopPage() {
   const router = useRouter();
@@ -46,12 +47,7 @@ export default function ShopPage() {
     return getTotal();
   }, [isLoggedIn, memberCart, getTotal]);
   const totalFormatted = useMemo(
-    () =>
-      new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-      }).format(totalAmount),
+    () => formatIDR(totalAmount),
     [totalAmount],
   );
   return (

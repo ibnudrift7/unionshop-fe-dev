@@ -118,17 +118,19 @@ export default function OrderConfirmation() {
   const [guestCartInfo, setGuestCartInfo] = useState<{
     cart_id?: number;
     address_id?: number;
-  } | null>(() => {
-    try {
-      if (typeof window === 'undefined') return null;
-      const raw = localStorage.getItem('guest_cart_info');
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  } | null>(null);
 
   useEffect(() => {
+    // Load initial guest cart info on client mount
+    try {
+      const raw = localStorage.getItem('guest_cart_info');
+      if (raw) {
+        setGuestCartInfo(JSON.parse(raw));
+      }
+    } catch {
+      // ignore
+    }
+
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'guest_cart_info') {
         try {
@@ -187,7 +189,14 @@ export default function OrderConfirmation() {
   const { mutate: applyPromoMutate, isPending: isApplying } =
     useApplyPromoMutation();
   const setCheckoutPromo = useCheckoutStore((s) => s.setPromo);
+  const checkoutPromo = useCheckoutStore((s) => s.promo);
   const [needAddressHighlight, setNeedAddressHighlight] = useState(false);
+
+  useEffect(() => {
+    if (checkoutPromo && isLoggedIn) {
+      setAppliedPromo(checkoutPromo);
+    }
+  }, [checkoutPromo, isLoggedIn]);
 
   const applyPromo = () => {
     setPromoError(null);
@@ -517,14 +526,29 @@ export default function OrderConfirmation() {
                       setPromoCode((e.target as HTMLInputElement).value)
                     }
                     placeholder='Kode promo'
+                    disabled={!!appliedPromo}
                   />
-                  <Button
-                    className='bg-brand hover:bg-brand/80'
-                    onClick={applyPromo}
-                    disabled={isApplying}
-                  >
-                    {isApplying ? 'Menerapkan…' : 'Terapkan'}
-                  </Button>
+                  {appliedPromo ? (
+                    <Button
+                      variant='outline'
+                      className='border-red-500 text-red-500 hover:bg-red-50'
+                      onClick={() => {
+                        setAppliedPromo(null);
+                        setCheckoutPromo(null);
+                        toast.info('Promo dihapus');
+                      }}
+                    >
+                      Hapus
+                    </Button>
+                  ) : (
+                    <Button
+                      className='bg-brand hover:bg-brand/80'
+                      onClick={applyPromo}
+                      disabled={isApplying}
+                    >
+                      {isApplying ? 'Menerapkan…' : 'Terapkan'}
+                    </Button>
+                  )}
                 </div>
                 {promoError && (
                   <p className='text-xs text-red-500'>{promoError}</p>
@@ -532,7 +556,7 @@ export default function OrderConfirmation() {
                 {appliedPromo && (
                   <div className='text-xs text-green-700 mt-1'>
                     Promo {appliedPromo.promo_code} • Diskon{' '}
-                    {appliedPromo.discount_amount}
+                    {formatIDR(Number(appliedPromo.discount_amount))}
                   </div>
                 )}
               </div>
@@ -617,7 +641,6 @@ export default function OrderConfirmation() {
                 return !(effectiveTotal > 0 && itemsCount > 0);
               })()}
               onClick={() => {
-                // Guest validation: ensure address exists before proceeding
                 if (!isLoggedIn && !guestAddress) {
                   setNeedAddressHighlight(true);
                   toast.error('Silakan isi data pengiriman terlebih dahulu');

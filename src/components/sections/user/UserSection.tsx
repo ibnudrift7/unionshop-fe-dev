@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Edit2, LogOut, MapPin, Menu, Phone } from 'lucide-react';
@@ -25,11 +25,14 @@ import {
 import { useProfileQuery } from '@/hooks/use-profile';
 import { setAuthToken, useAuthStatus } from '@/hooks/use-auth-status';
 import { useSettingsMapQuery } from '@/hooks/use-setting';
+import { usePromotionsQuery } from '@/hooks/use-promotion';
 import { clearUserLocalStorage } from '@/lib/auth-token';
 import type { LoginPayload, RegisterPayload } from '@/types/auth';
 import { locationService } from '@/services/location';
 import { addressService } from '@/services/address';
 import type { CreateAddressPayload } from '@/types/address';
+import type { Voucher2Props } from '@/types/promo';
+import VoucherModalInline from '../shop/VoucherModalInline';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -78,31 +81,55 @@ export default function MobileMenu() {
   const { isLoggedIn, isReady } = useAuthStatus();
   const { data: profileData } = useProfileQuery(Boolean(isReady && isLoggedIn));
   const { data: settingsMap } = useSettingsMapQuery();
+  const { data: promosResp, isLoading: loadingPromotions } = usePromotionsQuery(
+    Boolean(isReady && isLoggedIn),
+  );
   const [userName, setUserName] = useState<string | null>(null);
   const pointsBalance = profileData?.data?.points_balance ?? 0;
   const [loginError, setLoginError] = useState<string | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [voucherModalOpen, setVoucherModalOpen] = useState(false);
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher2Props | null>(
+    null,
+  );
 
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
   const forgotMutation = useForgotPasswordMutation();
 
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
-  const voucherBase = {
-    title1: 'Mau Voucher',
-    title2: 'Diskon 10RB?',
-    description: 'Gabung & Ambil Vouchernya Sekarang juga!',
-    buttonText: 'CLAIM SEKARANG',
-    image: '/assets/Voucher.png',
-  };
-  const vouchers = [
-    voucherBase,
-    {
-      ...voucherBase,
-      title2: 'Diskon 15RB?',
-      image: '/assets/Voucher2.png',
-    },
-  ];
+
+  const vouchersFallback = useMemo(() => {
+    const voucherBase = {
+      title1: 'Mau Voucher',
+      title2: 'Diskon 10RB?',
+      description: 'Gabung & Ambil Vouchernya Sekarang juga!',
+      buttonText: 'CLAIM SEKARANG',
+      image: '/assets/Voucher.png',
+    };
+    return [
+      voucherBase,
+      {
+        ...voucherBase,
+        title2: 'Diskon 15RB?',
+        image: '/assets/Voucher2.png',
+      },
+    ];
+  }, []);
+
+  const promotions = useMemo(() => promosResp?.data ?? [], [promosResp]);
+
+  const vouchers: Voucher2Props[] = useMemo(() => {
+    if (!promotions || promotions.length === 0) return vouchersFallback;
+    const DEFAULT_IMG = '/assets/Voucher.png';
+    return promotions.map((p) => ({
+      title1: p.name,
+      description: p.description ?? '',
+      buttonText: 'Klaim',
+      image: p.image ? p.image : DEFAULT_IMG,
+      code: p.code,
+    }));
+  }, [promotions, vouchersFallback]);
 
   useEffect(() => {
     const fullName = profileData?.data?.full_name;
@@ -476,9 +503,6 @@ export default function MobileMenu() {
                           <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-0 sm:mb-0 leading-tight'>
                             {item.title1}
                           </h3>
-                          <h3 className='text-lg md:text-2xl font-bold text-[#218d46] mb-1 sm:mb-2'>
-                            {item.title2}
-                          </h3>
                           <p className='text-[9px] md:text-sm font-semibold text-[#7c7c7c]'>
                             {item.description}
                           </p>
@@ -496,7 +520,13 @@ export default function MobileMenu() {
                         </div>
                       </div>
 
-                      <Button className='w-full bg-brand hover:bg-brand/90 text-white font-base py-6 md:py-8 rounded-4xl text-sm md:text-base'>
+                      <Button
+                        className='w-full bg-brand hover:bg-brand/90 text-white font-base py-6 md:py-8 rounded-4xl text-sm md:text-base'
+                        onClick={() => {
+                          setSelectedVoucher(item);
+                          setVoucherModalOpen(true);
+                        }}
+                      >
                         {item.buttonText}
                       </Button>
                     </div>
@@ -656,6 +686,17 @@ export default function MobileMenu() {
           </p>
         </div>
       )}
+
+      <VoucherModalInline
+        open={voucherModalOpen}
+        onOpenChange={(v: boolean) => setVoucherModalOpen(v)}
+        title={selectedVoucher?.title1 ?? selectedVoucher?.title2}
+        subtitle={selectedVoucher ? 'Promo' : undefined}
+        description={selectedVoucher?.description}
+        promotions={promotions}
+        loadingPromotions={loadingPromotions}
+        selectedCode={selectedVoucher?.code}
+      />
     </div>
   );
 }
