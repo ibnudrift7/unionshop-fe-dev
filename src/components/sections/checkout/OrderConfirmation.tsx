@@ -118,17 +118,19 @@ export default function OrderConfirmation() {
   const [guestCartInfo, setGuestCartInfo] = useState<{
     cart_id?: number;
     address_id?: number;
-  } | null>(() => {
-    try {
-      if (typeof window === 'undefined') return null;
-      const raw = localStorage.getItem('guest_cart_info');
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  } | null>(null);
 
   useEffect(() => {
+    // Load initial guest cart info on client mount
+    try {
+      const raw = localStorage.getItem('guest_cart_info');
+      if (raw) {
+        setGuestCartInfo(JSON.parse(raw));
+      }
+    } catch {
+      // ignore
+    }
+
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'guest_cart_info') {
         try {

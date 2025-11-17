@@ -17,6 +17,7 @@ import type { OrderListItem, OrderHistoryItem } from '@/types/order';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { HttpError } from '@/services/http';
+import { formatIDR } from '@/lib/utils';
 
 function formatDateTimeID(dateStr: string) {
   const d = new Date(dateStr);
@@ -38,11 +39,7 @@ function formatRupiah(value?: string | number | null): string {
       ? parseFloat(value.replace(/,/g, ''))
       : Number(value);
   if (isNaN(num)) return String(value);
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(num);
+  return formatIDR(num);
 }
 
 function resolveOrderImage(image?: string | null): string {

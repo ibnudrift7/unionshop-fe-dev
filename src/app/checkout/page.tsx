@@ -12,6 +12,7 @@ import { checkoutService } from '@/services/checkout';
 import { useCheckoutStore } from '@/store/checkout';
 import { useCartStore as useLocalCartStore } from '@/store/cart';
 import { toast } from 'sonner';
+import { formatIDR } from '@/lib/utils';
 
 async function loadMidtransSnap(paymentUrl?: string) {
   if (typeof window === 'undefined') return;
@@ -74,15 +75,7 @@ export default function CheckoutPage() {
   const promo = useCheckoutStore((s) => s.promo);
   const clearCheckout = useCheckoutStore((s) => s.clear);
 
-  const totalFormatted = useMemo(
-    () =>
-      new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-      }).format(total),
-    [total],
-  );
+  const totalFormatted = useMemo(() => formatIDR(total), [total]);
 
   const handlePay = async () => {
     const guestToken = typeof window !== 'undefined' ? getGuestToken() : null;
@@ -149,23 +142,44 @@ export default function CheckoutPage() {
         };
 
         const token = extractSnapToken(paymentUrl);
+
         try {
           await loadMidtransSnap(paymentUrl);
           if (window.snap?.pay && token) {
             window.snap.pay(token, {
-              onSuccess: () => {
-                toast.success('Pembayaran berhasil');
-                clearGuestLocal();
+              onSuccess: (result) => {
+                console.log('Payment success:', result);
+                try {
+                  const orderId =
+                    (result as { order_id?: string })?.order_id || 'unknown';
+                  localStorage.setItem(
+                    'payment_success',
+                    JSON.stringify({
+                      timestamp: Date.now(),
+                      order_id: orderId,
+                    }),
+                  );
+                  clearGuestLocal();
+                } catch (err) {
+                  console.error('Failed to clean localStorage:', err);
+                }
                 clearCheckout();
-                router.push('/user?thankyou=1');
+                toast.success('Pembayaran berhasil! Mengarahkan...');
+                setTimeout(() => {
+                  router.push('/user?thankyou=1');
+                }, 500);
               },
-              onPending: () => {
+              onPending: (result) => {
+                console.log('Payment pending:', result);
                 toast.info('Menunggu pembayaran');
               },
-              onError: () => {
+              onError: (result) => {
+                console.error('Payment error:', result);
                 toast.error('Terjadi kesalahan pembayaran');
               },
-              onClose: () => {},
+              onClose: () => {
+                console.log('Payment modal closed');
+              },
             });
             return;
           }
@@ -202,7 +216,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200'>
+    <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x border-gray-200 relative'>
       <div className='flex items-center gap-2 p-4 pt-8 border-b border-gray-100 bg-white'>
         <Button
           variant='ghost'

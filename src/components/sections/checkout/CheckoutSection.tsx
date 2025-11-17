@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useCartQuery } from '@/hooks/use-cart';
@@ -17,6 +18,8 @@ import {
   useCouriersQuery,
   useShippingCalculateQuery,
 } from '@/hooks/use-shipping';
+import { useCheckoutStore } from '@/store/checkout';
+import { formatIDR } from '@/lib/utils';
 
 interface CheckoutSectionProps {
   onTotalChange?: (total: number) => void;
@@ -33,25 +36,28 @@ export function CheckoutSection({
   onTotalChange,
   onSelectionChange,
 }: CheckoutSectionProps) {
+  const router = useRouter();
   const { isLoggedIn, isReady } = useAuthStatus();
   const { items: guestItems } = useCartStore();
-  const [guestToken, setGuestToken] = useState<string | null>(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('guest_token') : null,
-  );
+  const [guestToken, setGuestToken] = useState<string | null>(null);
   const [guestCartInfo, setGuestCartInfo] = useState<{
     cart_id?: number;
     address_id?: number;
-  } | null>(() => {
-    try {
-      if (typeof window === 'undefined') return null;
-      const raw = localStorage.getItem('guest_cart_info');
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  } | null>(null);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setGuestToken(localStorage.getItem('guest_token'));
+      try {
+        const raw = localStorage.getItem('guest_cart_info');
+        if (raw) {
+          setGuestCartInfo(JSON.parse(raw));
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'guest_token')
         setGuestToken(localStorage.getItem('guest_token'));
@@ -76,6 +82,7 @@ export function CheckoutSection({
   const isGuest = Boolean(guestToken);
   const { data: memberCart } = useCartQuery(isReady && (isLoggedIn || isGuest));
   const { data: profileResp } = useProfileQuery(isReady && isLoggedIn);
+  const promo = useCheckoutStore((s) => s.promo);
   const [usePoints, setUsePoints] = useState(false);
   const { data: couriersRes, isLoading: loadingCouriers } = useCouriersQuery(
     isReady && (isLoggedIn || isGuest),
@@ -158,6 +165,19 @@ export function CheckoutSection({
     }));
   }, [isLoggedIn, memberCart, guestItems]);
 
+  // Redirect to homepage if cart is empty
+  useEffect(() => {
+    if (!isReady) return;
+
+    const isEmpty = isLoggedIn
+      ? (memberCart?.data?.items?.length ?? 0) === 0
+      : guestItems.length === 0;
+
+    if (isEmpty) {
+      router.push('/');
+    }
+  }, [isReady, isLoggedIn, memberCart, guestItems, router]);
+
   const subtotalProduct = useMemo(
     () => displayItems.reduce((sum, i) => sum + i.total, 0),
     [displayItems],
@@ -170,9 +190,17 @@ export function CheckoutSection({
   const pointsBalance = profileResp?.data?.points_balance ?? 0;
   const pointsToUse = usePoints ? pointsBalance : 0;
   const pointsDiscount = pointsToUse;
+  const promoDiscount = useMemo(() => {
+    if (!promo?.discount_amount) return 0;
+    return Number(promo.discount_amount);
+  }, [promo]);
   const totalOrder = useMemo(
-    () => Math.max(0, subtotalProduct + subtotalShipping - pointsDiscount),
-    [subtotalProduct, subtotalShipping, pointsDiscount],
+    () =>
+      Math.max(
+        0,
+        subtotalProduct + subtotalShipping - pointsDiscount - promoDiscount,
+      ),
+    [subtotalProduct, subtotalShipping, pointsDiscount, promoDiscount],
   );
 
   const estimatedDeliveryDate = useMemo(() => {
@@ -201,8 +229,6 @@ export function CheckoutSection({
     subtotalShipping,
     pointsToUse,
   ]);
-
-  const format = (n: number) => new Intl.NumberFormat('id-ID').format(n);
 
   return (
     <div className='p-4 space-y-4'>
@@ -280,12 +306,12 @@ export function CheckoutSection({
                   </p>
                   {typeof i.price !== 'undefined' && (
                     <p className='text-xs text-gray-500 mt-1'>
-                      Rp {format(i.price)} / pcs
+                      {formatIDR(i.price)} / pcs
                     </p>
                   )}
                 </div>
                 <p className='text-sm font-semibold text-gray-900 ml-4 whitespace-nowrap'>
-                  Rp {format(i.total)}
+                  {formatIDR(i.total)}
                 </p>
                 {idx !== displayItems.length - 1 && (
                   <hr className='border-dashed border-gray-300 absolute -bottom-2 left-0 right-0' />
@@ -360,14 +386,14 @@ export function CheckoutSection({
                 >
                   {availableServices.map((s) => (
                     <option key={s.code} value={s.code}>
-                      {s.name} — Rp {format(s.cost)}
+                      {s.name} — {formatIDR(s.cost)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <p className='text-xs text-gray-600 mt-2'>
-                Ongkir: Rp {format(subtotalShipping)} • Estimasi:{' '}
+                Ongkir: {formatIDR(subtotalShipping)} • Estimasi:{' '}
                 {selectedService?.estimated_day || '-'}
               </p>
             </>
@@ -432,20 +458,28 @@ export function CheckoutSection({
           <div className='flex justify-between items-center'>
             <p className='text-sm text-gray-600'>Subtotal produk</p>
             <p className='text-sm font-medium text-gray-900'>
-              Rp {format(subtotalProduct)}
+              {formatIDR(subtotalProduct)}
             </p>
           </div>
           <div className='flex justify-between items-center'>
             <p className='text-sm text-gray-600'>Subtotal Pengiriman</p>
             <p className='text-sm font-medium text-gray-900'>
-              Rp {format(subtotalShipping)}
+              {formatIDR(subtotalShipping)}
             </p>
           </div>
+          {promoDiscount > 0 && (
+            <div className='flex justify-between items-center text-green-600'>
+              <p className='text-sm'>Diskon Promo ({promo?.promo_code})</p>
+              <p className='text-sm font-medium'>
+                - {formatIDR(promoDiscount)}
+              </p>
+            </div>
+          )}
           {pointsDiscount > 0 && (
             <div className='flex justify-between items-center text-green-600'>
               <p className='text-sm'>Diskon Poin</p>
               <p className='text-sm font-medium'>
-                - Rp {format(pointsDiscount)}
+                - {formatIDR(pointsDiscount)}
               </p>
             </div>
           )}
@@ -453,7 +487,7 @@ export function CheckoutSection({
           <div className='flex justify-end items-center gap-2'>
             <p className='text-base text-gray-900'>Total Pesanan:</p>
             <p className='text-base font-bold text-gray-900'>
-              Rp {format(totalOrder)}
+              {formatIDR(totalOrder)}
             </p>
           </div>
         </CardContent>
@@ -469,9 +503,9 @@ export function CheckoutSection({
               <p className='text-xs text-gray-600'>
                 Total poin kamu :{' '}
                 {profileResp?.data?.points_balance !== undefined
-                  ? new Intl.NumberFormat('id-ID').format(
-                      profileResp.data.points_balance,
-                    )
+                  ? formatIDR(profileResp.data.points_balance)
+                      .replace('Rp', '')
+                      .trim()
                   : '—'}
               </p>
             </label>
@@ -487,10 +521,8 @@ export function CheckoutSection({
             <Coins className='h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0' />
             <p className='text-base text-brand'>
               Kamu akan mendapatkan{' '}
-              <span className='font-bold text-brand'>
-                400 point
-              </span>{' '}
-              dari total belanja ini.
+              <span className='font-bold text-brand'>400 point</span> dari total
+              belanja ini.
             </p>
           </div>
         </CardContent>

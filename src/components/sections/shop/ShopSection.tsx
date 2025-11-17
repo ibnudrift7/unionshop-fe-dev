@@ -161,7 +161,15 @@ export default function ShopSection({
         </div>
 
         <div className='px-4 py-3 bg-white border-b'>
-          <div className='flex gap-4 flex-wrap' role='tablist'>
+          <div
+            className='flex gap-4 overflow-x-auto scrollbar-hide'
+            role='tablist'
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             {categoriesLoading && (
               <div className='px-2 text-sm text-gray-500'>Memuat kategori…</div>
             )}
@@ -190,7 +198,7 @@ export default function ShopSection({
                         }`,
                       );
                     }}
-                    className='px-1 text-sm font-medium transition-colors cursor-pointer'
+                    className='px-1 text-sm font-medium transition-colors cursor-pointer whitespace-nowrap flex-shrink-0'
                   >
                     <span
                       className={

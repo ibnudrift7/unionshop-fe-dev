@@ -33,6 +33,7 @@ import {
   promoImages,
 } from '@/components/sections/shop/data';
 import { useProfileQuery } from '@/hooks/use-profile';
+import { formatIDR } from '@/lib/utils';
 
 export default function Home() {
   const router = useRouter();
@@ -58,9 +59,9 @@ export default function Home() {
     if (isSearching) {
       return productsData && productsData.length > 0 ? productsData : [];
     }
-    return productsData && productsData.length > 0
-      ? productsData
-      : mockProducts;
+    const products =
+      productsData && productsData.length > 0 ? productsData : mockProducts;
+    return products.slice(0, 6);
   }, [productsData, isSearching]);
 
   const itemsCount = useMemo(() => {
@@ -80,15 +81,7 @@ export default function Home() {
     return getTotal();
   }, [isLoggedIn, memberCart, getTotal]);
 
-  const totalFormatted = useMemo(
-    () =>
-      new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-      }).format(totalAmount),
-    [totalAmount],
-  );
+  const totalFormatted = useMemo(() => formatIDR(totalAmount), [totalAmount]);
 
   const pointsBalance: number = useMemo(() => {
     if (!isReady || !isLoggedIn) return locationData.points;
