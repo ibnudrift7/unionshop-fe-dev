@@ -140,7 +140,7 @@ function OrderCard({ order }: { order: OrderListItem }) {
   const createReview = useCreateOrderReviewMutation(order.id);
 
   type RatingState = { rating: number; hover: number; reviewText: string };
-  const [ratings, setRatings] = useState<Record<number, RatingState>>({}); 
+  const [ratings, setRatings] = useState<Record<number, RatingState>>({});
 
   const ensureRatingState = (productId: number): RatingState => {
     const state = ratings[productId] ?? { rating: 0, hover: 0, reviewText: '' };
