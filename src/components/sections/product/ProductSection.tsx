@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types';
 import { Package, Star } from 'lucide-react';
+import { formatIDR } from '@/lib/utils';
 
 const getDummySold = (seed: string | number) => {
   const s = String(seed ?? 'seed');
@@ -43,11 +44,7 @@ export default function ProductSection({
 }: ProductSectionProps) {
   const router = useRouter();
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(price);
+    return formatIDR(price);
   };
 
   return (

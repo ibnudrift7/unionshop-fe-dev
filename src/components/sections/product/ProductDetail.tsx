@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
+import DOMPurify from 'isomorphic-dompurify';
 import {
   Carousel,
   CarouselContent,
@@ -19,6 +20,7 @@ import { useCartStore } from '@/store/cart';
 import type { Product } from '@/types';
 import { useAuthStatus } from '@/hooks/use-auth-status';
 import { useAddCartItemsMutation } from '@/hooks/use-cart';
+import { formatIDR } from '@/lib/utils';
 
 interface ProductDetailProps {
   product?: Product;
@@ -69,6 +71,22 @@ export default function ProductDetail({
   const handleQuantityChange = (change: number) => {
     setQuantity(Math.max(1, quantity + change));
   };
+
+  const savingsAmount = useMemo(() => {
+    if (!product) return 0;
+
+    // Ambil base_price dan sale_price dari product (bisa jadi string dari API)
+    const basePrice = Number(product.discountPrice ?? 0);
+    const salePrice = Number(product.price ?? 0);
+
+    // Hitung hemat jika base_price > sale_price dan sale_price > 0
+    if (basePrice > salePrice && salePrice > 0) {
+      return basePrice - salePrice;
+    }
+
+    return 0;
+  }, [product]);
+
   const addToCart = () => {
     if (!product) return;
     const attrs: Array<{ name: string; value: string }> = [];
@@ -212,32 +230,32 @@ export default function ProductDetail({
           </div>
           <div className='text-right shrink-0'>
             <div className='text-2xl font-bold text-red-500 leading-tight'>
-              {product
-                ? new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                  }).format(product.price)
-                : '—'}
+              {product ? formatIDR(product.price) : '—'}
             </div>
             {product?.discountPrice && (
               <div className='text-sm text-gray-400 line-through'>
-                {new Intl.NumberFormat('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  minimumFractionDigits: 0,
-                }).format(product.discountPrice)}
+                {formatIDR(product.discountPrice)}
               </div>
             )}
           </div>
         </div>
 
         <p className='text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-line'>
-          {loading
-            ? 'Memuat deskripsi…'
-            : product
-            ? product.description || 'Deskripsi tidak tersedia.'
-            : 'Produk tidak ditemukan atau belum tersedia.'}
+          {loading ? (
+            'Memuat deskripsi…'
+          ) : product ? (
+            product.description ? (
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(product.description),
+                }}
+              />
+            ) : (
+              'Deskripsi tidak tersedia.'
+            )
+          ) : (
+            'Produk tidak ditemukan atau belum tersedia.'
+          )}
         </p>
 
         {/* Color attribute ("type": "images") - render only when API returns values */}
@@ -315,24 +333,16 @@ export default function ProductDetail({
         <>
           <BottomActionBar
             noteText={
-              product
-                ? new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                  }).format(product.price)
-                : '—'
+              savingsAmount > 0 && product
+                ? formatIDR(savingsAmount)
+                : undefined
             }
             quantity={quantity}
             onDecrease={() => handleQuantityChange(-1)}
             onIncrease={() => handleQuantityChange(1)}
             primaryLabel={
               product
-                ? `+ Keranjang ${new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                  }).format(product.price * quantity)}`
+                ? `+ Keranjang ${formatIDR(product.price * quantity)}`
                 : '+ Keranjang'
             }
             onPrimaryClick={addToCart}

@@ -33,13 +33,60 @@ export default function UserPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    try {
-      const url = new URL(window.location.href);
-      const show =
-        url.searchParams.get('thankyou') === '1' ||
-        url.searchParams.get('thankyou') === 'true';
-      if (show) setOpen(true);
-    } catch {}
+
+    // Check both localStorage and URL parameter
+    const checkPaymentSuccess = () => {
+      try {
+        // Check localStorage for payment success flag
+        const paymentSuccess = localStorage.getItem('payment_success');
+        if (paymentSuccess) {
+          const { timestamp } = JSON.parse(paymentSuccess) as {
+            timestamp: number;
+            order_id: string;
+          };
+
+          // Check if flag is still valid (within 5 minutes)
+          const isStillValid = Date.now() - timestamp < 5 * 60 * 1000;
+
+          if (isStillValid) {
+            // Remove flag and show dialog
+            localStorage.removeItem('payment_success');
+            setOpen(true);
+
+            // Clean up URL parameter
+            try {
+              const url = new URL(window.location.href);
+              if (url.searchParams.has('thankyou')) {
+                url.searchParams.delete('thankyou');
+                window.history.replaceState({}, '', url.toString());
+              }
+            } catch {}
+
+            return;
+          } else {
+            // Flag expired, remove it
+            localStorage.removeItem('payment_success');
+          }
+        }
+
+        // Fallback: check URL parameter (legacy support)
+        const url = new URL(window.location.href);
+        const show =
+          url.searchParams.get('thankyou') === '1' ||
+          url.searchParams.get('thankyou') === 'true';
+
+        if (show) {
+          setOpen(true);
+          // Clean up URL parameter
+          url.searchParams.delete('thankyou');
+          window.history.replaceState({}, '', url.toString());
+        }
+      } catch (err) {
+        console.error('Failed to check payment success:', err);
+      }
+    };
+
+    checkPaymentSuccess();
   }, []);
 
   return (
@@ -51,9 +98,18 @@ export default function UserPage() {
         onOpenChange={(v) => {
           setOpen(v);
           if (!v) {
+            // Clean up URL when dialog closed
             try {
-              router.replace('/user');
-            } catch {}
+              const url = new URL(window.location.href);
+              if (url.searchParams.has('thankyou')) {
+                url.searchParams.delete('thankyou');
+                window.history.replaceState({}, '', url.toString());
+              } else {
+                router.replace('/user', { scroll: false });
+              }
+            } catch {
+              router.replace('/user', { scroll: false });
+            }
           }
         }}
       >
@@ -171,7 +227,9 @@ export default function UserPage() {
                     undefined);
                 if (token) setAuthToken(token);
               } catch {}
-              toast.success('Registrasi berhasil. Cek email Anda untuk verifikasi.');
+              toast.success(
+                'Registrasi berhasil. Cek email Anda untuk verifikasi.',
+              );
               setGuestOpen(false);
               try {
                 router.refresh();
