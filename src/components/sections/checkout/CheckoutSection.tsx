@@ -92,6 +92,16 @@ export function CheckoutSection({
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
     null,
   );
+  const [debouncedCourierId, setDebouncedCourierId] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCourierId(selectedCourierId);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [selectedCourierId]);
 
   useEffect(() => {
     if (couriers.length > 0 && selectedCourierId == null) {
@@ -100,8 +110,8 @@ export function CheckoutSection({
   }, [couriers, selectedCourierId]);
 
   const selectedCourier = useMemo(() => {
-    return couriers.find((c) => c.id === selectedCourierId) || null;
-  }, [couriers, selectedCourierId]);
+    return couriers.find((c) => c.id === debouncedCourierId) || null;
+  }, [couriers, debouncedCourierId]);
 
   const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
   const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;

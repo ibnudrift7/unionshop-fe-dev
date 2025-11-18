@@ -35,5 +35,7 @@ export function useShippingCalculateQuery(
     ],
     queryFn: () => shippingService.calculate(params).then((r) => r.data),
     enabled,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
   });
 }
