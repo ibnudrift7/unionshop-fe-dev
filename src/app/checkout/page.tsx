@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { getGuestToken } from '@/lib/auth-token';
@@ -76,6 +77,13 @@ export default function CheckoutPage() {
   const clearCheckout = useCheckoutStore((s) => s.clear);
 
   const totalFormatted = useMemo(() => formatIDR(total), [total]);
+  const isCheckoutValid = useMemo(
+    () =>
+      selection.courierId !== null &&
+      selection.serviceCode !== null &&
+      selection.shippingFee > 0,
+    [selection],
+  );
 
   const handlePay = async () => {
     const guestToken = typeof window !== 'undefined' ? getGuestToken() : null;
@@ -241,12 +249,20 @@ export default function CheckoutPage() {
           </div>
         )}
         <Button
-          className='w-full bg-brand hover:bg-brand/80 text-white font-bold text-lg py-7 rounded-xl justify-center'
+          className='w-full bg-brand hover:bg-brand/80 text-white font-bold text-lg py-7 rounded-xl justify-center disabled:opacity-60 disabled:cursor-not-allowed'
           onClick={handlePay}
-          disabled={isPaying}
+          disabled={isPaying || !isCheckoutValid}
           aria-label='Bayar sekarang'
         >
-          {isPaying ? 'Memproses…' : `Bayar - ${totalFormatted}`}
+          {isPaying ? (
+            <span className='flex items-center justify-center gap-2'>
+              <Spinner className='size-5' />
+            </span>
+          ) : !isCheckoutValid ? (
+            'Pilih Paket Layanan'
+          ) : (
+            `Bayar - ${totalFormatted}`
+          )}
         </Button>
       </div>
     </div>

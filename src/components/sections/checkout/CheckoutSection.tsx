@@ -4,6 +4,7 @@ import { Coins, ShoppingBag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Spinner } from '@/components/ui/spinner';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -91,6 +92,16 @@ export function CheckoutSection({
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
     null,
   );
+  const [debouncedCourierId, setDebouncedCourierId] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedCourierId(selectedCourierId);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [selectedCourierId]);
 
   useEffect(() => {
     if (couriers.length > 0 && selectedCourierId == null) {
@@ -99,8 +110,8 @@ export function CheckoutSection({
   }, [couriers, selectedCourierId]);
 
   const selectedCourier = useMemo(() => {
-    return couriers.find((c) => c.id === selectedCourierId) || null;
-  }, [couriers, selectedCourierId]);
+    return couriers.find((c) => c.id === debouncedCourierId) || null;
+  }, [couriers, debouncedCourierId]);
 
   const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
   const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;
@@ -344,24 +355,31 @@ export function CheckoutSection({
               Pilih kurir
             </label>
             {isLoggedIn || isGuest ? (
-              <select
-                id='courier'
-                value={selectedCourierId ?? ''}
-                onChange={(e) => {
-                  const id = Number(e.target.value);
-                  setSelectedCourierId(isNaN(id) ? null : id);
-                  setSelectedServiceCode(null);
-                }}
-                disabled={displayItems.length === 0 || loadingCouriers}
-                className='w-1/2 md:w-2/5 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
-                aria-disabled={displayItems.length === 0}
-              >
-                {couriers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+              <div className='relative w-1/2 md:w-2/5'>
+                <select
+                  id='courier'
+                  value={selectedCourierId ?? ''}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    setSelectedCourierId(isNaN(id) ? null : id);
+                    setSelectedServiceCode(null);
+                  }}
+                  disabled={displayItems.length === 0 || loadingCouriers}
+                  className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
+                  aria-disabled={displayItems.length === 0}
+                >
+                  {couriers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+                {loadingCouriers && (
+                  <div className='absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none'>
+                    <Spinner className='size-4' />
+                  </div>
+                )}
+              </div>
             ) : (
               <p className='text-xs text-gray-600'>
                 Masukkan alamat / daftar tamu untuk memilih kurir.
@@ -377,19 +395,26 @@ export function CheckoutSection({
                 >
                   Paket layanan
                 </label>
-                <select
-                  id='service'
-                  value={selectedServiceCode ?? ''}
-                  onChange={(e) => setSelectedServiceCode(e.target.value)}
-                  disabled={availableServices.length === 0 || loadingShipping}
-                  className='w-1/2 md:w-2/5 border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
-                >
-                  {availableServices.map((s) => (
-                    <option key={s.code} value={s.code}>
-                      {s.name} — {formatIDR(s.cost)}
-                    </option>
-                  ))}
-                </select>
+                <div className='relative w-1/2 md:w-2/5'>
+                  <select
+                    id='service'
+                    value={selectedServiceCode ?? ''}
+                    onChange={(e) => setSelectedServiceCode(e.target.value)}
+                    disabled={availableServices.length === 0 || loadingShipping}
+                    className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
+                  >
+                    {availableServices.map((s) => (
+                      <option key={s.code} value={s.code}>
+                        {s.name} — {formatIDR(s.cost)}
+                      </option>
+                    ))}
+                  </select>
+                  {loadingShipping && (
+                    <div className='absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none'>
+                      <Spinner className='size-4' />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <p className='text-xs text-gray-600 mt-2'>
