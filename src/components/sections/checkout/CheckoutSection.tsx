@@ -54,9 +54,7 @@ export function CheckoutSection({
         if (raw) {
           setGuestCartInfo(JSON.parse(raw));
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
 
     const onStorage = (e: StorageEvent) => {
@@ -102,12 +100,6 @@ export function CheckoutSection({
     }, 500);
     return () => clearTimeout(timer);
   }, [selectedCourierId]);
-
-  useEffect(() => {
-    if (couriers.length > 0 && selectedCourierId == null) {
-      setSelectedCourierId(couriers[0].id);
-    }
-  }, [couriers, selectedCourierId]);
 
   const selectedCourier = useMemo(() => {
     return couriers.find((c) => c.id === debouncedCourierId) || null;
@@ -197,7 +189,6 @@ export function CheckoutSection({
     if (!selectedService) return 0;
     return selectedService.cost || 0;
   }, [selectedService]);
-  // if user chooses to use points, use their full points balance (1 point = 1 IDR)
   const pointsBalance = profileResp?.data?.points_balance ?? 0;
   const pointsToUse = usePoints ? pointsBalance : 0;
   const pointsDiscount = pointsToUse;
@@ -368,6 +359,7 @@ export function CheckoutSection({
                   className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
                   aria-disabled={displayItems.length === 0}
                 >
+                  <option value=''>Pilih Kurir</option>
                   {couriers.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name.toUpperCase()}
