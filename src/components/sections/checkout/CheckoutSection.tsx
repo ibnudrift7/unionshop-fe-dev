@@ -135,7 +135,7 @@ export function CheckoutSection({
   const shippingErrorMessage = useMemo(() => {
     if (!shippingError || !selectedCourier) return null;
     if (selectedCourier.code?.toLowerCase() === 'gosend') {
-      return 'Mohon ganti pilihan kurir anda, karena wilayah tidak dapat dijangkau oleh Gosend';
+      return 'Mohon Maaf 🙏, Pilihan Kurir Perlu Diperbarui Saat ini, Gosend belum dapat menjangkau wilayah pengiriman Anda.';
     }
     return 'Gagal menghitung biaya pengiriman. Silakan coba kurir lain.';
   }, [shippingError, selectedCourier]);
@@ -179,7 +179,6 @@ export function CheckoutSection({
     }));
   }, [isLoggedIn, memberCart, guestItems]);
 
-  // Redirect to homepage if cart is empty
   useEffect(() => {
     if (!isReady) return;
 
