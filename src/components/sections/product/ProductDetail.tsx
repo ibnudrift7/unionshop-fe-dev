@@ -37,6 +37,7 @@ export default function ProductDetail({
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType | null>(
@@ -89,6 +90,7 @@ export default function ProductDetail({
 
   const addToCart = () => {
     if (!product) return;
+    setIsAddingToCart(true);
     const attrs: Array<{ name: string; value: string }> = [];
     if (colorAttr && selectedColorId != null) {
       const v = colorAttr.values.find((vv) => vv.id === selectedColorId);
@@ -346,6 +348,7 @@ export default function ProductDetail({
                 : '+ Keranjang'
             }
             onPrimaryClick={addToCart}
+            isLoading={isAddingToCart}
           />
           <div className='h-40 sm:h-44'></div>
         </>
