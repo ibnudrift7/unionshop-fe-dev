@@ -62,8 +62,14 @@ function isOrderDeliveredFrom(orderStatusName?: string): boolean {
 
 export default function RiwayatPesanan() {
   const router = useRouter();
-  const { data, isLoading, isError, error } = useOrdersQuery(true);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const { data, isLoading, isError, error } = useOrdersQuery(
+    { page, limit },
+    true,
+  );
   const orders = useMemo(() => data?.data.data ?? [], [data]);
+  const pagination = data?.data.pagination;
 
   return (
     <div className='min-h-screen bg-white mx-auto max-w-[550px] border-x'>
@@ -118,6 +124,34 @@ export default function RiwayatPesanan() {
         {!isLoading &&
           !isError &&
           orders.map((order) => <OrderCard key={order.id} order={order} />)}
+
+        {!isLoading && !isError && pagination && pagination.total_pages > 1 && (
+          <div className='flex items-center justify-between gap-2 mt-6 mb-4'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className='px-3 py-1 text-sm'
+            >
+              Sebelumnya
+            </Button>
+            <span className='text-sm text-gray-600'>
+              Halaman {pagination.page} dari {pagination.total_pages}
+            </span>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() =>
+                setPage((p) => Math.min(pagination.total_pages, p + 1))
+              }
+              disabled={page === pagination.total_pages}
+              className='px-3 py-1 text-sm'
+            >
+              Selanjutnya
+            </Button>
+          </div>
+        )}
       </div>
       <FooterNavigationSection activeTab='history' />
     </div>
