@@ -12,10 +12,13 @@ import type {
 } from '@/types/order';
 import { HttpError } from '@/services/http';
 
-export function useOrdersQuery(enabled: boolean = true) {
+export function useOrdersQuery(
+  params?: { page?: number; limit?: number },
+  enabled: boolean = true,
+) {
   return useQuery<OrderListResponse, HttpError>({
-    queryKey: ['orders', 'list'],
-    queryFn: () => ordersService.list().then((r) => r.data),
+    queryKey: ['orders', 'list', params?.page, params?.limit],
+    queryFn: () => ordersService.list(params).then((r) => r.data),
     enabled,
     staleTime: 30_000,
   });
