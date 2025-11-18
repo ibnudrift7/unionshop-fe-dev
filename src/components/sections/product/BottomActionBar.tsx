@@ -2,6 +2,7 @@
 
 import { Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import React from 'react';
 
 interface BottomActionBarProps {
@@ -12,6 +13,7 @@ interface BottomActionBarProps {
   showQuantity?: boolean;
   primaryLabel: string;
   onPrimaryClick?: () => void;
+  isLoading?: boolean;
 }
 
 export default function BottomActionBar({
@@ -22,6 +24,7 @@ export default function BottomActionBar({
   showQuantity = true,
   primaryLabel,
   onPrimaryClick,
+  isLoading = false,
 }: BottomActionBarProps) {
   return (
     <div className='fixed left-1/2 -translate-x-1/2 bottom-[72px] sm:bottom-[76px] w-full max-w-[550px] bg-white p-4'>
@@ -41,6 +44,7 @@ export default function BottomActionBar({
               size='icon'
               className='h-10 w-10'
               onClick={onDecrease}
+              disabled={isLoading}
             >
               <Minus className='h-4 w-4' />
             </Button>
@@ -52,6 +56,7 @@ export default function BottomActionBar({
               size='icon'
               className='h-10 w-10'
               onClick={onIncrease}
+              disabled={isLoading}
             >
               <Plus className='h-4 w-4' />
             </Button>
@@ -61,11 +66,19 @@ export default function BottomActionBar({
         )}
 
         <Button
-          className='bg-brand hover:bg-brand/80 text-white py-3 rounded-lg flex-1 ml-4 min-w-0'
+          className='bg-brand hover:bg-brand/80 text-white py-3 rounded-lg flex-1 ml-4 min-w-0 disabled:opacity-60 disabled:cursor-not-allowed'
           onClick={onPrimaryClick}
+          disabled={isLoading}
           aria-label={primaryLabel}
         >
-          <span className='truncate'>{primaryLabel}</span>
+          {isLoading ? (
+            <span className='flex items-center justify-center gap-2'>
+              <Spinner className='size-5' />
+              Memproses…
+            </span>
+          ) : (
+            <span className='truncate'>{primaryLabel}</span>
+          )}
         </Button>
       </div>
     </div>

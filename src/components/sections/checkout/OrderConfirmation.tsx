@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Minus, Plus, Coins, CircleArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ import { formatIDR, resolveMemberUnitPrice, toNumber } from '@/lib/utils';
 
 export default function OrderConfirmation() {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<{
     productId: string;
     memberItemId?: number;
@@ -629,7 +631,7 @@ export default function OrderConfirmation() {
               </span>
             </div>
             <Button
-              className='bg-brand hover:bg-brand/80 text-white py-5 px-4 shrink-0'
+              className='bg-brand hover:bg-brand/80 text-white py-5 px-4 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed'
               disabled={(() => {
                 const effectiveTotal =
                   appliedPromo && isLoggedIn
@@ -638,7 +640,7 @@ export default function OrderConfirmation() {
                 const itemsCount = isLoggedIn
                   ? memberCart?.data?.items?.length ?? 0
                   : items.length;
-                return !(effectiveTotal > 0 && itemsCount > 0);
+                return !(effectiveTotal > 0 && itemsCount > 0) || isNavigating;
               })()}
               onClick={() => {
                 if (!isLoggedIn && !guestAddress) {
@@ -653,11 +655,20 @@ export default function OrderConfirmation() {
                 const itemsCount = isLoggedIn
                   ? memberCart?.data?.items?.length ?? 0
                   : items.length;
-                if (effectiveTotal > 0 && itemsCount > 0)
+                if (effectiveTotal > 0 && itemsCount > 0) {
+                  setIsNavigating(true);
                   router.push('/checkout');
+                }
               }}
             >
-              Pilih Pembayaran
+              {isNavigating ? (
+                <span className='flex items-center justify-center gap-2'>
+                  <Spinner className='size-5' />
+                  Memproses…
+                </span>
+              ) : (
+                'Pilih Pembayaran'
+              )}
             </Button>
           </div>
         </div>
