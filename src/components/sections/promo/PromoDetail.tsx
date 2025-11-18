@@ -68,6 +68,7 @@ export default function PromoDetail() {
     selectedOptionValue,
   ]);
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const plugin = useRef(Autoplay({ delay: 2500, stopOnInteraction: true }));
   const [carouselApi, setCarouselApi] = useState<EmblaCarouselType | null>(
     null,
@@ -87,6 +88,7 @@ export default function PromoDetail() {
 
   const addToCart = () => {
     if (!product) return;
+    setIsAddingToCart(true);
 
     const attrs: Array<{ name: string; value: string }> = [];
 
@@ -308,6 +310,7 @@ export default function PromoDetail() {
               Number(product?.price ?? 0) * quantity
             ).toLocaleString('id-ID')}`}
             onPrimaryClick={addToCart}
+            isLoading={isAddingToCart}
           />
           <div className='h-40 sm:h-44'></div>
         </>
