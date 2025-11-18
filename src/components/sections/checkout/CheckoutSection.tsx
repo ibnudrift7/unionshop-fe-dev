@@ -54,9 +54,7 @@ export function CheckoutSection({
         if (raw) {
           setGuestCartInfo(JSON.parse(raw));
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
 
     const onStorage = (e: StorageEvent) => {
@@ -103,12 +101,6 @@ export function CheckoutSection({
     return () => clearTimeout(timer);
   }, [selectedCourierId]);
 
-  useEffect(() => {
-    if (couriers.length > 0 && selectedCourierId == null) {
-      setSelectedCourierId(couriers[0].id);
-    }
-  }, [couriers, selectedCourierId]);
-
   const selectedCourier = useMemo(() => {
     return couriers.find((c) => c.id === debouncedCourierId) || null;
   }, [couriers, debouncedCourierId]);
@@ -116,18 +108,21 @@ export function CheckoutSection({
   const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
   const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;
 
-  const { data: shippingCalcRes, isLoading: loadingShipping } =
-    useShippingCalculateQuery(
-      (isLoggedIn || isGuest) &&
-        Boolean(selectedCourier?.code) &&
-        Boolean(cartId) &&
-        Boolean(addressId),
-      {
-        courier: selectedCourier?.code || '',
-        cart_id: cartId || 0,
-        address_id: addressId || 0,
-      },
-    );
+  const {
+    data: shippingCalcRes,
+    isLoading: loadingShipping,
+    error: shippingError,
+  } = useShippingCalculateQuery(
+    (isLoggedIn || isGuest) &&
+      Boolean(selectedCourier?.code) &&
+      Boolean(cartId) &&
+      Boolean(addressId),
+    {
+      courier: selectedCourier?.code || '',
+      cart_id: cartId || 0,
+      address_id: addressId || 0,
+    },
+  );
 
   const availableServices: ShippingServiceItem[] = useMemo(() => {
     if (!shippingCalcRes?.data || !selectedCourier?.code) return [];
@@ -136,6 +131,14 @@ export function CheckoutSection({
     const courierOpt = shippingCalcRes.data.shipping_options[key];
     return courierOpt?.services ?? [];
   }, [shippingCalcRes, selectedCourier]);
+
+  const shippingErrorMessage = useMemo(() => {
+    if (!shippingError || !selectedCourier) return null;
+    if (selectedCourier.code?.toLowerCase() === 'gosend') {
+      return 'Mohon ganti pilihan kurir anda, karena wilayah tidak dapat dijangkau oleh Gosend';
+    }
+    return 'Gagal menghitung biaya pengiriman. Silakan coba kurir lain.';
+  }, [shippingError, selectedCourier]);
 
   const [selectedServiceCode, setSelectedServiceCode] = useState<string | null>(
     null,
@@ -197,7 +200,6 @@ export function CheckoutSection({
     if (!selectedService) return 0;
     return selectedService.cost || 0;
   }, [selectedService]);
-  // if user chooses to use points, use their full points balance (1 point = 1 IDR)
   const pointsBalance = profileResp?.data?.points_balance ?? 0;
   const pointsToUse = usePoints ? pointsBalance : 0;
   const pointsDiscount = pointsToUse;
@@ -368,6 +370,7 @@ export function CheckoutSection({
                   className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
                   aria-disabled={displayItems.length === 0}
                 >
+                  <option value=''>Pilih Kurir</option>
                   {couriers.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name.toUpperCase()}
@@ -388,39 +391,52 @@ export function CheckoutSection({
           </div>
           {(isLoggedIn || isGuest) && selectedCourier && (
             <>
-              <div className='flex items-center justify-between gap-3 mt-3'>
-                <label
-                  htmlFor='service'
-                  className='text-sm font-semibold text-gray-900'
-                >
-                  Paket layanan
-                </label>
-                <div className='relative w-1/2 md:w-2/5'>
-                  <select
-                    id='service'
-                    value={selectedServiceCode ?? ''}
-                    onChange={(e) => setSelectedServiceCode(e.target.value)}
-                    disabled={availableServices.length === 0 || loadingShipping}
-                    className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
-                  >
-                    {availableServices.map((s) => (
-                      <option key={s.code} value={s.code}>
-                        {s.name} — {formatIDR(s.cost)}
-                      </option>
-                    ))}
-                  </select>
-                  {loadingShipping && (
-                    <div className='absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none'>
-                      <Spinner className='size-4' />
+              {shippingErrorMessage && (
+                <Alert className='mt-3 border-red-300 bg-red-50'>
+                  <AlertDescription className='text-red-800 text-sm'>
+                    {shippingErrorMessage}
+                  </AlertDescription>
+                </Alert>
+              )}
+              {!shippingErrorMessage && (
+                <>
+                  <div className='flex items-center justify-between gap-3 mt-3'>
+                    <label
+                      htmlFor='service'
+                      className='text-sm font-semibold text-gray-900'
+                    >
+                      Paket layanan
+                    </label>
+                    <div className='relative w-1/2 md:w-2/5'>
+                      <select
+                        id='service'
+                        value={selectedServiceCode ?? ''}
+                        onChange={(e) => setSelectedServiceCode(e.target.value)}
+                        disabled={
+                          availableServices.length === 0 || loadingShipping
+                        }
+                        className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
+                      >
+                        {availableServices.map((s) => (
+                          <option key={s.code} value={s.code}>
+                            {s.name} — {formatIDR(s.cost)}
+                          </option>
+                        ))}
+                      </select>
+                      {loadingShipping && (
+                        <div className='absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none'>
+                          <Spinner className='size-4' />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              <p className='text-xs text-gray-600 mt-2'>
-                Ongkir: {formatIDR(subtotalShipping)} • Estimasi:{' '}
-                {selectedService?.estimated_day || '-'}
-              </p>
+                  <p className='text-xs text-gray-600 mt-2'>
+                    Ongkir: {formatIDR(subtotalShipping)} • Estimasi:{' '}
+                    {selectedService?.estimated_day || '-'}
+                  </p>
+                </>
+              )}
             </>
           )}
         </CardContent>
