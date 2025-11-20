@@ -12,6 +12,8 @@ export interface DefaultAddressData {
   subdistrict_name?: string;
   postal_code: string;
   is_default: number;
+  latitude?: string;
+  longitude?: string;
   created_at?: string;
 }
 
@@ -41,6 +43,8 @@ export interface CreateAddressPayload {
   postal_code: string;
   is_default: 'true' | 'false' | string; // API expects string boolean in form
   subdistrict_name: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 export interface CreateAddressData {
@@ -74,6 +78,8 @@ export interface UpdateAddressPayload {
   postal_code: string;
   is_default: 'true' | 'false' | string;
   subdistrict_name: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 export interface UpdateAddressResponse {

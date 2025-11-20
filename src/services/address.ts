@@ -37,6 +37,8 @@ export const addressService = {
     params.set('postal_code', payload.postal_code);
     params.set('is_default', String(payload.is_default));
     params.set('subdistrict_name', payload.subdistrict_name);
+    if (payload.latitude) params.set('latitude', payload.latitude);
+    if (payload.longitude) params.set('longitude', payload.longitude);
 
     return httpFetch<CreateAddressResponse, URLSearchParams>(
       API_ENDPOINTS.addressCreate,
@@ -61,6 +63,8 @@ export const addressService = {
     params.set('postal_code', payload.postal_code);
     params.set('is_default', String(payload.is_default));
     params.set('subdistrict_name', payload.subdistrict_name);
+    if (payload.latitude) params.set('latitude', payload.latitude);
+    if (payload.longitude) params.set('longitude', payload.longitude);
 
     return httpFetch<UpdateAddressResponse>(
       `${API_ENDPOINTS.addressCreate}/${id}`,

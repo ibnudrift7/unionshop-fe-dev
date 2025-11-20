@@ -52,6 +52,20 @@ function SheetContent({
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: 'top' | 'right' | 'bottom' | 'left';
 }) {
+  // Prevent closing when interacting with external floating elements like Google Places Autocomplete (.pac-container)
+  const userInteractOutside = (props as SheetPrimitive.DialogContentProps)
+    .onInteractOutside;
+  const handleInteractOutside: SheetPrimitive.DialogContentProps['onInteractOutside'] =
+    (event) => {
+      const target = event.target as HTMLElement | null;
+      if (target && target.closest('.pac-container')) {
+        // Cancel Radix outside click close
+        event.preventDefault();
+        return;
+      }
+      if (typeof userInteractOutside === 'function') userInteractOutside(event);
+    };
+
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -69,6 +83,7 @@ function SheetContent({
             'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t',
           className,
         )}
+        onInteractOutside={handleInteractOutside}
         {...props}
       >
         {children}
