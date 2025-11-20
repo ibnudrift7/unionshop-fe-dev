@@ -21,6 +21,7 @@ import {
 import { useCreateAddressMutation } from '@/hooks/use-address';
 import type { Province, City, District } from '@/types/location';
 import type { HttpError } from '@/services/http';
+import MapPicker from './MapPicker';
 
 export interface AddressPayload {
   recipientName: string;
@@ -56,6 +57,8 @@ export default function AddAddressSheet({
     null,
   );
   const [isDefault, setIsDefault] = useState(false);
+  const [latitude, setLatitude] = useState<string>('');
+  const [longitude, setLongitude] = useState<string>('');
 
   const { data: provincesRes, isLoading: loadingProv } =
     useProvincesQuery(true);
@@ -101,6 +104,10 @@ export default function AddAddressSheet({
       setAddressDetailError('Detail alamat minimal 10 karakter');
       return;
     }
+    if (!latitude || !longitude) {
+      toast.error('Silakan pilih lokasi di peta terlebih dahulu!');
+      return;
+    }
     if (phone) {
       const digits = phone.replace(/\D/g, '');
       if (!/^(08|62)/.test(digits)) {
@@ -129,6 +136,8 @@ export default function AddAddressSheet({
         address_line: addressDetail,
         postal_code: postalCode,
         is_default: isDefault ? 'true' : 'false',
+        latitude,
+        longitude,
       },
       {
         onSuccess: (res) => {
@@ -152,6 +161,8 @@ export default function AddAddressSheet({
           setPostalCode('');
           setAddressDetail('');
           setIsDefault(false);
+          setLatitude('');
+          setLongitude('');
           setOpen(false);
         },
         onError: (err: HttpError) => {
@@ -392,6 +403,17 @@ export default function AddAddressSheet({
               <p className='text-xs text-red-600'>{addressDetailError}</p>
             ) : null}
           </div>
+
+          <MapPicker
+            initialLat={latitude ? parseFloat(latitude) : -2.5489}
+            initialLng={longitude ? parseFloat(longitude) : 118.0149}
+            addressText={addressDetail}
+            onLocationChange={(lat, lng) => {
+              setLatitude(lat.toString());
+              setLongitude(lng.toString());
+            }}
+          />
+
           <div className='pt-1'>
             <div className='flex items-center gap-2'>
               <Checkbox

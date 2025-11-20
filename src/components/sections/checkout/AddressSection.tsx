@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-// no-op
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Plus, Edit2, Trash2 } from 'lucide-react';
@@ -76,6 +75,8 @@ export default function AddressSection() {
         address_line: payload.addressDetail || target.address_line,
         postal_code: payload.postalCode || target.postal_code,
         is_default: isDefault,
+        latitude: payload.latitude || target.latitude,
+        longitude: payload.longitude || target.longitude,
       },
     });
   };
@@ -171,6 +172,8 @@ export default function AddressSection() {
                   addressDetail: address.address_line,
                   postalCode: address.postal_code,
                   isDefault: address.is_default === 1,
+                  latitude: address.latitude,
+                  longitude: address.longitude,
                 }}
                 onSubmit={(p) => handleEditSubmit(String(address.id), p)}
                 trigger={

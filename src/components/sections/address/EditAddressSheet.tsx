@@ -19,18 +19,21 @@ import {
   useDistrictsQuery,
 } from '@/hooks/use-location';
 import type { Province, City, District } from '@/types/location';
+import MapPicker from './MapPicker';
 
 export interface EditAddressPayload {
   phone?: string;
   provinceId?: number;
   cityId?: number;
-  districtId?: number; 
+  districtId?: number;
   districtName?: string;
   province?: string;
   city?: string;
   district?: string;
-  postalCode: string; 
+  postalCode: string;
   addressDetail: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 export interface EditAddressSheetProps {
@@ -62,6 +65,8 @@ export default function EditAddressSheet({
   const [isDefault, setIsDefault] = useState<boolean>(!!initial?.isDefault);
   const [phone, setPhone] = useState(initial?.phone ?? '');
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<string>(initial?.latitude ?? '');
+  const [longitude, setLongitude] = useState<string>(initial?.longitude ?? '');
 
   // Location dropdown queries
   const { data: provincesRes, isLoading: loadingProv } =
@@ -103,6 +108,10 @@ export default function EditAddressSheet({
       setAddressDetailError('Detail alamat minimal 10 karakter');
       return;
     }
+    if (!latitude || !longitude) {
+      toast?.error?.('Silakan pilih lokasi di peta terlebih dahulu!');
+      return;
+    }
     if (phone) {
       const digits = phone.replace(/\D/g, '');
       if (!/^(08|62)/.test(digits)) {
@@ -130,6 +139,8 @@ export default function EditAddressSheet({
       postalCode,
       addressDetail,
       isDefault,
+      latitude,
+      longitude,
     });
     toast?.success?.('Alamat berhasil diperbarui');
     setOpen(false);
@@ -350,6 +361,16 @@ export default function EditAddressSheet({
               <p className='text-xs text-red-600'>{addressDetailError}</p>
             ) : null}
           </div>
+          <MapPicker
+            initialLat={latitude ? parseFloat(latitude) : -2.5489}
+            initialLng={longitude ? parseFloat(longitude) : 118.0149}
+            addressText={addressDetail}
+            onLocationChange={(lat, lng) => {
+              setLatitude(lat.toString());
+              setLongitude(lng.toString());
+            }}
+          />
+
           <div className='pt-1'>
             <div className='flex items-center gap-2'>
               <Checkbox
