@@ -15,6 +15,7 @@ import {
   useCitiesQuery,
   useDistrictsQuery,
 } from '@/hooks/use-location';
+import MapPicker from '@/components/sections/address/MapPicker';
 
 export default function GuestAddressPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function GuestAddressPage() {
   const [districtName, setDistrictName] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [addressDetailError, setAddressDetailError] = useState<string | null>(
     null,
   );
@@ -218,6 +221,11 @@ export default function GuestAddressPage() {
       setAddressDetailError(null);
     }
 
+    if (latitude === undefined || longitude === undefined) {
+      toast.error('Silakan pilih lokasi di peta terlebih dahulu');
+      hasError = true;
+    }
+
     if (hasError) {
       toast.error('Harap lengkapi semua field yang wajib diisi');
       return;
@@ -259,6 +267,8 @@ export default function GuestAddressPage() {
         subdistrict_name: districtName,
         address_line: addressDetail,
         postal_code: postalCode,
+        latitude: String(latitude ?? ''),
+        longitude: String(longitude ?? ''),
       },
       cart_items: cartItems,
     };
@@ -299,6 +309,8 @@ export default function GuestAddressPage() {
             districtName,
             postalCode,
             addressDetail,
+            latitude: String(latitude ?? ''),
+            longitude: String(longitude ?? ''),
           };
           setGuestAddress(guestAddr);
         } catch {}
@@ -617,6 +629,17 @@ export default function GuestAddressPage() {
             <p className='text-xs text-red-600'>{postalCodeError}</p>
           ) : null}
         </div>
+
+        <MapPicker
+          initialLat={latitude}
+          initialLng={longitude}
+          addressText={addressDetail}
+          onLocationChange={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+          }}
+        />
+
         <div className='space-y-1'>
           <Label htmlFor='addr-detail'>
             Detail alamat <span className='text-red-500'>*</span>

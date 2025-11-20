@@ -17,6 +17,8 @@ export interface GuestAddressData {
   districtName?: string;
   postalCode: string;
   addressDetail: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 const KEY = 'guest_address';

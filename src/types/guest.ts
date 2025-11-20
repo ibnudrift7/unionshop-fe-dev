@@ -9,6 +9,8 @@ export interface RegisterGuestPayload {
     subdistrict_name: string;
     address_line: string;
     postal_code: string;
+    latitude: string;
+    longitude: string;
   };
   cart_items: Array<{
     product_id: number;
