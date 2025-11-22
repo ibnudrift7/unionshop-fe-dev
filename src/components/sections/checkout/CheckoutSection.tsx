@@ -126,9 +126,11 @@ export function CheckoutSection({
 
   const availableServices: ShippingServiceItem[] = useMemo(() => {
     if (!shippingCalcRes?.data || !selectedCourier?.code) return [];
-    const key =
-      selectedCourier.code as keyof typeof shippingCalcRes.data.shipping_options;
-    const courierOpt = shippingCalcRes.data.shipping_options[key];
+    const key = selectedCourier.code.toUpperCase();
+    const courierOpt =
+      shippingCalcRes.data.shipping_options[
+        key as keyof typeof shippingCalcRes.data.shipping_options
+      ];
     return courierOpt?.services ?? [];
   }, [shippingCalcRes, selectedCourier]);
 
@@ -145,13 +147,14 @@ export function CheckoutSection({
   );
   useEffect(() => {
     if (availableServices.length > 0 && !selectedServiceCode) {
-      setSelectedServiceCode(availableServices[0].code);
+      setSelectedServiceCode(availableServices[0].service_code);
     }
   }, [availableServices, selectedServiceCode]);
 
   const selectedService = useMemo(() => {
     return (
-      availableServices.find((s) => s.code === selectedServiceCode) || null
+      availableServices.find((s) => s.service_code === selectedServiceCode) ||
+      null
     );
   }, [availableServices, selectedServiceCode]);
 
@@ -229,7 +232,7 @@ export function CheckoutSection({
   useEffect(() => {
     onSelectionChange?.({
       courierId: selectedCourier?.id ?? null,
-      serviceCode: selectedService?.code ?? null,
+      serviceCode: selectedService?.service_code ?? null,
       shippingFee: subtotalShipping,
       estimatedDay: selectedService?.estimated_day ?? null,
       pointsToUse: pointsToUse,
@@ -417,8 +420,8 @@ export function CheckoutSection({
                         className='w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-400'
                       >
                         {availableServices.map((s) => (
-                          <option key={s.code} value={s.code}>
-                            {s.name} — {formatIDR(s.cost)}
+                          <option key={s.service_code} value={s.service_code}>
+                            {s.service_name} — {formatIDR(s.cost)}
                           </option>
                         ))}
                       </select>

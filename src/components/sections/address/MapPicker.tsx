@@ -20,6 +20,7 @@ export default function MapPicker({
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = useState({
     lat: initialLat,
     lng: initialLng,
@@ -134,14 +135,12 @@ export default function MapPicker({
       });
     };
 
-    // Observe DOM for dynamically injected .pac-container
     const observer = new MutationObserver(() => {
       attachListeners();
     });
 
     if (typeof window !== 'undefined') {
       observer.observe(document.body, { childList: true, subtree: true });
-      // Initial attempt
       attachListeners();
     }
 
@@ -157,11 +156,6 @@ export default function MapPicker({
 
   return (
     <div className='space-y-3'>
-      <div
-        ref={mapRef}
-        className='w-full h-[300px] border border-gray-300 rounded-md relative z-0'
-      />
-
       <div className='space-y-1'>
         <Label htmlFor='map-search'>Cari Alamat</Label>
         <div className='relative'>
@@ -177,10 +171,11 @@ export default function MapPicker({
         </div>
       </div>
 
-      <div className='text-xs text-gray-600'>
-        <strong>Koordinat:</strong> Latitude: {coordinates.lat.toFixed(6)},
-        Longitude: {coordinates.lng.toFixed(6)}
-      </div>
+      <div
+        ref={mapRef}
+        className='w-full h-[300px] border border-gray-300 rounded-md relative z-0'
+      />
+
       <p className='text-xs text-gray-500'>
         Geser pin untuk menyesuaikan lokasi yang tepat
       </p>
