@@ -91,23 +91,6 @@ export function CheckoutSection({
     null,
   );
 
-  const defaultCourier = useMemo(() => {
-    if (!couriers || couriers.length === 0) return null;
-    return (
-      couriers.find((c) => c.code && c.code.toUpperCase() === 'NINJA') ||
-      couriers[0] ||
-      null
-    );
-  }, [couriers]);
-  const defaultCourierCode = defaultCourier?.code ?? '';
-  const defaultCourierId = defaultCourier?.id ?? null;
-
-  useEffect(() => {
-    if (!selectedCourierId && defaultCourierId) {
-      setSelectedCourierId(defaultCourierId);
-    }
-  }, [defaultCourierId, selectedCourierId]);
-
   const selectedCourier = useMemo(() => {
     return couriers.find((c) => c.id === selectedCourierId) || null;
   }, [couriers, selectedCourierId]);
@@ -121,30 +104,25 @@ export function CheckoutSection({
     error: shippingError,
   } = useShippingCalculateQuery(
     (isLoggedIn || isGuest) &&
+      Boolean(selectedCourier?.code) &&
       Boolean(cartId) &&
-      Boolean(addressId) &&
-      couriers.length > 0,
+      Boolean(addressId),
     {
-      courier: selectedCourier?.code || defaultCourierCode || '',
+      courier: selectedCourier?.code || '',
       cart_id: cartId || 0,
       address_id: addressId || 0,
     },
   );
 
   const availableServices: ShippingServiceItem[] = useMemo(() => {
-    if (!shippingCalcRes?.data) return [];
-    const code = (
-      selectedCourier?.code ||
-      defaultCourierCode ||
-      ''
-    ).toUpperCase();
-    if (!code) return [];
+    if (!shippingCalcRes?.data || !selectedCourier?.code) return [];
+    const code = selectedCourier.code.toUpperCase();
     const courierOpt =
       shippingCalcRes.data.shipping_options[
         code as keyof typeof shippingCalcRes.data.shipping_options
       ];
     return courierOpt?.services ?? [];
-  }, [shippingCalcRes, selectedCourier, defaultCourierCode]);
+  }, [shippingCalcRes, selectedCourier]);
 
   const shippingErrorMessage = useMemo(() => {
     if (!shippingError || !selectedCourier) return null;
