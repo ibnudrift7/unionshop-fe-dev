@@ -217,10 +217,33 @@ export default function EditAddressSheet({
                     : cityQuery
                 }
                 onChange={(e) => {
-                  setCityQuery(e.target.value);
+                  const val = e.target.value;
+                  setCityQuery(val);
                   setCityOpen(true);
+                  if (!val) {
+                    setCityId('');
+                    setDistrictId('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === 'Backspace' || e.key === 'Delete') &&
+                    typeof cityId === 'number'
+                  ) {
+                    e.preventDefault();
+                    setCityId('');
+                    setDistrictId('');
+                    setCityQuery('');
+                    setCityOpen(true);
+                  }
                 }}
                 onFocus={() => setCityOpen(true)}
+                onBlur={() => {
+                  setTimeout(() => setCityOpen(false), 200);
+                  if (!cityId && cityQuery) {
+                    setCityQuery('');
+                  }
+                }}
                 disabled={!provinceId}
               />
               {cityOpen && provinceId && (
@@ -283,10 +306,31 @@ export default function EditAddressSheet({
                     : districtQuery
                 }
                 onChange={(e) => {
-                  setDistrictQuery(e.target.value);
+                  const val = e.target.value;
+                  setDistrictQuery(val);
                   setDistrictOpen(true);
+                  if (!val) {
+                    setDistrictId('');
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === 'Backspace' || e.key === 'Delete') &&
+                    typeof districtId === 'number'
+                  ) {
+                    e.preventDefault();
+                    setDistrictId('');
+                    setDistrictQuery('');
+                    setDistrictOpen(true);
+                  }
                 }}
                 onFocus={() => setDistrictOpen(true)}
+                onBlur={() => {
+                  setTimeout(() => setDistrictOpen(false), 200);
+                  if (!districtId && districtQuery) {
+                    setDistrictQuery('');
+                  }
+                }}
                 disabled={!cityId}
               />
               {districtOpen && cityId && (
