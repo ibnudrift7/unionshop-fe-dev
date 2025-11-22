@@ -90,20 +90,10 @@ export function CheckoutSection({
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
     null,
   );
-  const [debouncedCourierId, setDebouncedCourierId] = useState<number | null>(
-    null,
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedCourierId(selectedCourierId);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [selectedCourierId]);
 
   const selectedCourier = useMemo(() => {
-    return couriers.find((c) => c.id === debouncedCourierId) || null;
-  }, [couriers, debouncedCourierId]);
+    return couriers.find((c) => c.id === selectedCourierId) || null;
+  }, [couriers, selectedCourierId]);
 
   const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
   const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;
@@ -126,10 +116,10 @@ export function CheckoutSection({
 
   const availableServices: ShippingServiceItem[] = useMemo(() => {
     if (!shippingCalcRes?.data || !selectedCourier?.code) return [];
-    const key = selectedCourier.code.toUpperCase();
+    const code = selectedCourier.code.toUpperCase();
     const courierOpt =
       shippingCalcRes.data.shipping_options[
-        key as keyof typeof shippingCalcRes.data.shipping_options
+        code as keyof typeof shippingCalcRes.data.shipping_options
       ];
     return courierOpt?.services ?? [];
   }, [shippingCalcRes, selectedCourier]);
@@ -223,6 +213,10 @@ export function CheckoutSection({
     const match = dayStr.match(/\d+/);
     const days = match ? parseInt(match[0], 10) : 3;
     return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  }, [selectedService]);
+
+  const estimatedLabel = useMemo(() => {
+    return selectedService?.estimated_day || '-';
   }, [selectedService]);
 
   useEffect(() => {
@@ -435,7 +429,7 @@ export function CheckoutSection({
 
                   <p className='text-xs text-gray-600 mt-2'>
                     Ongkir: {formatIDR(subtotalShipping)} • Estimasi:{' '}
-                    {selectedService?.estimated_day || '-'}
+                    {estimatedLabel}
                   </p>
                 </>
               )}
@@ -446,7 +440,7 @@ export function CheckoutSection({
 
       <div className='space-y-3'>
         <h3 className='text-sm font-semibold text-gray-900'>
-          Estimasi Pengiriman {selectedService?.estimated_day || '-'}
+          Estimasi Pengiriman {estimatedLabel}
         </h3>
 
         <div className='flex items-center justify-between'>
