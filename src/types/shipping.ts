@@ -1,7 +1,7 @@
 export interface CourierItem {
   id: number;
-  name: string; 
-  code: string; 
+  name: string;
+  code: string;
   support_tracking: number;
 }
 
@@ -13,15 +13,20 @@ export interface CouriersResponse {
 }
 
 export interface ShippingServiceItem {
-  code: string; 
-  name: string; 
-  cost: number; 
+  service_code: string;
+  service_name: string;
+  cost: number;
+  cost_net: number;
+  cashback: number;
   estimated_day: string;
+  is_cod: boolean;
+  weight: number;
+  type: string;
 }
 
 export interface ShippingCourierOption {
-  code: string; 
-  name: string; 
+  code: string;
+  name: string;
   services: ShippingServiceItem[];
 }
 
@@ -36,7 +41,7 @@ export interface ShippingCalculateData {
   };
   weight: number;
   weight_unit: string; // gram
-  shipping_options: Record<string, ShippingCourierOption>; 
+  shipping_options: Record<string, ShippingCourierOption>;
 }
 
 export interface ShippingCalculateResponse {

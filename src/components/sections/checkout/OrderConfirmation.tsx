@@ -160,8 +160,17 @@ export default function OrderConfirmation() {
     Boolean(cartId) &&
     Boolean(addressId);
   const { data: couriersResp } = useCouriersQuery(couriersEnabled);
-  const couriers = couriersResp?.data ?? [];
-  const defaultCourierCode = couriers.length > 0 ? couriers[0].code : null;
+  const couriers = useMemo(() => couriersResp?.data ?? [], [couriersResp]);
+  const ninjaCourier = useMemo(
+    () =>
+      couriers.find((c) => c.code && c.code.toUpperCase() === 'NINJA') || null,
+    [couriers],
+  );
+  const defaultCourierCode = ninjaCourier
+    ? ninjaCourier.code
+    : couriers.length > 0
+    ? couriers[0].code
+    : null;
 
   const shippingEnabled = couriersEnabled && Boolean(defaultCourierCode);
   const { data: shippingResp } = useShippingCalculateQuery(shippingEnabled, {
@@ -170,17 +179,20 @@ export default function OrderConfirmation() {
     cart_id: String(cartId ?? ''),
   });
 
-  const shippingOptions = shippingResp?.data?.shipping_options ?? {};
-  const selectedCourierOption =
-    (defaultCourierCode &&
-      (shippingOptions as Record<string, ShippingCourierOption>)[
-        defaultCourierCode
-      ]) ||
-    null;
-  const selectedService =
-    selectedCourierOption?.services && selectedCourierOption.services.length > 0
-      ? selectedCourierOption.services[0]
-      : null;
+  const shippingOptions = useMemo(
+    () => shippingResp?.data?.shipping_options ?? {},
+    [shippingResp],
+  );
+  const selectedCourierOption = useMemo(() => {
+    if (!defaultCourierCode) return null;
+    const key = defaultCourierCode.toUpperCase();
+    const record = shippingOptions as Record<string, ShippingCourierOption>;
+    return record[key] || null;
+  }, [defaultCourierCode, shippingOptions]);
+  const selectedService = useMemo(() => {
+    if (!selectedCourierOption) return null;
+    return selectedCourierOption.services?.[0] || null;
+  }, [selectedCourierOption]);
   const shippingFee = selectedService?.cost ?? 0;
   const estimatedDay = selectedService?.estimated_day ?? null;
   // const courir = selectedService?.name || '';
