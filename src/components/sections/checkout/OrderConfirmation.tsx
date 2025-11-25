@@ -41,7 +41,8 @@ import { formatIDR, resolveMemberUnitPrice, toNumber } from '@/lib/utils';
 
 export default function OrderConfirmation() {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isNavigatingToPayment, setIsNavigatingToPayment] = useState(false);
+  const [isNavigatingToAddress, setIsNavigatingToAddress] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<{
     productId: string;
     memberItemId?: number;
@@ -581,8 +582,12 @@ export default function OrderConfirmation() {
             {!isLoggedIn && !guestAddress && (
               <button
                 type='button'
-                onClick={() => router.push('/order-confirmation/address')}
-                className='w-full text-left mb-3'
+                onClick={() => {
+                  setIsNavigatingToAddress(true);
+                  router.push('/order-confirmation/address');
+                }}
+                disabled={isNavigatingToAddress}
+                className='w-full text-left mb-3 disabled:opacity-60 disabled:cursor-not-allowed'
               >
                 <div
                   className={
@@ -595,7 +600,10 @@ export default function OrderConfirmation() {
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
                       <div>
-                        <p className='text-lg font-bold text-black'>
+                        <p className='text-lg font-bold text-black flex items-center gap-2'>
+                          {isNavigatingToAddress && (
+                            <Spinner className='size-5' />
+                          )}
                           Isi Data Pengiriman
                         </p>
                       </div>
@@ -652,7 +660,10 @@ export default function OrderConfirmation() {
                 const itemsCount = isLoggedIn
                   ? memberCart?.data?.items?.length ?? 0
                   : items.length;
-                return !(effectiveTotal > 0 && itemsCount > 0) || isNavigating;
+                return (
+                  !(effectiveTotal > 0 && itemsCount > 0) ||
+                  isNavigatingToPayment
+                );
               })()}
               onClick={() => {
                 if (!isLoggedIn && !guestAddress) {
@@ -668,12 +679,12 @@ export default function OrderConfirmation() {
                   ? memberCart?.data?.items?.length ?? 0
                   : items.length;
                 if (effectiveTotal > 0 && itemsCount > 0) {
-                  setIsNavigating(true);
+                  setIsNavigatingToPayment(true);
                   router.push('/checkout');
                 }
               }}
             >
-              {isNavigating ? (
+              {isNavigatingToPayment ? (
                 <span className='flex items-center justify-center gap-2'>
                   <Spinner className='size-5' />
                   Memproses…
