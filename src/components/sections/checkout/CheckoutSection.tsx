@@ -86,17 +86,39 @@ export function CheckoutSection({
   const { data: couriersRes, isLoading: loadingCouriers } = useCouriersQuery(
     isReady && (isLoggedIn || isGuest),
   );
-  const couriers = useMemo(() => couriersRes?.data ?? [], [couriersRes]);
+  const allCouriers = useMemo(() => couriersRes?.data ?? [], [couriersRes]);
   const [selectedCourierId, setSelectedCourierId] = useState<number | null>(
     null,
   );
 
-  const selectedCourier = useMemo(() => {
-    return couriers.find((c) => c.id === selectedCourierId) || null;
-  }, [couriers, selectedCourierId]);
-
   const cartId = memberCart?.data?.cart_id ?? guestCartInfo?.cart_id;
   const addressId = defaultAddress?.data?.id ?? guestCartInfo?.address_id;
+
+  const { data: allShippingOptionsRes } = useShippingCalculateQuery(
+    (isLoggedIn || isGuest) &&
+      Boolean(cartId) &&
+      Boolean(addressId) &&
+      allCouriers.length > 0,
+    {
+      courier: 'all',
+      cart_id: cartId || 0,
+      address_id: addressId || 0,
+    },
+  );
+
+  const couriers = useMemo(() => {
+    if (!allShippingOptionsRes?.data?.shipping_options) return allCouriers;
+    const availableKeys = Object.keys(
+      allShippingOptionsRes.data.shipping_options,
+    );
+    return allCouriers.filter((c) =>
+      availableKeys.some((key) => key.toUpperCase() === c.code.toUpperCase()),
+    );
+  }, [allShippingOptionsRes, allCouriers]);
+
+  const selectedCourier = useMemo(() => {
+    return couriers.find((c) => c.id === selectedCourierId) || null;
+  }, [selectedCourierId, couriers]);
 
   const {
     data: shippingCalcRes,
