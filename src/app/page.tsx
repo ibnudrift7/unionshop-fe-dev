@@ -28,7 +28,6 @@ import {
   categories as mockCategories,
   voucher1Data,
   voucher2List,
-  officialMerchData,
   products as mockProducts,
   promoImages,
 } from '@/components/sections/shop/data';
@@ -142,13 +141,7 @@ export default function Home() {
         onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
       />
 
-      <OfficialMerchandiseSection
-        title={officialMerchData.title}
-        subtitle={officialMerchData.subtitle}
-        buttonText={officialMerchData.buttonText}
-        imageSrc={officialMerchData.imageSrc}
-        onOrderClick={() => router.push('/shop?category=8')}
-      />
+      <OfficialMerchandiseSection />
 
       <div id='product-section'>
         {isSearching && productsData && productsData.length === 0 ? (

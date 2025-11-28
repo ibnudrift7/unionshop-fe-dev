@@ -1,61 +1,49 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import React from 'react';
+import { offMerchData } from '@/components/sections/shop/data';
+
+interface MerchItem {
+  image: string;
+  url: string;
+}
 
 interface OfficialMerchandiseSectionProps {
-  title: string;
-  subtitle: string;
-  buttonText: string;
-  imageSrc: string;
-  onOrderClick?: () => void;
+  items?: MerchItem[];
 }
 
 export default function OfficialMerchandiseSection({
-  title,
-  subtitle,
-  buttonText,
-  imageSrc,
-  onOrderClick,
+  items = offMerchData,
 }: OfficialMerchandiseSectionProps) {
+  const item = items && items.length ? items[0] : null;
+
+  if (!item) return null;
+
   return (
     <section className='p-4 pt-0'>
-      <Card className='bg-white shadow rounded-3xl py-0'>
-        <CardContent className='p-4'>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='flex justify-center'>
-              <div className='relative'>
-                <div className='w-15 h-15 md:w-18 md:h-18 bg-brand rounded-full flex items-center justify-center'>
-                  <Image
-                    src={imageSrc}
-                    alt='Official Merchandise'
-                    width={70}
-                    height={70}
-                    className='object-contain'
-                  />
-                </div>
-              </div>
+      <a
+        href={item.url}
+        target='_blank'
+        rel='noopener noreferrer'
+        aria-label='Official merchandise'
+      >
+        <Card className='bg-white py-0 overflow-hidden border-none'>
+          <CardContent className='p-0'>
+            <div className='w-full'>
+              <Image
+                src={item.image}
+                alt='Official Merchandise'
+                width={1200}
+                height={600}
+                className='w-full h-auto object-contain'
+                sizes='(max-width: 768px) 100vw, 50vw'
+              />
             </div>
-
-            <div className='col-span-2 text-start'>
-              <h3 className='font-bold text-brand mb-1 text-base md:text-lg leading-snug'>
-                {title}
-              </h3>
-              <p className='text-black text-sm font-light'>{subtitle}</p>
-            </div>
-
-            <div className='flex justify-center'>
-              <Button
-                className='bg-brand hover:bg-brand/90 text-sm px-4 py-2'
-                onClick={onOrderClick}
-              >
-                <span className='font-bold text-lg'>{buttonText}</span>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </a>
     </section>
   );
 }
