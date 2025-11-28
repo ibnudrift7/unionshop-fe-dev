@@ -161,7 +161,7 @@ export default function Home() {
 
       <ChatAdminSection />
 
-      <div className='h-36 sm:h-40' aria-hidden />
+      <div className='h-24' aria-hidden />
 
       {itemsCount > 0 && (
         <div className='fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-24 w-full max-w-[550px] px-4 z-50'>

@@ -207,6 +207,14 @@ export default function OrderConfirmation() {
   const checkoutPromo = useCheckoutStore((s) => s.promo);
   const [needAddressHighlight, setNeedAddressHighlight] = useState(false);
 
+  const calculatedPoints = useMemo(() => {
+    const effectiveTotal =
+      appliedPromo && isLoggedIn
+        ? Number(appliedPromo.total_after_discount || 0)
+        : total;
+    return Math.floor(effectiveTotal * 0.01);
+  }, [appliedPromo, isLoggedIn, total]);
+
   useEffect(() => {
     if (checkoutPromo && isLoggedIn) {
       setAppliedPromo(checkoutPromo);
@@ -618,8 +626,8 @@ export default function OrderConfirmation() {
               <Coins className='h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0' />
               <p className='text-sm text-gray-900'>
                 Kamu akan mendapatkan{' '}
-                <span className='font-semibold'>400 point</span> dari total
-                belanja ini
+                <span className='font-semibold'>{calculatedPoints} point</span>{' '}
+                dari total belanja ini
               </p>
             </div>
 
