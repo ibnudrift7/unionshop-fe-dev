@@ -22,7 +22,6 @@ export interface ApiBundleProductDetail {
   base_price: string;
   sale_price: string;
   stock_quantity: number;
-  stock_alert_threshold: number;
   is_active: number;
   status: string;
   is_newest: number;

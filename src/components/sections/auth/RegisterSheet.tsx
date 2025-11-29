@@ -78,10 +78,6 @@ export function RegisterSheet({
     string | null
   >(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [genderError, setGenderError] = useState<string | null>(null);
-  const [dobError, setDobError] = useState<string | null>(null);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value;
@@ -143,24 +139,6 @@ export function RegisterSheet({
     }
   };
 
-  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let v = String(e.target.value || '')?.replace(/\D/g, '');
-    if (v.length > 15) v = v.slice(0, 15);
-    setPhone(v);
-    if (!v) {
-      setPhoneError('Nomor handphone wajib diisi');
-    } else if (!/^(08|62)\d*$/.test(v)) {
-      setPhoneError('Nomor harus diawali dengan 08 atau 62');
-    } else if (v.length < 10) {
-      setPhoneError('Nomor minimal 10 digit');
-    } else {
-      setPhoneError(null);
-    }
-  };
-
-  const [gender, setGender] = useState<'' | 'wanita' | 'pria'>('');
-  const [dateOfBirth, setDateOfBirth] = useState(''); // ISO yyyy-mm-dd
-  const [dobDraft, setDobDraft] = useState('');
   // const [province, setProvince] = useState('');
   // const [city, setCity] = useState('');
   // const [district, setDistrict] = useState('');
@@ -239,61 +217,6 @@ export function RegisterSheet({
       setConfirmPasswordError(null);
     }
 
-    if (!phone) {
-      setPhoneError('Nomor handphone wajib diisi');
-      hasError = true;
-    } else {
-      const digits = phone.replace(/\D/g, '');
-      if (!/^(08|62)/.test(digits)) {
-        setPhoneError('Nomor harus diawali dengan 08 atau 62');
-        hasError = true;
-      } else if (!/^\d+$/.test(digits)) {
-        setPhoneError('Nomor hanya boleh berisi angka');
-        hasError = true;
-      } else if (digits.length < 10 || digits.length > 15) {
-        setPhoneError('Nomor harus antara 10 hingga 15 digit');
-        hasError = true;
-      } else {
-        setPhoneError(null);
-      }
-    }
-
-    if (!gender) {
-      setGenderError('Jenis kelamin wajib dipilih');
-      hasError = true;
-    } else {
-      setGenderError(null);
-    }
-
-    if (!dateOfBirth) {
-      setDobError('Tanggal lahir wajib diisi');
-      hasError = true;
-    } else {
-      try {
-        const birth = new Date(dateOfBirth);
-        if (isNaN(birth.getTime())) {
-          setDobError('Tanggal lahir tidak valid');
-          hasError = true;
-        } else {
-          const now = new Date();
-          let age = now.getFullYear() - birth.getFullYear();
-          const m = now.getMonth() - birth.getMonth();
-          if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-            age--;
-          }
-          if (age < 13) {
-            setDobError('Anda harus berusia minimal 13 tahun');
-            hasError = true;
-          } else {
-            setDobError(null);
-          }
-        }
-      } catch {
-        setDobError('Tanggal lahir tidak valid');
-        hasError = true;
-      }
-    }
-
     if (hasError) {
       toast.error('Harap lengkapi semua field yang wajib diisi dengan benar');
       return;
@@ -303,9 +226,6 @@ export function RegisterSheet({
       name,
       email,
       password,
-      phone,
-      gender,
-      dateOfBirth,
       // province,
       // city,
       // district,
@@ -368,13 +288,6 @@ export function RegisterSheet({
     setConfirmPassword('');
     setConfirmPasswordError(null);
     setShowPassword(false);
-    setPhone('');
-    setPhoneError(null);
-    setGender('');
-    setGenderError(null);
-    setDateOfBirth('');
-    setDobDraft('');
-    setDobError(null);
   };
 
   const router = useRouter();
@@ -499,159 +412,6 @@ export function RegisterSheet({
               *Kata sandi anda harus terdiri dari setidaknya 8 karakter,
               mengandung minimal 1 huruf kecil dan 1 huruf kapital
             </p>
-
-            <div className='space-y-1 pt-2'>
-              <Label htmlFor='register-phone'>
-                Nomor handphone <span className='text-red-500'>*</span>
-              </Label>
-              <Input
-                id='register-phone'
-                type='tel'
-                inputMode='tel'
-                placeholder='08xxxxxxxxxx'
-                value={phone}
-                onChange={handlePhoneChange}
-                maxLength={15}
-                disabled={isSubmitting}
-                className={phoneError ? 'border-red-500' : ''}
-              />
-              {phoneError ? (
-                <p className='text-xs text-red-600'>{phoneError}</p>
-              ) : fieldErrors.phone ? (
-                <p className='text-xs text-red-600'>{fieldErrors.phone}</p>
-              ) : null}
-            </div>
-
-            <div className='space-y-2 pt-1'>
-              <Label>
-                Jenis kelamin <span className='text-red-500'>*</span>
-              </Label>
-              <div className='flex items-center gap-2'>
-                <Button
-                  type='button'
-                  variant='outline'
-                  className={
-                    'flex-1 border ' +
-                    (gender === 'wanita'
-                      ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-black border-gray-300')
-                  }
-                  onClick={() => {
-                    setGender('wanita');
-                    setGenderError(null);
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Wanita
-                </Button>
-                <Button
-                  type='button'
-                  variant='outline'
-                  className={
-                    'flex-1 border ' +
-                    (gender === 'pria'
-                      ? 'bg-brand text-white border-brand'
-                      : 'bg-white text-black border-gray-300')
-                  }
-                  onClick={() => {
-                    setGender('pria');
-                    setGenderError(null);
-                  }}
-                  disabled={isSubmitting}
-                >
-                  Pria
-                </Button>
-              </div>
-              {genderError ? (
-                <p className='text-xs text-red-600'>{genderError}</p>
-              ) : null}
-              {fieldErrors.gender ? (
-                <p className='text-xs text-red-600'>{fieldErrors.gender}</p>
-              ) : null}
-            </div>
-
-            <div className='space-y-2 pt-1'>
-              <Label>
-                Tanggal lahir <span className='text-red-500'>*</span>
-              </Label>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <button
-                    type='button'
-                    className={`w-full text-left border rounded-md px-3 py-2 text-sm bg-white ${
-                      dobError ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    disabled={isSubmitting}
-                  >
-                    {dateOfBirth ? (
-                      <span>
-                        {new Date(dateOfBirth).toLocaleDateString('id-ID')}
-                      </span>
-                    ) : (
-                      <span className='text-gray-500'>Pilih tanggal lahir</span>
-                    )}
-                  </button>
-                </SheetTrigger>
-                <SheetContent
-                  side='bottom'
-                  className='rounded-t-2xl max-h-[85vh] overflow-auto w-full max-w-[720px] left-1/2 -translate-x-1/2 right-auto border-x border-gray-200'
-                >
-                  <SheetHeader>
-                    <SheetTitle className='text-center text-lg'>
-                      Pilih tanggal lahir
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className='px-4 pb-4 space-y-3'>
-                    <div className='space-y-1'>
-                      <Label htmlFor='dob-input'>Tanggal</Label>
-                      <Input
-                        id='dob-input'
-                        type='date'
-                        value={dobDraft || dateOfBirth}
-                        onChange={(e) => {
-                          setDobDraft(e.target.value);
-                          setDobError(null);
-                        }}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className='pt-2 flex gap-2'>
-                      <SheetClose asChild>
-                        <Button
-                          type='button'
-                          variant='outline'
-                          className='flex-1'
-                          disabled={isSubmitting}
-                        >
-                          Batal
-                        </Button>
-                      </SheetClose>
-                      <SheetClose asChild>
-                        <Button
-                          type='button'
-                          className='flex-1 bg-brand hover:bg-brand/90 text-white'
-                          onClick={() => {
-                            setDateOfBirth(dobDraft || dateOfBirth);
-                            setDobDraft('');
-                            setDobError(null);
-                          }}
-                          disabled={isSubmitting}
-                        >
-                          Simpan tanggal
-                        </Button>
-                      </SheetClose>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-              {dobError ? (
-                <p className='text-xs text-red-600'>{dobError}</p>
-              ) : fieldErrors.dateOfBirth ? (
-                <p className='text-xs text-red-600'>
-                  {fieldErrors.dateOfBirth}
-                </p>
-              ) : null}
-            </div>
 
             {/* <div className='space-y-1 pt-1'>
             <Label htmlFor='register-province'>Provinsi</Label>

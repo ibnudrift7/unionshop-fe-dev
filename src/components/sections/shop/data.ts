@@ -9,8 +9,13 @@ export const heroImages: string[] = [
 
 export const promoImages: string[] = [
   '/assets/Cashback.png',
-  '/assets/Cashback.png',
-  '/assets/Cashback.png',
+];
+
+export const offMerchData = [
+  {
+    image: '/assets/offmerch.png',
+    url: 'https://www.unionlabs.my.id/promo',
+  },
 ];
 
 // Location / User points

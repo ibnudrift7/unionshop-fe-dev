@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Star, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Star, CalendarDays, Copy } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -228,6 +228,20 @@ function OrderCard({ order }: { order: OrderListItem }) {
             </p>
           </div>
         </div>
+      </div>
+      <div className='flex justify-end items-center gap-2'>
+        <button
+          type='button'
+          onClick={() => {
+            navigator.clipboard.writeText(order.invoice_no);
+            toast.success('Nomor invoice disalin');
+          }}
+          className='p-1 hover:bg-gray-100 rounded transition-colors'
+          aria-label='Salin nomor invoice'
+        >
+          <Copy className='w-3.5 h-3.5 text-gray-500' />
+        </button>
+        <p className='text-xs text-gray-500'>Invoice: {order.invoice_no}</p>
       </div>
 
       <div className='mt-2 space-y-1 mx-10'>

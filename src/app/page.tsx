@@ -28,7 +28,6 @@ import {
   categories as mockCategories,
   voucher1Data,
   voucher2List,
-  officialMerchData,
   products as mockProducts,
   promoImages,
 } from '@/components/sections/shop/data';
@@ -142,13 +141,7 @@ export default function Home() {
         onProductClick={(p) => router.push(`/product/${p.slug ?? p.id}`)}
       />
 
-      <OfficialMerchandiseSection
-        title={officialMerchData.title}
-        subtitle={officialMerchData.subtitle}
-        buttonText={officialMerchData.buttonText}
-        imageSrc={officialMerchData.imageSrc}
-        onOrderClick={() => router.push('/shop?category=8')}
-      />
+      <OfficialMerchandiseSection />
 
       <div id='product-section'>
         {isSearching && productsData && productsData.length === 0 ? (
@@ -168,7 +161,7 @@ export default function Home() {
 
       <ChatAdminSection />
 
-      <div className='h-36 sm:h-40' aria-hidden />
+      <div className='h-24' aria-hidden />
 
       {itemsCount > 0 && (
         <div className='fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-24 w-full max-w-[550px] px-4 z-50'>

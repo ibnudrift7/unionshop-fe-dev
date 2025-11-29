@@ -8,6 +8,8 @@ export { default as OfficialMerchandiseSection } from './shop/OfficialMerchandis
 export { default as ProductSection } from './product/ProductSection';
 export { default as ProductReviews } from './product/ProductReview';
 export { default as ProductDetail } from './product/ProductDetail';
+export { default as OffDayBanner } from './product/OffDayBanner';
+export { default as OffDayOverlay } from './product/OffDayOverlay';
 export { default as PromoSection } from './shop/PromoSection';
 export { default as ChatAdminSection } from './shop/ChatAdminSection';
 export { default as FooterNavigationSection } from './shop/FooterNavigationSection';

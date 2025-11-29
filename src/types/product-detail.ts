@@ -32,7 +32,6 @@ export interface ApiProductDetail {
   total_reviews?: number;
   formatted_sales?: string;
   stock_quantity: number;
-  stock_alert_threshold: number;
   is_active: number;
   status: string;
   is_newest: number;
