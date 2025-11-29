@@ -8,7 +8,6 @@ export interface ApiProduct {
   base_price: string;
   sale_price: string;
   stock_quantity: number;
-  stock_alert_threshold: number;
   is_active: number;
   is_newest: number;
   sku_code: string;
